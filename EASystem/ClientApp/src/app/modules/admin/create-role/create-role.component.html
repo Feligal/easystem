@@ -1,0 +1,28 @@
+<h4 mat-dialog-title>{{title}}</h4>
+<section>
+  <mat-card>
+    <mat-card-content>
+      <form style="margin:0 30px" fxLayoutGap="30px" [formGroup]="myForm" (ngSubmit)="onSubmit()">
+        <div fxLayoutAlign="center" fxLayout="row wrap">
+          <input type="number" hidden formControlName="id" />
+          <mat-form-field>
+            <input matInput type="text" placeholder="Role Name *"
+                   formControlName="roleName" />
+            <mat-hint>Please enter role name.</mat-hint>
+            <mat-error><span *ngIf="errorHandling('roleName','required')">Role name is a required field.</span></mat-error>
+            <mat-error><span *ngIf="errorHandling('roleName','maxlength')">Role name must not be more that 32 characters.</span></mat-error>
+          </mat-form-field>
+        </div>
+        <br />
+        <mat-divider></mat-divider>
+        <br />
+        <div fxLayoutAlign="center" fxLayoutGap="30px" fxLayout="row wrap">
+          <button  matTooltip="Save" mat-raised-button type="submit" color="primary" [disabled]="myForm.invalid"><mat-icon>save</mat-icon></button>
+          <button matTooltip="Clear" mat-raised-button type="reset" (click)="onReset()" color="warn"><mat-icon>clear</mat-icon></button>
+          <button matTooltip="Cancel" mat-raised-button type="button" (click)="onCancel()" color="accent"><mat-icon>not_interested</mat-icon></button>
+        </div>
+      </form><br />
+    </mat-card-content>
+  </mat-card>
+</section>
+

@@ -1,0 +1,19 @@
+<ng-material-multilevel-menu [configuration]="config"
+                             [items]="homeMenuItem"
+                             (selectedItem)="selectedItem($event)">
+</ng-material-multilevel-menu>
+
+<ng-material-multilevel-menu *ngIf="authService.isLoggedIn() && authService.isInRole(adminUserRole)"  [configuration]="config"
+                             [items]="appitems_loggedIn"
+                             (selectedItem)="selectedItem($event)">
+</ng-material-multilevel-menu>
+
+<ng-material-multilevel-menu *ngIf="authService.isLoggedIn() && authService.isInRole(adminUserRole)"  [configuration]="config"
+                             [items]="adminMenuItems"
+                             (selectedItem)="selectedItem($event)">
+</ng-material-multilevel-menu>
+
+<ng-material-multilevel-menu *ngIf="authService.isLoggedIn() && authService.isInRole(clientUserRole)" [configuration]="config"
+                             [items]="clientUserMenuItems"
+                             (selectedItem)="selectedItem($event)">
+</ng-material-multilevel-menu>

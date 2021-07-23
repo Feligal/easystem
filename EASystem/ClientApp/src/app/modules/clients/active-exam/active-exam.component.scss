@@ -1,0 +1,35 @@
+
+.fullWidth {
+  display: flex;
+  flex-direction: column;
+  margin: 15px 0;
+}
+
+.example-radio-button {
+  margin: 5px;
+}
+
+.timeFormatter {
+  padding: 10px;
+  border: 1px solid grey;
+  border-radius: 10px;
+}
+
+mat-form-field {
+  width: 550px;
+}
+
+.overlay {
+  opacity: 1;
+}
+
+mat-card {
+  background-color:grey;
+}
+::ng-deep.custom-class {
+  opacity: 0.4;
+}
+
+
+
+

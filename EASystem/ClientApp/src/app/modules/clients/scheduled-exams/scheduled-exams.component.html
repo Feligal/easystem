@@ -1,0 +1,16 @@
+<section>
+  <mat-card>
+    <h4>Scheduled Exams</h4>
+    <mat-divider></mat-divider>
+    <mat-card-content>
+      <br />
+      <div fxLayout="row wrap" fxLayout.xs="column" fxLayoutAlign="space-between">
+        <div *ngFor="let exam of exams">
+          <app-display-exams [examData]="exam"></app-display-exams>
+        </div>
+      </div>
+      <button style="margin-top:15px" color="primary" mat-raised-button type="button" matTooltip="Schedule Exam" id="scheduleExam" (click)="onScheduleExam()"><mat-icon>add</mat-icon>Schedule Exam</button>
+    </mat-card-content>
+  </mat-card>
+
+</section>

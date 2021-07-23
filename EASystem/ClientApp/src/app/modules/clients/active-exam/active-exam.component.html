@@ -1,0 +1,44 @@
+<section class="overlay " >
+  <mat-card>
+    <mat-card-content>
+      <div>
+        <h1>{{data.examName}} exam session is running. <b style="color:orange">Do not refresh the browser.</b></h1>
+        <mat-divider></mat-divider>        
+      </div>     
+      <form #examForm="ngForm">
+        <div  fxLayout="">
+          <div fxFlex fxLayout="row" fxLayoutAlign="flex-end">
+           <div style="padding:0 5px;margin:10px 0;border-radius:10px; background-color:green;"><p style="font-size:30px; font-weight:bold">Remaining Time : {{timerDisplayer}}</p></div> 
+          </div>
+        </div>        
+        <mat-accordion>
+          <mat-expansion-panel *ngFor="let question of questions; let i = index" [expanded]="step === i" (opened)="setStep(i)">
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                <input type="number" hidden [(ngModel)]="question.id" name="q_{{question.id}}" value="{{question.id}}" />
+                <p style="font-size:larger">Q {{ i + 1}}.  {{question.text}}</p>
+              </mat-panel-title>
+              <mat-panel-description>
+
+              </mat-panel-description>
+            </mat-expansion-panel-header>
+            <mat-radio-group name="{{question.text}}" id="{{question.text}}" aria-labelledby="example-radio-group-label"
+                             class="fullWidth"
+                             [(ngModel)]="question.selectedAnswer">
+              <mat-radio-button color="primary" style="font-size:large" class="example-radio-button" *ngFor="let answer of question.answers" [value]="answer">
+                {{answer}}
+              </mat-radio-button>
+            </mat-radio-group>
+            <mat-action-row>
+              <button *ngIf="i > 0" mat-raised-button color="warn" (click)="prevStep()"><mat-icon>arrow_back_ios</mat-icon> Previous</button>
+              <button mat-raised-button color="primary" (click)="nextStep()"><mat-icon>arrow_forward_ios</mat-icon> Next</button>
+            </mat-action-row>
+          </mat-expansion-panel>
+        </mat-accordion>
+      </form>
+    </mat-card-content>
+    <mat-card-actions>
+      <button mat-raised-button type="button" (click)="onFinish()" style="margin:10px; background-color:green"><mat-icon>done</mat-icon>Finish</button>
+    </mat-card-actions>
+  </mat-card>
+</section>

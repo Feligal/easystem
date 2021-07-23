@@ -1,0 +1,43 @@
+<section>
+  <div class="plotFormatter" fxLayout="row" fxLayout.xs="column" fxLayoutGap="15px">
+    <mat-card fxFlex="20" style="height:100%">
+      <mat-card-content>
+        <div>
+          <h3>Available Exams</h3>
+          <mat-divider></mat-divider>
+        </div>
+        <mat-nav-list fxLayout="column">
+          <a class="mat-nav-list" fxFlex id="exam_{{exam.id}}" (click)="onSelectExam($event)" [matMenuTriggerFor]="subMenu" *ngFor="let exam of pagedExams" style="margin-top:10px; " mat-raised-button><mat-icon>apartment</mat-icon><span style="margin-right:10px"></span>{{ exam.name}}</a>
+          <mat-menu #subMenu="matMenu">
+            <button (click)="onShowQuestions()" mat-menu-item><mat-icon>preview</mat-icon>View Questions</button>
+            <button (click)="onShowAddQuestion()" mat-menu-item><mat-icon>add</mat-icon>Add Question</button>
+            <button (click)="onImportQuestions()" mat-menu-item><mat-icon>post_add</mat-icon>Import Questions</button>
+            <button (click)="onViewReports()" mat-menu-item><mat-icon>fact_check</mat-icon>Exam Reports</button>
+            <button (click)="onShowEdit()" mat-menu-item><mat-icon>edit</mat-icon>Edit</button>
+            <button (click)="onDelete()" mat-menu-item><mat-icon>delete_outline</mat-icon>Delete</button>
+          </mat-menu>
+        </mat-nav-list>
+        <br />
+        <mat-divider></mat-divider>
+        <mat-paginator (page)="pageChangeEvent($event)" #paginator
+                       [length]="length"
+                       [pageSize]="10"
+                       [pageSizeOptions]="[10,20, 30, 40, 50]">
+        </mat-paginator>
+        <mat-divider></mat-divider>
+        <br />
+        <button type="button" style="margin: 5px 10px" (click)="onAddExam()" matTooltip="Add New Exam" color="primary" mat-raised-button><mat-icon>add</mat-icon>Add</button>       
+      </mat-card-content>
+    </mat-card>
+
+
+   
+    <mat-card fxFlex>
+       <mat-card-content>
+      <router-outlet></router-outlet>
+    </mat-card-content>
+    </mat-card>
+  </div>
+</section>
+
+

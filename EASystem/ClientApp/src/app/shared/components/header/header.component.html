@@ -1,0 +1,63 @@
+<mat-toolbar>
+  <mat-toolbar-row>
+    <button (click)="toggleSideBar()" mat-icon-button><mat-icon>menu</mat-icon></button>
+    <div fxFlex fxLayout>
+      <a routerLink="/">
+        <img src="/finacial_logo.png" alt="Finacial Consultancy Ltd" style="width:75px;height:75px ; margin-top:8px" />
+      </a>
+    </div>
+
+    <div fxFlex fxLayout="row" fxLayoutAlign="flex-end">
+      <ul fxLayout="row" fxLayoutGap="20px">
+        <li fxHide.xs fxShow>
+          <button matTooltip="Register" color="primary" mat-raised-button routerLinkActive="list-item-active" routerLink="/register" *ngIf="!auth.isLoggedIn()"><mat-icon>how_to_reg</mat-icon>Register</button>
+        </li>
+        <li fxHide.xs fxShow>
+          <button matTooltip="Login" color="default"  mat-raised-button routerLinkActive="list-item-active" routerLink="/login" *ngIf="!auth.isLoggedIn()"><mat-icon>login</mat-icon>Login</button>
+        </li>
+
+
+        <li fxHide fxShow.xs>
+          <button matTooltip="Register" aria-label="Login" color="primary"  mat-mini-fab routerLinkActive="list-item-active" routerLink="/register" *ngIf="!auth.isLoggedIn()"><mat-icon>how_to_reg</mat-icon></button>
+        </li>
+        <li fxHide fxShow.xs>
+          <button matTooltip="Login" color="default" mat-mini-fab routerLinkActive="list-item-active" routerLink="/login" *ngIf="!auth.isLoggedIn()"><mat-icon>login</mat-icon></button>
+        </li>
+
+        <li>
+          <button color="primary"  mat-icon-button routerLink="/reminders" routerLinkActive="list-item-active" matTooltip="Reminders" *ngIf="auth.isLoggedIn()"><mat-icon matBadgeColor="accent" matBadge="{{reminderCounter | number}}" matBadgePosition="above after">notifications</mat-icon></button>
+        </li>
+
+        <li>
+          <button color="primary" mat-icon-button routerLink="/messages" routerLinkActive="list-item-active" matTooltip="Messages" *ngIf="auth.isLoggedIn()"><mat-icon matBadgeColor="accent" matBadge="{{messageCounter | number}}" matBadgePosition="above after">chat</mat-icon></button>
+        </li>
+
+        <li>
+          <button color="primary"  mat-icon-button routerLink="/applications" routerLinkActive="list-item-active" matTooltip="Applications" *ngIf="auth.isLoggedIn()"><mat-icon matBadgeColor="accent" matBadge="{{applicationCounter | number}}" matBadgePosition="above after">email</mat-icon></button>
+        </li>
+
+        <li>
+          <button color="primary"  mat-icon-button routerLink="/notifications" routerLinkActive="list-item-active" matTooltip="Notifications" *ngIf="auth.isLoggedIn()"><mat-icon matBadgeColor="accent" matBadge="{{counter | number}}" matBadgePosition="above after">notifications</mat-icon></button>
+        </li>
+
+        <li *ngIf="auth.isLoggedIn()" >
+          <span style="vertical-align:middle">{{currentUser}}</span>
+          <button matTooltip="Profile" mat-icon-button [matMenuTriggerFor]="menu">
+            <mat-icon>account_circle</mat-icon>
+          </button>
+
+          <mat-menu #menu="matMenu">
+            <button mat-menu-item routerLink="/changepassword">
+              <mat-icon>vpn_key</mat-icon>
+              <span>Change Password</span>
+            </button>
+            <button mat-menu-item (click)="logout()">
+              <mat-icon>exit_to_app</mat-icon>
+              <span>Logout</span>
+            </button>
+          </mat-menu>
+        </li>
+      </ul>
+    </div>
+  </mat-toolbar-row>
+</mat-toolbar>

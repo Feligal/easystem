@@ -1,0 +1,141 @@
+<section style="margin-bottom:30px">
+  <mat-card>
+    <mat-card-content>
+      <form style="margin:0 30px" fxLayoutGap="30px" #f="ngForm" (ngSubmit)="onSave()">
+        <div>
+          <div>
+            <h3>Select user(s) to add to {{currentRole[0].role.name}}</h3>
+            <mat-divider></mat-divider>
+            <input type="text" hidden ngModel name="roleName" />
+            <input type="text" hidden ngModel name="roleId" />
+            <div>
+              <button style="margin-top:15px" color="primary" mat-icon-button type="button" matTooltip="Refresh" (click)="onRefresh()"><mat-icon>refresh</mat-icon></button>
+              <div fxFlex fxLayout="row" fxLayoutAlign="flex-end">
+                <mat-form-field fxFlex="40%">
+                  <input matInput type="text" (keyup)="doFilter($event.target.value)" placeholder="Filter" />
+                </mat-form-field>
+              </div>
+            </div>
+
+            <mat-table style="width:auto" [dataSource]="dataSource1" matSort>
+              <ng-container matColumnDef="index">
+                <mat-header-cell *matHeaderCellDef>No</mat-header-cell>
+                <mat-cell *matCellDef="let element;let i = index;">{{i + 1}}<span style="margin-left:20px;"></span></mat-cell>
+              </ng-container>
+
+              <ng-container matColumnDef="userName">
+                <mat-header-cell *matHeaderCellDef mat-sort-header>User name</mat-header-cell>
+                <mat-cell *matCellDef="let element">{{element.userName }}</mat-cell>
+              </ng-container>
+
+
+              <ng-container matColumnDef="selection">
+                <mat-header-cell *matHeaderCellDef mat-sort-header>
+                  <mat-checkbox (change)="$event ? masterToggle() : null"
+                                [checked]="selection.hasValue() && isAllSelected()"
+                                [indeterminate]="selection.hasValue() && !isAllSelected()"
+                                [aria-label]="checkboxLabel()">
+                  </mat-checkbox>
+
+                </mat-header-cell>
+                <mat-cell *matCellDef="let element">
+                  <mat-checkbox (click)="$event.stopPropagation()"
+                                ngModel name="IdsToAdd_{{element.id}}"
+                                value="{{element.id}}"
+                                (change)="$event ? selection.toggle(element) : null"
+                                [checked]="selection.isSelected(element)"
+                                [aria-label]="checkboxLabel(element)">
+                  </mat-checkbox>
+                </mat-cell>
+              </ng-container>
+
+              <mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></mat-header-row>
+              <mat-row *matRowDef="let row;
+          columns: displayedColumns;
+          let i = index;
+          let even = even;"
+                       [ngClass]="{ 'gray': even, 'highlight': selectedRowIndex == row.id}"
+                       (click)="highlight(row)">
+              </mat-row>
+            </mat-table>
+
+            <mat-paginator #paginator1
+                           [pageSize]="5"
+                           [pageSizeOptions]="[5, 10, 20]">
+            </mat-paginator>
+          </div>
+
+          <div>
+            <h3>Select user(s) to remove from {{currentRole[0].role.name}}</h3>
+            <mat-divider></mat-divider>
+            <input type="text" hidden ngModel name="roleName" />
+            <input type="text" hidden ngModel name="roleId" />
+            <div>
+              <div fxFlex fxLayout="row" fxLayoutAlign="flex-end">
+                <mat-form-field fxFlex="40%">
+                  <input matInput type="text" (keyup)="doFilter2($event.target.value)" placeholder="Filter" />
+                </mat-form-field>
+              </div>
+            </div>
+
+            <mat-table style="width:auto" [dataSource]="dataSource2" matSort>
+              <ng-container matColumnDef="index2">
+                <mat-header-cell *matHeaderCellDef>No</mat-header-cell>
+                <mat-cell *matCellDef="let element;let i = index;">{{i + 1}}<span style="margin-left:20px;"></span></mat-cell>
+              </ng-container>
+
+              <ng-container matColumnDef="userName2">
+                <mat-header-cell *matHeaderCellDef mat-sort-header>User name</mat-header-cell>
+                <mat-cell *matCellDef="let element">{{element.userName }}</mat-cell>
+              </ng-container>
+
+
+              <ng-container matColumnDef="selection2">
+                <mat-header-cell *matHeaderCellDef mat-sort-header>
+                  <mat-checkbox (change)="$event ? masterToggle2() : null"
+                                [checked]="selection2.hasValue() && isAllSelected2()"
+                                [indeterminate]="selection2.hasValue() && !isAllSelected2()"
+                                [aria-label]="checkboxLabel2()">
+                  </mat-checkbox>
+
+                </mat-header-cell>
+                <mat-cell *matCellDef="let element">
+                  <mat-checkbox (click)="$event.stopPropagation()"
+                                ngModel name="IdsToDelete_{{element.id}}"
+                                value="{{element.id}}"
+                                (change)="$event ? selection2.toggle(element) : null"
+                                [checked]="selection2.isSelected(element)"
+                                [aria-label]="checkboxLabel2(element)">
+                  </mat-checkbox>
+                </mat-cell>
+              </ng-container>
+
+              <mat-header-row *matHeaderRowDef="displayedColumns2; sticky: true"></mat-header-row>
+              <mat-row *matRowDef="let row;
+          columns: displayedColumns2;
+          let i = index;
+          let even = even;"
+                       [ngClass]="{ 'gray': even, 'highlight': selectedRowIndex2 == row.id}"
+                       (click)="highlight2(row)">
+              </mat-row>
+            </mat-table>
+
+            <mat-paginator #paginator2
+                           [pageSize]="5"
+                           [pageSizeOptions]="[5, 10, 20]">
+            </mat-paginator>
+
+          </div>
+          <mat-divider></mat-divider>
+          <br />
+          <div fxLayoutAlign="" fxLayoutGap="30px" fxLayout="row wrap">
+            <button mat-raised-button type="submit" color="primary"><mat-icon>save</mat-icon>Save</button>
+            <button matTooltip="Clear" mat-raised-button type="reset" color="accent"><mat-icon>clear</mat-icon>Clear</button>
+          </div>
+
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</section>
+

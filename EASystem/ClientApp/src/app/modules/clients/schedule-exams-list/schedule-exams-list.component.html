@@ -1,0 +1,101 @@
+<section>
+  <h3 style="text-align: center">Schedule Examination</h3>
+  <mat-divider></mat-divider>
+  <mat-card>
+    <mat-card-content>
+
+      <form style="margin:0 30px" fxLayoutGap="30px" [formGroup]="myForm" (ngSubmit)="onSubmit()">
+        <div fxLayoutAlign="center" fxLayout="row wrap">          
+          <mat-form-field>
+            <mat-label>Exam Name</mat-label>
+            <mat-select ([value])="selected" formControlName="name">
+              <mat-option *ngFor="let exam of exams" [value]="exam.id">
+                {{exam.name}}
+              </mat-option>
+            </mat-select>
+            <mat-hint>Please select exam.</mat-hint>
+            <mat-error><span *ngIf="errorHandling('name','required')">Exam Name is a required field.</span></mat-error>
+            <mat-error><span *ngIf="errorHandling('name','maxlength')">Exam Name must not exceed 40 characters.</span></mat-error>
+          </mat-form-field>
+
+          <mat-form-field>
+            <mat-label>Duration (Min) </mat-label>
+            <mat-select ([value])="selected" formControlName="duration">
+              <mat-option *ngFor="let duration of dulationList" [value]="duration">
+                {{duration}} Mins
+              </mat-option>
+            </mat-select>
+            <mat-hint>Please select exam duration.</mat-hint>
+            <mat-error><span *ngIf="errorHandling('duration','required')">Duration is a required field.</span></mat-error>
+            <mat-error><span *ngIf="errorHandling('duration','maxlength')">Duration must not exceed 3 characters.</span></mat-error>
+          </mat-form-field>
+
+          <mat-form-field>
+            <mat-label>Number of Questions </mat-label>
+            <mat-select ([value])="selected" formControlName="numberQuestions">
+              <mat-option *ngFor="let number of questionNumbers" [value]="number">
+                {{number}}
+              </mat-option>
+            </mat-select>
+            <mat-hint>Please select number of questions.</mat-hint>
+            <mat-error><span *ngIf="errorHandling('numberQuestions','required')">Number of questions is a required field.</span></mat-error>
+            <mat-error><span *ngIf="errorHandling('numberQuestions','maxlength')">Number of questions must not exceed 3 characters.</span></mat-error>
+          </mat-form-field>
+        </div>
+        <br />
+        <mat-divider></mat-divider>
+        <br />
+        <div fxLayoutAlign="center" fxLayoutGap="10px" fxLayout="row wrap">
+          <button matTooltip="Save" mat-raised-button type="submit" color="primary" [disabled]="myForm.invalid"><mat-icon>save</mat-icon>Save</button>
+          <button matTooltip="Clear" mat-raised-button type="reset" (click)="onReset()" color="warn"><mat-icon>clear</mat-icon>Reset</button>
+          <button matTooltip="Cancel" mat-raised-button type="button" (click)="onCancel()" color="accent"><mat-icon>not_interested</mat-icon>Cancel</button>
+        </div>
+      </form><br />
+
+      <!--<div fxFlex style="width:100%">
+        <mat-table [dataSource]="dataSource" matSort>
+          <ng-container matColumnDef="index">
+            <mat-header-cell *matHeaderCellDef>No</mat-header-cell>
+            <mat-cell *matCellDef="let element;let i = index;">{{i + 1}}</mat-cell>
+          </ng-container>
+
+
+          <ng-container matColumnDef="name">
+            <mat-header-cell *matHeaderCellDef mat-sort-header>Exam Name</mat-header-cell>
+            <mat-cell *matCellDef="let element">
+              {{element.name }}
+            </mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="action">
+            <mat-header-cell *matHeaderCellDef>Action</mat-header-cell>
+            <mat-cell *matCellDef="let element">
+              <button id="exam_{{element.id}}" (click)="onScheduleExam($event)"
+                      mat-icon-button matTooltip="Schdedule Exam">
+                <mat-icon class="btn">add_box</mat-icon>
+              </button>
+            </mat-cell>
+          </ng-container>
+
+          <mat-header-row *matHeaderRowDef="dataColumns; sticky: true"></mat-header-row>
+          <mat-row *matRowDef="let row;
+        columns: dataColumns;
+        let i = index;
+        let even = even;"
+                   [ngClass]="{gray: even, 'highlight': selectedRowIndex == row.id }"
+                   (click)="highlight(row)">
+          </mat-row>
+        </mat-table>
+        <mat-paginator #paginator
+                       [pageSize]="20"
+                       [pageSizeOptions]="[20, 30, 40,50]">
+        </mat-paginator>
+        <br />
+        <button matTooltip="Close" mat-raised-button color="warn" type="button" style="margin-left:10px" (click)="onClose()"><mat-icon>clear</mat-icon>Close</button>
+      </div>-->
+    </mat-card-content>
+  </mat-card>
+</section>
+
+
+

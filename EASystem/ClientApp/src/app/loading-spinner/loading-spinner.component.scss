@@ -1,0 +1,7 @@
+.overlay {
+  opacity: 1;
+}
+
+::ng-deep.custom-class {
+  opacity: 0.3;
+}

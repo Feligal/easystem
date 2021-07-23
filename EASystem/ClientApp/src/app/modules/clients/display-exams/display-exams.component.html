@@ -1,0 +1,18 @@
+<mat-card class="mat-custom">
+  <div style="text-align:center; background-color:green; padding:5px 0">
+    <h1 >Exam: {{examData.name}}</h1>
+  </div> <mat-divider></mat-divider><br />
+  <mat-card-content style="text-align:center">
+    <p *ngIf="examData.hasBeenTaken"><b>Pass Status : {{examData.passStatus}} </b></p>
+    <p *ngIf="examData.hasBeenTaken"><b>Score : {{examData.score}}% </b></p>
+    <p><b>Date Added: {{examData.dateAdded | date}} </b></p>
+    <p *ngIf="examData.hasBeenTaken"><b>Date Taken: {{examData.dateTaken | date}} </b></p>
+    <p><b>Duration: {{examData.duration / 60}} Mins</b></p>
+    <p><b>Number of Questions: {{examData.numberOfQuestions}}</b></p>
+  </mat-card-content>
+  <div align="center">
+    <button *ngIf="examData.hasBeenTaken" mat-raised-button id="button_{{examData.examId}}" color="primary" (click)="onPrintPDF($event)"><mat-icon>print</mat-icon>Print Statement</button>
+    <button *ngIf="authService.isInRole(clientUserRole) && !examData.hasBeenTaken" mat-raised-button id="button_{{examData.examId}}" color="primary" (click)="onTakeExam($event)"><mat-icon>smart_display</mat-icon> Take Exam</button>
+  </div>
+</mat-card>
+

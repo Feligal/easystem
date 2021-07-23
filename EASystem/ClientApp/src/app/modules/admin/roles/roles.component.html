@@ -1,0 +1,97 @@
+<section>
+  <mat-card>
+    <mat-card-content>
+      <h3>User Roles</h3>
+      <mat-divider></mat-divider>
+      <br />
+      <mat-table style="width:auto" [dataSource]="dataSource" matSort>
+        <ng-container matColumnDef="index">
+          <mat-header-cell *matHeaderCellDef>No</mat-header-cell>
+          <mat-cell *matCellDef="let element;let i = index;">{{i + 1}}<span style="margin-left:20px;"></span></mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="name">
+          <mat-header-cell *matHeaderCellDef mat-sort-header>Role Name</mat-header-cell>
+          <mat-cell *matCellDef="let element">{{element.role.name }}</mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="action">
+          <mat-header-cell *matHeaderCellDef>Action</mat-header-cell>
+          <mat-cell *matCellDef="let element">
+            <button type="button"
+                    matTooltip="Edit Role"
+                    name="editUser"
+                    id="detail_{{element.role.id}}_{{element.role.name}}"
+                    (click)="onEditRole($event)"
+                    mat-icon-button
+                    color="accent">
+              <mat-icon>edit</mat-icon>
+            </button>
+
+
+            <button type="button"
+                    matTooltip="Assign Users"
+                    name="assignUsers"
+                    id="assignUsers_{{element.role.id}}"
+                    (click)="onAssignUsers($event)"
+                    mat-icon-button
+                    color="accent">
+              <mat-icon>how_to_reg</mat-icon>
+            </button>
+
+            <button type="button"
+                    matTooltip="Assigned Users"
+                    name="assignedUsers_{{element.role.name}}"
+                    id="assignedUsers_{{element.role.id}}"
+                    (click)="onViewAssignedUsers($event)"
+                    mat-icon-button
+                    color="accent">
+              <mat-icon>group</mat-icon>
+            </button>
+
+
+            <button type="button"
+                    matTooltip="Delete User Info"
+                    name="btnDelUser"
+                    id="delete_{{element.role.id}}"
+                    (click)="onDeleteRole($event)"
+                    mat-icon-button
+                    color="warn">
+              <mat-icon>delete</mat-icon>
+            </button>
+
+          </mat-cell>
+        </ng-container>
+
+        <mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></mat-header-row>
+        <mat-row *matRowDef="let row;
+           columns: displayedColumns;
+           let i = index;
+           let even = even;"
+                 [ngClass]="{ 'gray': even, 'highlight': selectedRowIndex == row.id}"
+                 (click)="highlight(row)">
+        </mat-row>
+      </mat-table>
+
+      <mat-paginator #paginator
+                     [pageSize]="20"
+                     [pageSizeOptions]="[20, 30, 40]">
+      </mat-paginator>
+      <button style="margin-top:15px" color="primary" mat-raised-button type="button" matTooltip="Add New Role" id="createRoles" (click)="onCreateRole()"><mat-icon>add</mat-icon>Add</button>
+    </mat-card-content>
+  </mat-card>
+</section>
+<br />
+
+<app-assign-users [selectedRoleId]="selectedRoleId" [currentRole]="selectedRole" *ngIf="onShowUserAssign">
+
+</app-assign-users>
+
+<app-assigned-users [selectedRoleName]="selectedRoleName" [currentRole]="selectedRole" *ngIf="onShowUserAssigned">
+
+</app-assigned-users>
+
+
+
+
+

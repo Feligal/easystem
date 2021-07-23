@@ -1,0 +1,62 @@
+<section>
+  <mat-card>
+    <mat-card-content>
+      <h3 *ngIf="exam">{{exam.name}} - Exam Questions ({{totalQuestions}})</h3><mat-divider></mat-divider><br />
+      <div fxLayout="">
+        <div fxFlex fxLayout="row" fxLayoutAlign="flex-end">          
+          <mat-form-field fxFlex="40%">
+            <input matInput type="text" (keyup)="doFilter($event.target.value)" placeholder="Search" />
+          </mat-form-field>
+        </div>
+      </div>
+
+      <table mat-table style="width:100%" [dataSource]="questionDataSource" matSort>
+        <ng-container matColumnDef="index">
+          <th mat-header-cell *matHeaderCellDef>No</th>
+          <td mat-cell *matCellDef="let element;let i = index;">{{i + 1}}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="text">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>
+            Question
+          </th>
+          <td mat-cell *matCellDef="let element">
+            {{element.text}}
+          </td>
+        </ng-container>
+
+
+
+        <ng-container matColumnDef="action">
+          <th mat-header-cell *matHeaderCellDef>Action</th>
+          <td mat-cell *matCellDef="let element">
+            <button id="question_{{element.id}}" (click)="onEditQuestion($event)"
+                    mat-icon-button matTooltip="Edit Question">
+              <mat-icon class="btn">edit</mat-icon>
+            </button>
+            <button id="question_{{element.id}}" (click)="onDeleteQuestion($event)"
+                    mat-icon-button matTooltip="Delete Question">
+              <mat-icon color="warn">delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+        <tr mat-row *matRowDef="let row;
+            columns: displayedColumns;
+            let i = index;
+            let even = even;"
+            [ngClass]="{gray: even, 'highlight': selectedRowIndex == row.id }"
+            (click)="highlight(row)">
+        </tr>
+      </table>
+
+      <mat-paginator #paginator
+                     [pageSize]="10"
+                     [pageSizeOptions]="[10,20, 30, 40,50,100]">
+      </mat-paginator>
+
+    </mat-card-content>
+  </mat-card>
+</section>
+

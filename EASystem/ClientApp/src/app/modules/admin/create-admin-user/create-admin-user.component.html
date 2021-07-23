@@ -1,0 +1,87 @@
+<h4 mat-dialog-title>{{title}}</h4>
+<section>
+  <mat-card>
+    <mat-card-content>
+      <img id="login-img" class="login-img" src="//ssl.gstatic.com/accounts/ui/avatar_2x.png" />
+
+      <form style="margin:0 30px" fxLayoutGap="30px" [formGroup]="myForm" (ngSubmit)="onSubmit()">
+        <div fxLayoutAlign="center" fxLayout="row wrap">
+
+          <mat-error><span *ngIf="hasError">First name must not be more that 32 characters.</span></mat-error>
+          <input type="number" hidden
+                 formControlName="id" />
+          <mat-form-field>
+            <input matInput type="text" placeholder="First Name *"
+                   formControlName="firstName" />
+            <mat-hint>Please enter first name.</mat-hint>
+            <mat-error><span *ngIf="errorHandling('firstName','required')">First name is a required field.</span></mat-error>
+            <mat-error><span *ngIf="errorHandling('firstName','maxlength')">First name must not be more that 32 characters.</span></mat-error>
+          </mat-form-field>
+
+          <mat-form-field>
+            <input matInput type="text" placeholder="Last Name *"
+                   formControlName="lastName" />
+            <mat-hint>Please enter last name.</mat-hint>
+            <mat-error><span *ngIf="errorHandling('lastName','required')">Last name is a required field.</span></mat-error>
+            <mat-error><span *ngIf="errorHandling('lastName','maxlength')">Last name must not be more that 32 characters.</span></mat-error>
+          </mat-form-field>
+
+          <mat-form-field>
+            <input matInput type="text" placeholder="User Name"
+                   formControlName="userName" />
+            <mat-hint>Please enter username.</mat-hint>
+            <mat-error><span *ngIf="errorHandling('userName','required')">User name is a required field.</span></mat-error>
+            <mat-error><span *ngIf="errorHandling('userName','maxlength')">Username must not be more that 32 characters.</span></mat-error>
+          </mat-form-field>
+
+
+
+          <mat-form-field>
+            <input matInput type="text" placeholder="Phone *"
+                   formControlName="phoneNumber" />
+            <mat-hint>Please enter phone number.</mat-hint>
+            <mat-error><span *ngIf="errorHandling('phoneNumber','required')">Phone number is a required field.</span></mat-error>
+            <mat-error><span *ngIf="errorHandling('phoneNumber','maxlength')">Phone number can not be more than 13 characters.</span></mat-error>
+          </mat-form-field>
+
+          <mat-form-field>
+            <input matInput type="email" placeholder="Email *"
+                   formControlName="email" />
+            <mat-hint>Please enter email address.</mat-hint>
+            <mat-error><span *ngIf="errorHandling('email','required')">Email address is a required field.</span></mat-error>
+            <mat-error><span *ngIf="errorHandling('email','email')">Email address is invalid.</span></mat-error>
+            <mat-error><span *ngIf="errorHandling('email','maxlength')">Email address can not be more than 40 characters.</span></mat-error>
+          </mat-form-field>
+
+
+          <mat-form-field>
+            <input matInput type="password" placeholder="Password *"
+                   formControlName="password" />
+            <mat-hint>Please enter password.</mat-hint>
+            <mat-error><span *ngIf="errorHandling('password','required')">Password is a required field.</span></mat-error>
+            <mat-error><span *ngIf="errorHandling('password','maxlength')">Password can not be more than 40 characters.</span></mat-error>
+          </mat-form-field>
+
+          <mat-form-field>
+            <input matInput type="password" placeholder="Repeat the Password *"
+                   formControlName="passwordConfirm" />
+            <mat-hint>Please repeat the password.</mat-hint>
+            <mat-error><span *ngIf="errorHandling('passwordConfirm','required')">Repeat password is required.</span></mat-error>
+            <mat-error><span *ngIf="hasMismatchError('passwordConfirm')">Password and confirmed password do not match.</span></mat-error>
+          </mat-form-field>
+
+        </div>
+        <br />
+        <mat-divider></mat-divider>
+        <br />
+        <div fxLayoutAlign="center" fxLayoutGap="30px" fxLayout="row wrap">
+          <button mat-raised-button type="submit" color="primary" [disabled]="myForm.invalid"><mat-icon>add</mat-icon>Add</button>
+          <button matTooltip="Clear" mat-raised-button type="reset" (click)="onReset()" color="warn"><mat-icon>clear</mat-icon>Clear</button>
+          <button matTooltip="Cancel" mat-raised-button type="button" (click)="onCancel()" color="accent"><mat-icon>not_interested</mat-icon>Cancel</button>
+        </div>
+      </form><br />
+    </mat-card-content>
+  </mat-card>
+</section>
+
+

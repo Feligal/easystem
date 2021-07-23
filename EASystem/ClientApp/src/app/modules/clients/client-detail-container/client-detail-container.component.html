@@ -1,0 +1,37 @@
+<section>
+  <h3> Client Details</h3>  
+  <mat-divider></mat-divider>  
+  <mat-tab-group>
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="example-tab-icon">corporate_fare</mat-icon>
+        Client Info
+      </ng-template>
+      Client Info
+      <!--<app-physical-checklist *ngIf="inspection.id" [physicalChecklist]="inspection.physicalCheckList"></app-physical-checklist>-->
+    </mat-tab>
+
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="example-tab-icon">pending_actions</mat-icon>
+        Scheduled Exams
+      </ng-template>      
+      <app-scheduled-exams></app-scheduled-exams>
+    </mat-tab>
+
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="example-tab-icon">done_all</mat-icon>
+        Written Exams
+      </ng-template>      
+      <app-admin-written-exams></app-admin-written-exams>
+    </mat-tab>
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="example-tab-icon">settings_backup_restore</mat-icon>
+        Exam Recovery
+      </ng-template>      
+      <app-exam-recovery></app-exam-recovery>
+    </mat-tab>       
+  </mat-tab-group>
+</section>

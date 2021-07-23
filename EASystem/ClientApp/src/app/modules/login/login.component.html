@@ -1,0 +1,50 @@
+<br />
+<section>
+  <div class="login-container" fxLayout="row wrap" fxFlex fxLayoutAlign="center">
+    <mat-card>
+      <h4 style="text-align: center">User Login</h4>  <mat-divider></mat-divider>
+      <mat-card-content>
+        <br />
+        <img id="login-img" class="login-img" src="//ssl.gstatic.com/accounts/ui/avatar_2x.png" />
+        <form style="margin:0 30px" fxLayoutGap="10px" [formGroup]="myForm" (ngSubmit)="onSubmit()">
+          <div fxLayoutAlign="center" fxLayout="column">
+            <div class="has-error" *ngIf="myForm.errors?.authError">
+              {{myForm.errors.authError}}
+            </div>
+            <br />
+            <mat-form-field>
+              <input matInput type="text" placeholder="Email/Username *"
+                     formControlName="email" />
+              <mat-hint>Please enter email address.</mat-hint>
+              <mat-error><span *ngIf="errorHandling('email','required')">Email address is a required field.</span></mat-error>
+              <!--<mat-error><span *ngIf="errorHandling('email','email')">Email address is invalid.</span></mat-error>-->
+              <mat-error><span *ngIf="errorHandling('email','maxlength')">Email address can not be more than 40 characters.</span></mat-error>
+            </mat-form-field>
+
+            <mat-form-field>
+              <input matInput [type]="hide ? 'password': 'text'" placeholder="Password *"
+                     formControlName="password" /><mat-icon matSuffix (click)="hide = !hide">{{hide ? 'visibility_off' : 'visibility'}}</mat-icon>
+              <mat-hint>Please enter password.</mat-hint>
+              <mat-error><span *ngIf="errorHandling('password','required')">Password is a required field.</span></mat-error>
+              <mat-error><span *ngIf="errorHandling('password','maxlength')">Password can not be more than 40 characters.</span></mat-error>
+            </mat-form-field>
+          </div>
+          <br />
+          <mat-divider></mat-divider>
+          <br />
+          <div fxLayoutAlign="center" fxLayoutGap="10px" fxLayout="row wrap">
+            <button mat-raised-button type="submit" color="primary" [disabled]="myForm.invalid"><mat-icon>how_to_reg</mat-icon>Sign in</button>
+            <button matTooltip="Clear" mat-raised-button type="reset" (click)="onReset()" color="accent"><mat-icon>clear</mat-icon>Clear</button>
+          </div>
+        </form><br />
+        <div fxLayoutAlign="center">
+          <a style="color:blue" routerLink="/forgotpassword">Forgot Password?</a>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+</section>
+
+
+

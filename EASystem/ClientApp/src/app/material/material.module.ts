@@ -1,0 +1,113 @@
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+
+import {
+  MatBadgeModule,
+  MatButtonModule,
+  MatCardModule,
+  MatCheckboxModule,
+  MatDatepickerModule,
+  MatDialogModule,
+  MatDividerModule,
+  MatExpansionModule,
+  MatFormFieldModule,
+  MatGridListModule,
+  MatIconModule,
+  MatInputModule,
+  MatListModule,
+  MatMenuModule,
+  MatNativeDateModule,
+  MatPaginatorModule,
+  MatProgressBarModule,
+  MatProgressSpinnerModule,
+  MatRadioModule,
+  MatSelectModule,
+  MatSidenavModule,
+  MatSnackBarModule,
+  MatSortModule,
+  MatStepperModule,
+  MatTableModule,
+  MatTabsModule,
+  MatToolbarModule,
+  MatTooltipModule
+} from '@angular/material';
+import { FlexLayoutModule } from '@angular/flex-layout';
+import { MatTableExporterModule } from 'mat-table-exporter';
+
+
+
+@NgModule({
+  declarations: [],
+  imports: [
+    CommonModule,
+    FlexLayoutModule,
+    MatButtonModule,
+    MatSidenavModule,
+    MatDividerModule,
+    MatToolbarModule,
+    MatIconModule,
+    MatMenuModule,
+    MatListModule,
+    MatCardModule,
+    MatTableModule,
+    MatInputModule,
+    MatFormFieldModule,
+    MatSortModule,
+    MatPaginatorModule,
+    MatTabsModule,
+    MatTooltipModule,
+    MatCardModule,
+    MatSelectModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatSnackBarModule,
+    MatDialogModule,
+    MatProgressBarModule,
+    MatCheckboxModule,
+    MatTableExporterModule,
+    MatBadgeModule,    
+    MatProgressSpinnerModule,
+    MatStepperModule,
+    MatGridListModule,
+    MatExpansionModule,
+    MatRadioModule
+    //MatCarouselModule.forRoot(),
+
+  ],
+  exports: [
+    FlexLayoutModule,
+    MatButtonModule,
+    MatSidenavModule,
+    MatDividerModule,
+    MatToolbarModule,
+    MatIconModule,
+    MatMenuModule,
+    MatListModule,
+    MatCardModule,
+    MatTableModule,
+    MatInputModule,
+    MatFormFieldModule,
+    MatSortModule,
+    MatPaginatorModule,
+    MatTabsModule,
+    MatTooltipModule,
+    MatCardModule,
+    MatSelectModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatSnackBarModule,
+    MatDialogModule,
+    MatProgressBarModule,
+    MatBadgeModule,
+    MatCheckboxModule,
+    MatTableExporterModule,
+    MatProgressSpinnerModule,
+    MatStepperModule,
+    MatGridListModule,
+    MatExpansionModule,
+    MatRadioModule,
+   
+   // MatCarouselModule
+  ]
+})
+export class MaterialModule { }

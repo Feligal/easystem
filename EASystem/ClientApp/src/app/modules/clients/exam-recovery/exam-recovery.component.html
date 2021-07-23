@@ -1,0 +1,41 @@
+<section>
+  <mat-card>
+    <h4>Recovered Exam Questions</h4>
+    <mat-divider></mat-divider>
+    <mat-card-content>
+      <br />
+      <button style="margin-top:15px" color="primary" mat-raised-button type="button" matTooltip="Recover Exam" id="scheduleExam" (click)="onRecoverExam()"><mat-icon>undo</mat-icon>Recover Exam</button>
+
+      <form #examForm="ngForm">
+        <mat-accordion>
+          <mat-expansion-panel *ngFor="let question of questions; let i = index" [expanded]="step === i" (opened)="setStep(i)">
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                <input type="number" hidden [(ngModel)]="question.id" name="q_{{question.id}}" value="{{question.id}}" />
+                <p style="font-size:larger">Q {{ i + 1}}.  {{question.text}}</p>
+              </mat-panel-title>
+              <mat-panel-description>
+
+              </mat-panel-description>
+            </mat-expansion-panel-header>
+            <mat-radio-group [disabled]="true" name="{{question.text}}" id="{{question.text}}" aria-labelledby="example-radio-group-label"
+                             class="fullWidth"
+                             [(ngModel)]="examData.answers[i].selectedAnswer">
+              <mat-radio-button color="primary" style="font-size:large" class="example-radio-button" *ngFor="let answer of question.answers" [value]="answer">
+                {{answer}}
+              </mat-radio-button>
+            </mat-radio-group>
+            <mat-action-row>
+              <button *ngIf="i > 0" mat-raised-button color="warn" (click)="prevStep()"><mat-icon>arrow_back_ios</mat-icon> Previous</button>
+              <button mat-raised-button color="primary" (click)="nextStep()"><mat-icon>arrow_forward_ios</mat-icon> Next</button>
+            </mat-action-row>
+          </mat-expansion-panel>
+        </mat-accordion>
+      </form>
+    </mat-card-content>
+    <mat-card-actions>
+      <button *ngIf="examData" mat-raised-button type="button" (click)="onSubmit()" style="margin:10px; background-color:green"><mat-icon>done</mat-icon>Submit for Marking</button>
+    </mat-card-actions>
+  </mat-card>
+
+</section>

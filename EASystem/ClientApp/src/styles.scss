@@ -1,0 +1,71 @@
+/* You can add global styles to this file, and also import other style files */
+
+
+/*@import '@angular/material/prebuilt-themes/purple-green.css';*/
+/*@import '@angular/material/prebuilt-themes/deeppurple-amber.css';*/
+/*@import '@angular/material/prebuilt-themes/indigo-pink.css';*/
+@import '@angular/material/prebuilt-themes/pink-bluegrey.css';
+
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+.error-notification {
+  background-color: rgb(216, 0, 0);
+}
+
+.success-notification {
+  background-color: rgb(21, 131, 0);
+}
+
+.btn {
+  color: forestgreen;
+}
+
+
+
+.mat-toolbar {
+  min-height: 80px !important;
+  height: 80px !important;
+}
+
+.mat-toolbar-row {
+  min-height: 80px !important;
+  height: 80px !important;
+}
+
+
+
+.side-nav-menu .mat-list-item:hover {
+  background: dodgerblue !important;
+}
+
+
+.mat-nav-list a:hover {
+  /*background: #4a4a4a !important;*/
+  color: black !important;
+  background: dodgerblue !important;
+}
+
+.mat-nav-list a:active {
+  /*background: #4a4a4a !important;*/
+  color: red !important;
+  background: green !important;
+}
+
+/*.mat-nav-list a:active {
+  background: red !important;
+}*/
+.gray {
+  background-color: #313131
+}
+
+.highlight {
+  background: #585858
+}
+
+.mat-row:hover {
+  background: #808080;
+}
+ul li {
+  list-style: none;
+}

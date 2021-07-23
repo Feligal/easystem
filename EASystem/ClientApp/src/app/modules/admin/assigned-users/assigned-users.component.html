@@ -1,0 +1,46 @@
+<section style="margin-bottom:30px">
+  <mat-card>
+    <mat-card-content>
+      <h3>Users assigned to {{selectedRoleName}} </h3>
+      <mat-divider></mat-divider>
+      <div fxLayout="">
+        <button style="margin-top:15px" color="primary" mat-icon-button type="button" matTooltip="Refresh" (click)="onRefresh()"><mat-icon>refresh</mat-icon></button>
+        <div fxFlex fxLayout="row" fxLayoutAlign="flex-end">
+          <mat-form-field fxFlex="40%">
+            <input matInput type="text" (keyup)="doFilter($event.target.value)" placeholder="Filter" />
+          </mat-form-field>
+        </div>
+      </div>
+
+      <mat-table style="width:auto" [dataSource]="dataSource" matSort>
+        <ng-container matColumnDef="index">
+          <mat-header-cell *matHeaderCellDef>No</mat-header-cell>
+          <mat-cell *matCellDef="let element;let i = index;">{{i + 1}}<span style="margin-left:20px;"></span></mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="userName">
+          <mat-header-cell *matHeaderCellDef mat-sort-header>User Name</mat-header-cell>
+          <mat-cell *matCellDef="let element"><span style="margin-right:10px"><mat-icon>how_to_reg</mat-icon></span> {{element.userName}}</mat-cell>
+        </ng-container>
+
+        <mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></mat-header-row>
+        <mat-row *matRowDef="let row;
+      columns: displayedColumns;
+      let i = index;
+      let even = even;"
+                 [ngClass]="{ 'gray': even, 'highlight': selectedRowIndex == row.id}"
+                 (click)="highlight(row)">
+        </mat-row>
+      </mat-table>
+
+      <mat-paginator #paginator
+                     [pageSize]="5"
+                     [pageSizeOptions]="[5, 10, 20]">
+      </mat-paginator>
+    </mat-card-content>
+  </mat-card>
+</section>
+<br />
+
+
+
