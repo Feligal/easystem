@@ -13,8 +13,11 @@ namespace EASystem.Models.ExamModels
         public string Name { get; set; }
         public DateTime DateCreated { get; set; }
         public ICollection<Report> ExamReports { get; set; }
+        public ICollection<Question> Questions { get; set; }
+
         public Exam()
         {
+            Questions = new Collection<Question>();
             ExamReports = new Collection<Report>();
         }
 

@@ -205,6 +205,80 @@ namespace EASystem.Migrations.ExamMigrations
                     b.ToTable("Tokens");
                 });
 
+            modelBuilder.Entity("EASystem.Models.ExamModels.Application", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<DateTime>("ApplicationDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ApplicationText")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsOpened")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("ReadDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("ReadStatus")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Subject")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Applications");
+                });
+
+            modelBuilder.Entity("EASystem.Models.ExamModels.ClientApplication", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<DateTime>("ApplicationDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ApplicationText")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("ClientUserProfileId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsOpened")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("ReadDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("ReadStatus")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Subject")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClientUserProfileId");
+
+                    b.ToTable("ClientApplications");
+                });
+
             modelBuilder.Entity("EASystem.Models.ExamModels.Exam", b =>
                 {
                     b.Property<int>("Id")
@@ -221,6 +295,32 @@ namespace EASystem.Migrations.ExamMigrations
                     b.HasKey("Id");
 
                     b.ToTable("Exams");
+                });
+
+            modelBuilder.Entity("EASystem.Models.ExamModels.ExamReview", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<DateTime>("DateTaken")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ExamTakenId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("QuestionId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SelectedAnswer")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ExamTakenId");
+
+                    b.ToTable("ExamReviews");
                 });
 
             modelBuilder.Entity("EASystem.Models.ExamModels.ExamTaken", b =>
@@ -256,6 +356,9 @@ namespace EASystem.Migrations.ExamMigrations
 
                     b.Property<string>("PassStatus")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("ScheduledDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<int>("Score")
                         .HasColumnType("int");
@@ -302,6 +405,8 @@ namespace EASystem.Migrations.ExamMigrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ExamId");
 
                     b.ToTable("Questions");
                 });
@@ -515,11 +620,36 @@ namespace EASystem.Migrations.ExamMigrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("EASystem.Models.ExamModels.ClientApplication", b =>
+                {
+                    b.HasOne("EASystem.Models.AuthenticationModels.ClientUserProfile", null)
+                        .WithMany("ClientApplications")
+                        .HasForeignKey("ClientUserProfileId");
+                });
+
+            modelBuilder.Entity("EASystem.Models.ExamModels.ExamReview", b =>
+                {
+                    b.HasOne("EASystem.Models.ExamModels.ExamTaken", null)
+                        .WithMany("ExamReviews")
+                        .HasForeignKey("ExamTakenId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("EASystem.Models.ExamModels.ExamTaken", b =>
                 {
                     b.HasOne("EASystem.Models.AuthenticationModels.ClientUserProfile", null)
                         .WithMany("WrittenExams")
                         .HasForeignKey("ClientUserProfileId");
+                });
+
+            modelBuilder.Entity("EASystem.Models.ExamModels.Question", b =>
+                {
+                    b.HasOne("EASystem.Models.ExamModels.Exam", null)
+                        .WithMany("Questions")
+                        .HasForeignKey("ExamId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("EASystem.Models.ExamModels.Report", b =>

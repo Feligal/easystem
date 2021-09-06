@@ -11,6 +11,7 @@ import * as pdfMake from 'pdfmake/build/pdfmake';
 import * as pdfFonts from 'pdfmake/build/vfs_fonts';
 import { DatePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
+import { ConfirmationMessageComponent } from '../../../confirmation-message/confirmation-message.component';
 pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
 @Component({
@@ -18,9 +19,10 @@ pdfMake.vfs = pdfFonts.pdfMake.vfs;
   templateUrl: './admin-exam-records.component.html',
   styleUrls: ['./admin-exam-records.component.scss']
 })
-export class AdminExamRecordsComponent implements OnInit, OnDestroy, AfterViewInit {
+export class AdminExamRecordsComponent implements OnInit,AfterViewInit, OnDestroy  {  
   logoImageBlob = [];
   examRecords = [];
+  pagedRecords = [];
   firstDate: any;
   secondDate: any;
   selection = new SelectionModel<any>(true, []);
@@ -41,7 +43,8 @@ export class AdminExamRecordsComponent implements OnInit, OnDestroy, AfterViewIn
     'select',
     'action'
   ];
-  dataSource = new MatTableDataSource<any>();
+
+  dataSource = new MatTableDataSource<any[]>();
   @ViewChild(MatSort, { static: true }) sort: MatSort;
   @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
 
@@ -53,13 +56,14 @@ export class AdminExamRecordsComponent implements OnInit, OnDestroy, AfterViewIn
     private uiService: UiService, private datepipe: DatePipe,
     @Inject('BASE_URL') private baseUrl
   ) { }
+   
 
   ngOnInit() {
     this.changeCAALogFileToBase64();
     const spinner = this.dialog.open(LoadingSpinnerComponent, {
       panelClass: 'custom-class',
       disableClose: true
-    });
+    });    
 
     this.appService.getAllExamRecords().subscribe((res: any[]) => {
       if (res.length > 0) {
@@ -80,11 +84,10 @@ export class AdminExamRecordsComponent implements OnInit, OnDestroy, AfterViewIn
     });    
   }
 
-
-  ngAfterViewInit(): void {
+  ngAfterViewInit(): void {    
     this.dataSource.sort = this.sort;
     this.dataSource.paginator = this.paginator;
-  }
+  } 
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
@@ -120,6 +123,10 @@ export class AdminExamRecordsComponent implements OnInit, OnDestroy, AfterViewIn
     return `${this.selection.isSelected(row) ? 'deselect' : 'select'} row ${row.position + 1}`;
   }
 
+  highlight(row) {
+    this.selectedRowIndex = row.id;
+  }
+
   masterToggle() {
     this.isAllSelected() ?
       this.selection.clear() : this.dataSource.data.forEach(row => this.selection.select(row));
@@ -129,6 +136,66 @@ export class AdminExamRecordsComponent implements OnInit, OnDestroy, AfterViewIn
     const numSelected = this.selection.selected.length;
     const numRows = this.dataSource.data.length;
     return numSelected === numRows;
+  }
+
+  onDeleteRecord(event) {
+    const id = +event.currentTarget.id.split("_")[1];
+    const dialogRef = this.dialog.open(ConfirmationMessageComponent, {
+      data: {
+        message: "Are you sure you want to delete the record?"
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        //If accepted to delete
+        const dialogRef = this.dialog.open(LoadingSpinnerComponent, {
+          panelClass: 'custom-class',
+          disableClose: true
+        });
+        this.appService.deleteExamRecord(id).subscribe((res: any) => {
+          this.$examRecordSubject.next(res);
+          dialogRef.close();
+          this.uiService.showSnackBarNotification("The record was successfully deleted.", null, 3000, 'top', 'success-notification');
+        }, error => {
+            dialogRef.close();
+            this.uiService.showSnackBarNotification("An error occured while processing the request, try again later.", null, 3000, 'top', 'errror-notification');
+        });
+      } else {
+        //Do nothing
+      }
+    })  
+  }
+
+  onDeleteAllSelected() {
+    const dialog = this.dialog.open(ConfirmationMessageComponent, {
+      data: {
+        message: "Are you sure you want to delete the selected exam records?"
+      }
+    });
+    dialog.afterClosed().subscribe(result => {
+      if (result) {
+        const dialog = this.dialog.open(LoadingSpinnerComponent, {
+          panelClass: 'custom-class',
+          disableClose: true
+        });
+        const selectedItems = this.selection.selected;
+        for (const item of selectedItems) {
+          const id = item.id;
+          this.appService.deleteExamRecord(id).subscribe((res:any) => {
+            this.uiService.showSnackBarNotification("Exam records were successfully deleted.", null, 3000, 'top', 'success-notification');
+            this.$examRecordSubject.next(res);
+            dialog.close();
+          }, error => {
+              dialog.close();
+              console.log(error);
+          });
+        }
+        this.selection.clear();
+      } else {
+        this.selection.clear();
+      }
+    })
   }
 
   generatePdf() {
@@ -172,7 +239,7 @@ export class AdminExamRecordsComponent implements OnInit, OnDestroy, AfterViewIn
           ],
         },
         {
-          text: `${this.examName} Exam Records`,
+          text: `Examination Records`,
           style: 'header',
           margin: [0, 10, 0, 30],
           alignment: 'center',

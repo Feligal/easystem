@@ -42,38 +42,24 @@ export class SidebarComponent implements OnInit{
       link: '/dashboard',
       icon: 'dashboard',
       hidden: false
-    },
-
+    },    
     {
-      label: 'Examinations',     
-      icon: 'inventory',      
+      label: 'Examinations',
+      link: '/examinations',
+      icon: 'groups',
+      hidden: false,
+    },
+    {
+      label: 'Exam Records',
+      link: '/examrecords',
+      icon: 'grading',
       hidden: false,      
-      items: [
-        {
-          label: 'Exams',
-          link: '/examinations',
-          icon: 'groups',
-          hidden: false,
-        },
-        {
-          label: 'Records',
-          link: '/examrecords',
-          icon: 'grading',
-          hidden: false,
-        }
-      ]
     },
-    {
+    {      
       label: 'Clients',
-      icon: 'people',
-      items: [       
-        {
-          label: 'Students',
-          link: '/clients',
-          icon: 'groups',
-          hidden: false,   
-        }
-      ]
+      link: '/clients',
+      icon: 'groups',
+      hidden: false,         
     },        
   ];
 
@@ -113,29 +99,22 @@ export class SidebarComponent implements OnInit{
   ]
   clientUserMenuItems = [
     {
-      label: 'Client',
-      icon: 'people_alt',
-      items: [
-        {
-          label: 'Schedule Exams',
-          link: '/client/scheduledexams',
-          icon: 'assignment',
-
-        },
-        {
-          label: 'Written Exams',
-          link: '/client/writtenexams',
-          icon: 'assignment_turned_in',
-          disabled: false,
-        },
-        {
-          label: 'Reports',
-          link: '/client/reports',
-          icon: 'grading',
-          disabled: false,
-        },
-      ]
+      label: 'Schedule Exams',
+      link: '/client/scheduledexams',
+      icon: 'assignment',
     },
+    {
+      label: 'Written Exams',
+      link: '/client/writtenexams',
+      icon: 'assignment_turned_in',
+      disabled: false,
+    },        
+    {
+      label: 'Applications',
+      link: '/client/applications',
+      icon: 'email',
+      disabled: false,
+    }      
   ];
 
   adminUserRole = "AdminUserRole";

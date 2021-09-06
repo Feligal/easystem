@@ -24,7 +24,7 @@ namespace EASystem.Extensions
             message.To.Add(MailboxAddress.Parse(toEmail));
             message.Subject = subject;
             message.Body = new TextPart(TextFormat.Html) { Text = body };
-
+            
             //Send email
             using var smtp = new MailKit.Net.Smtp.SmtpClient();
             await smtp.ConnectAsync(configuration["EmailSettings:MailServer"], int.Parse(configuration["EmailSettings:Port"]), SecureSocketOptions.StartTls);

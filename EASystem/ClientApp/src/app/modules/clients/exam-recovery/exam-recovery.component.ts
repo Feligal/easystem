@@ -1,6 +1,7 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { MatDialog } from '@angular/material';
+import { Router } from '@angular/router';
 import { LoadingSpinnerComponent } from '../../../loading-spinner/loading-spinner.component';
 import { ApplicationService } from '../../../services/application.service';
 import { UiService } from '../../../services/ui.service';
@@ -18,7 +19,7 @@ export class ExamRecoveryComponent implements OnInit {
   questions = [];
   constructor(
     private appService: ApplicationService,
-    private uiService: UiService, private dialog: MatDialog) { }
+    private uiService: UiService, private dialog: MatDialog, private router: Router) { }
   ngOnInit() {
     
   }
@@ -85,5 +86,9 @@ export class ExamRecoveryComponent implements OnInit {
 
   prevStep() {
     this.step--;
+  }
+
+  onBack() {
+    this.router.navigate(['clients']);
   }
 }

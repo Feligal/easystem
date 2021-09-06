@@ -1,0 +1,39 @@
+<h4 style="text-align:center" mat-dialog-title>Create Exam Application</h4>
+<section>
+  <mat-card>
+    <mat-card-content>      
+      <form style="margin:0 30px" fxLayoutGap="30px" [formGroup]="myForm" (ngSubmit)="onSubmit()">
+        <div fxLayoutAlign="center" fxLayout="row wrap">          
+          <input type="number" hidden formControlName="id" />
+          <mat-form-field>
+            <input matInput type="text" placeholder="Subject *" formControlName="subject" />
+            <mat-hint>Please enter subject.</mat-hint>
+            <mat-error><span *ngIf="errorHandling('subject','required')">Subject is a required field.</span></mat-error>
+            <mat-error><span *ngIf="errorHandling('subject','maxlength')">Subject must not be more that 100 characters.</span></mat-error>
+          </mat-form-field>
+
+          <mat-form-field>
+            <textarea matInput type="text" placeholder="Application Text *"
+                      formControlName="applicationText">                  
+            </textarea>
+            <mat-hint>Please enter application text.</mat-hint>
+            <mat-error><span *ngIf="errorHandling('applicationText','required')">Application Text is a required field.</span></mat-error>
+            <mat-error><span *ngIf="errorHandling('applicationText','maxlength')">Application Text must not be more that 1000 characters.</span></mat-error>
+
+          </mat-form-field>
+         
+        </div>
+        <br />
+        <mat-divider></mat-divider>
+        <br />
+        <div fxLayoutAlign="center" fxLayoutGap="30px" fxLayout="row wrap">
+          <button mat-raised-button type="submit" color="primary" [disabled]="myForm.invalid"><mat-icon>add</mat-icon>Add</button>          
+          <button matTooltip="Cancel" mat-raised-button type="button" (click)="onCancel()" color="accent"><mat-icon>close</mat-icon>Close</button>
+        </div>
+      </form><br />
+    </mat-card-content>
+  </mat-card>
+</section>
+
+
+

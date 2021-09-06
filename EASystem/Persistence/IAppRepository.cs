@@ -18,13 +18,27 @@ namespace EASystem.Persistence
         Task<IEnumerable<ExamTaken>> TakenExamsByClientId(int id);
         Task<ExamTaken> GetWrittenExam(int examId);
         Task<Exam> GetExam(int examId);
+        Task<Exam> GetExamWithQuestion(int examId);
+        void DeleteExam(Exam exam);
+        void DeleteExamRecord(Report report);
         void AddExam(Exam exam);
+        void CancelExam(ExamTaken exam);
         void AddQuestion(Question question);
         void RemoveQuestion(Question question);
         Task<IEnumerable<Question>> GetQuestionsByExamId(int examId);
         Task<Question> GetQuestionById(int questionId);
         Task<IEnumerable<Report>> GetExamRecords(int examId);
+        Task<Report> GetExamRecord(int Id);
         Task<IEnumerable<Report>> GetAllExamRecords();
+        Task<IEnumerable<ExamReview>> GetExamReviews(int id);
+        void AddClientApplication(ClientApplication application);
+        void AddApplication(Application application);
+        Task<IEnumerable<ClientApplication>> GetClientApplications(string userId);
+        Task<IEnumerable<Application>> GetApplications();
+        void RemoveClientApplication(ClientApplication application);
+        void RemoveApplication(Application application);
+        Task<ClientApplication> GetClientApplication(int id);
+        Task<Application> GetApplication(int id);
 
 
         //ADMINISTRATIVE FUNCTIONS

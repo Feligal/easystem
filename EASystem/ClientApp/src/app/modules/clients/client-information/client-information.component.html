@@ -1,0 +1,95 @@
+<section>
+  <h4>Client Information</h4>
+  <mat-card>
+    <mat-card-content>
+      <div style="margin-left:20px; width:100px;height:auto">
+        <img *ngIf="client.portraitImage" src="/clientThumbnailPortraits/{{client.portraitImage}}" style="cursor:pointer" class="image-thumbnail" />
+        <img *ngIf="!client.portraitImage" src="/user-icon.png" style="cursor:pointer" class="image-thumbnail" />
+        <br />
+        <button mat-button matTooltip="Upload" color="primary" (click)="onClick()">
+          <mat-icon>file_upload</mat-icon>
+          {{text}}
+        </button>
+        <ul>
+          <li *ngFor="let file of files" [@fadeInOut]="file.state">
+            <mat-progress-bar [value]="file.progress"></mat-progress-bar>
+            <span id="file-label">
+              {{file.data.name}}
+              <a title="Retry" (click)="retryFile(file)" *ngIf="file.canRetry">
+                <mat-icon>refresh</mat-icon>
+              </a>
+              <a title="Cancel" (click)="cancelFile(file)" *ngIf="file.canCancel">
+                <mat-icon>cancel</mat-icon>
+              </a>
+            </span>
+          </li>
+        </ul>
+        <input type="file" id="fileUpload" name="fileUpload" multiple="multiple" accept="{{accept}}" style="display:none;" />
+        <mat-divider></mat-divider>
+        <br />
+      </div>
+      <form style="margin:0 30px" fxLayoutGap="30px" [formGroup]="createClientForm" (ngSubmit)="onSubmit()">
+        <div fxLayoutAlign="space-between" fxLayout="row wrap">
+          <input hidden type="number" formControlName="itemId" />
+          <mat-form-field>
+            <input matInput type="text" placeholder="First Name *"
+                   formControlName="firstName" />
+            <mat-hint>Please enter first name.</mat-hint>
+            <mat-error><span *ngIf="errorHandling('firstName','required')">First name is a required field.</span></mat-error>
+            <mat-error><span *ngIf="errorHandling('firstName','maxlength')">First name must not be more that 32 characters.</span></mat-error>
+          </mat-form-field>
+
+          <mat-form-field>
+            <input matInput type="text" placeholder="Last Name *"
+                   formControlName="lastName" />
+            <mat-hint>Please enter last name.</mat-hint>
+            <mat-error><span *ngIf="errorHandling('lastName','required')">First name is a required field.</span></mat-error>
+            <mat-error><span *ngIf="errorHandling('lastName','maxlength')">Last name must not be more that 32 characters.</span></mat-error>
+          </mat-form-field>
+
+         
+
+          <mat-form-field>
+            <input matInput type="text" placeholder="Identification Username *"
+                   formControlName="userName" />
+            <mat-hint>Please enter unique Username.</mat-hint>
+            <mat-error><span *ngIf="errorHandling('userName','required')">Unique Username is a required field.</span></mat-error>
+            <mat-error><span *ngIf="errorHandling('userName','maxlength')">Unique Username must not be more that 32 characters.</span></mat-error>
+          </mat-form-field>                   
+
+          <mat-form-field>
+            <input matInput type="text" placeholder="NRC *"
+                   formControlName="nrc" />
+            <mat-hint>Please enter nrc number in format 000000/00/1.</mat-hint>
+            <mat-error><span *ngIf="errorHandling('nrc','required')">NRC number is a required field.</span></mat-error>
+            <mat-error><span *ngIf="errorHandling('nrc','maxlength')">NRC number can not be more that 11 characters.</span></mat-error>
+          </mat-form-field>          
+
+          <mat-form-field>
+            <input matInput type="text" placeholder="Phone *"
+                   formControlName="phone" />
+            <mat-hint>Please enter phone number.</mat-hint>
+            <mat-error><span *ngIf="errorHandling('phone','required')">Phone number is a required field.</span></mat-error>
+            <mat-error><span *ngIf="errorHandling('phone','maxlength')">Phone number can not be more than 13characters.</span></mat-error>
+          </mat-form-field>
+
+          <mat-form-field>
+            <input matInput type="email" placeholder="Email *"
+                   formControlName="email" />
+            <mat-hint>Please enter email address.</mat-hint>
+            <mat-error><span *ngIf="errorHandling('email','required')">Email address is a required field.</span></mat-error>
+            <mat-error><span *ngIf="errorHandling('email','email')">Email address is invalid.</span></mat-error>
+            <mat-error><span *ngIf="errorHandling('email','maxlength')">Email address can not be more than 40 characters.</span></mat-error>
+          </mat-form-field>         
+        </div>
+        <br />
+        <mat-divider></mat-divider>
+        <br />
+        <button matTooltip="Save" mat-raised-button type="submit" color="primary" [disabled]="createClientForm.invalid">  <mat-icon>save</mat-icon>Save</button>
+        <button matTooltip="Cancel" mat-raised-button type="button" (click)="onBack()" color="accent"><mat-icon>arrow_back_ios</mat-icon>Back</button>
+      </form>
+      <br />
+    </mat-card-content>
+  </mat-card>
+</section>
+

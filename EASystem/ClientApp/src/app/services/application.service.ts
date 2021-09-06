@@ -12,7 +12,9 @@ export class ApplicationService {
   $clientUsers = new Subject<any>();
   $userRoles = new Subject<any>();
   $pendingExams = new Subject<any>();
-
+  $writtenExams = new Subject<any>();
+  $clientApplications = new Subject<any>();
+  $applications = new Subject<any>();
   $exams = new Subject<any>();
   $questions = new Subject<any>();
   activeExam;
@@ -38,8 +40,6 @@ export class ApplicationService {
     const url = this.baseUrl + 'api/getquestions/' + examId;
     return this.httpClient.get(url);
   }
-
-
   getShuffledQuestionsByExamId(examId, numberOfQuestions) {
     const url = this.baseUrl + `api/getshufflequestions/${examId}/${numberOfQuestions}`;
     return this.httpClient.get(url);
@@ -64,6 +64,8 @@ export class ApplicationService {
     const url = this.baseUrl + 'api/getexam/' + examId;
     return this.httpClient.get(url);
   }
+
+
 
   //Administrative Functions
   createAdminUser(data) {
@@ -209,6 +211,12 @@ export class ApplicationService {
     return this.httpClient.post(url, data);
   }
 
+  getExamReview(id) {
+    const url = this.baseUrl + `api/getexamreview/${id}`;
+    return this.httpClient.get(url);
+  }
+
+
   getExamRecords(examId) {
     const url = this.baseUrl + `api/examRecords/${examId}`;
     return this.httpClient.get(url);
@@ -218,4 +226,51 @@ export class ApplicationService {
     const url = this.baseUrl + `api/allexamrecords/`;
     return this.httpClient.get(url);
   }
+
+  deleteCancelExam(id) {
+    const url = this.baseUrl + `api/cancelexam/${id}`;
+    return this.httpClient.delete(url);
+  }
+  createExamApplication(data) {
+    const url = this.baseUrl + `api/createapplication`;
+    return this.httpClient.post(url,data);
+  }
+  getClientApplications() {
+    const url = this.baseUrl + `api/clientapplications`;
+    return this.httpClient.get(url);
+  }
+
+  getApplications() {
+    const url = this.baseUrl + `api/applications`;
+    return this.httpClient.get(url);
+  }
+
+  deleteApplication(id) {
+    const url = this.baseUrl + `api/deleteapplication/${id}`;
+    return this.httpClient.delete(url);
+  }
+
+  deleteClientApplication(id) {
+    const url = this.baseUrl + `api/deleteclientapplication/${id}`;
+    return this.httpClient.delete(url);
+  }
+  getApplication(id) {
+    const url = this.baseUrl + `api/getapplication/${id}`;
+    return this.httpClient.get(url);
+  }
+
+  deleteExam(id) {
+    const url = this.baseUrl + `api/deleteexam/${id}`;
+    return this.httpClient.delete(url);
+  }
+
+  deleteExamRecord(id) {
+    const url = this.baseUrl + `api/deleteexamrecord/${id}`;
+    return this.httpClient.delete(url);
+  }
+
+  deleteRecordByExamId(id,examId) {
+    const url = this.baseUrl + `api/deleterecordbyexamid/${id}/${examId}`;
+    return this.httpClient.delete(url);
+  } 
 }

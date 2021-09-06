@@ -74,9 +74,9 @@
         </tr>
       </table>
 
-      <mat-paginator #paginator
-                     [pageSize]="20"
-                     [pageSizeOptions]="[20, 30, 40,50,100]">
+      <mat-paginator #paginator showFirstLastButtons
+                     [pageSize]="10"
+                     [pageSizeOptions]="[10,20, 30, 40,50,100]">
       </mat-paginator>
       <button style="margin-top:15px" color="primary" mat-raised-button type="button" matTooltip="Add New User" id="createUser" (click)="onCreateAdminUser()"><mat-icon>add</mat-icon>Add</button>
     </mat-card-content>

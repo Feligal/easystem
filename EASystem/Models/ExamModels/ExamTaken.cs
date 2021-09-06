@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Microsoft.VisualBasic;
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
@@ -18,9 +20,14 @@ namespace EASystem.Models.ExamModels
         public  int ? ClientUserProfileId { get; set; }
         public DateTime DateTaken { get; set; }
         public DateTime DateAdded { get; set; }
+        public DateTime ScheduledDate { get; set; }
         public int Score { get; set; }
         public string PassStatus { get; set; }        
         public bool HasBeenTaken { get; set; } = false;
-
+        public ICollection<ExamReview> ExamReviews { get; set; }
+        public ExamTaken()
+        {
+            ExamReviews = new Collection<ExamReview>();
+        }
     }
 }

@@ -1,9 +1,8 @@
 import { OnDestroy, ViewChild } from '@angular/core';
 import { AfterViewInit, Component, Inject, OnInit } from '@angular/core';
-import { MatTableDataSource } from '@angular/material';
+import { MatPaginator, MatTableDataSource } from '@angular/material';
 import { MatSort } from '@angular/material';
 import { MatDialog } from '@angular/material';
-import { MatPaginator } from '@angular/material';
 import { Subscription } from 'rxjs';
 import { ConfirmationMessageComponent } from '../../../confirmation-message/confirmation-message.component';
 import { LoadingSpinnerComponent } from '../../../loading-spinner/loading-spinner.component';
@@ -50,8 +49,7 @@ export class AdminUsersComponent implements OnInit, AfterViewInit, OnDestroy {
     });
 
     
-    this.appService.getAdminUsers().subscribe((res: any) => {
-      console.log(res);
+    this.appService.getAdminUsers().subscribe((res: any) => {      
       this.adminUsers = res;
       this.dataSource.data = this.adminUsers;
       dialogRef.close();

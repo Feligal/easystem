@@ -11,8 +11,8 @@
     <p><b>Number of Questions: {{examData.numberOfQuestions}}</b></p>
   </mat-card-content>
   <div align="center">
-    <button *ngIf="examData.hasBeenTaken" mat-raised-button id="button_{{examData.examId}}" color="primary" (click)="onPrintPDF($event)"><mat-icon>print</mat-icon>Print Statement</button>
-    <button *ngIf="authService.isInRole(clientUserRole) && !examData.hasBeenTaken" mat-raised-button id="button_{{examData.examId}}" color="primary" (click)="onTakeExam($event)"><mat-icon>smart_display</mat-icon> Take Exam</button>
+    <button *ngIf="examData.hasBeenTaken" mat-raised-button id="button_{{examData.id}}" color="primary" (click)="onPrintPDF($event)"><mat-icon>print</mat-icon>Print Statement</button>    
+    <button *ngIf="authService.isInRole(clientUserRole) && !examData.hasBeenTaken" mat-raised-button id="button_{{examData.id}}" color="primary" (click)="onTakeExam($event)"><mat-icon>smart_display</mat-icon> Take Exam</button>
   </div>
 </mat-card>
 

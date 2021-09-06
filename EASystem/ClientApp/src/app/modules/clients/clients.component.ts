@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatDialog, MatPaginator, MatSort, MatTableDataSource } from '@angular/material';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -7,13 +7,14 @@ import { LoadingSpinnerComponent } from '../../loading-spinner/loading-spinner.c
 import { ApplicationService } from '../../services/application.service';
 import { UiService } from '../../services/ui.service';
 import { CreateClientUserComponent } from '../admin/create-client-user/create-client-user.component';
+import { ImportUsersComponent } from './import-users/import-users.component';
 
 @Component({
   selector: 'app-clients',
   templateUrl: './clients.component.html',
   styleUrls: ['./clients.component.scss']
 })
-export class ClientsComponent implements OnInit {
+export class ClientsComponent implements OnInit, AfterViewInit, OnDestroy {
 
   selectedRowIndex = -1;
   id: number;
@@ -49,8 +50,7 @@ export class ClientsComponent implements OnInit {
     });
 
 
-    this.appService.getClientUsers().subscribe((res: any) => {
-      console.log(res);
+    this.appService.getClientUsers().subscribe((res: any) => {      
       this.clientUsers = res;
       this.dataSource.data = this.clientUsers;
       dialogRef.close();
@@ -149,6 +149,15 @@ export class ClientsComponent implements OnInit {
         }
       }
     )
+  }
+
+  onAddBulkUser() {
+    this.dialog.open(ImportUsersComponent,
+      {
+        minWidth: 300,
+        width: '400px',        
+      }
+    );
   }
 
   onDetailUser(event) {

@@ -1,8 +1,9 @@
 import { Component, EventEmitter, OnDestroy, OnInit, Output } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
 import * as jwt_decode from 'jwt-decode';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
+import { ApplicationService } from '../../../services/application.service';
 
 @Component({
   selector: 'app-header',
@@ -13,33 +14,35 @@ export class HeaderComponent implements OnInit, OnDestroy {
   @Output() toggleSideBarForMe: EventEmitter<any> = new EventEmitter();
   adminUserRole = "AdminUserRole";
   clientUserRole = "ClientUserRole";
+  applicationCounter;
   currentUser: any;
   userSubscription: Subscription;
-  constructor(private router: Router, private auth: AuthService) {
-    this.userSubscription = this.auth.$currentUser.subscribe(res => {
-      this.currentUser = res;
-      //if (this.auth.isLoggedIn() && this.auth.isInRole(this.aerodromeClientRole)) {
-      //  this.url = this.baseUrl + 'api/getAerodromeClient/' + this.currentUser;
-      //  this.appService.getAerodromeClientByUsername(this.url).subscribe((res: any) => {
-      //    this.appService.$aerodromeOperatorId.next(res.aerodromeOperatorId);
-      //  });
-      //}
-    }); 
+  counterSubscription: Subscription;
+  $counterSubject = new Subject<any>();
+  constructor(private router: Router, private auth: AuthService, private appService: ApplicationService) {
+    
   }
 
   ngOnInit() {
-    const token = localStorage.getItem("auth");
-    //if (token) {
-    //  const tokenPayLoad = jwt_decode(token);
-    //  const user = tokenPayLoad['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'];
-    //  if (this.auth.isLoggedIn()) {
-    //    //const url = this.baseUrl + 'api/getAerodromeClient/' + user;
-    //    //this.appService.getAerodromeClientByUsername(url).subscribe((res: any) => {
-    //    //  this.aerodromeOperatorId = res.aerodromeOperatorId;
-    //    //});
-    //  }
-    //}
+    this.userSubscription = this.auth.$currentUser.subscribe(res => {
+      this.currentUser = res;
+    }); 
+
     this.getAuthenticatedUser();
+    if (this.auth.isLoggedIn() && this.auth.isInRole(this.adminUserRole)) {
+      this.counterSubscription = this.$counterSubject.subscribe(res => {
+        this.applicationCounter = res;
+      });
+      const _this = this;
+      setInterval(function () {
+        if (_this.auth.isLoggedIn() && _this.auth.isInRole(_this.adminUserRole)) {
+          _this.appService.getApplications().subscribe((res:any[]) => {
+            const applications = res.filter(x => x.isOpened === false)
+            _this.$counterSubject.next(applications.length);
+          });
+        }
+      }, 40000);
+    }
   }
 
   getAuthenticatedUser() {

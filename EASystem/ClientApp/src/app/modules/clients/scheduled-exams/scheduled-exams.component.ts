@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material';
-import { ActivatedRoute, Params } from '@angular/router';
+import { ActivatedRoute, Params, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { ApplicationService } from '../../../services/application.service';
 import { UiService } from '../../../services/ui.service';
@@ -19,18 +19,18 @@ export class ScheduledExamsComponent implements OnInit {
     private route: ActivatedRoute,
     private dialog: MatDialog,
     private appService: ApplicationService,
-    private uiService: UiService
+    private uiService: UiService, private router: Router
   ) {
     this.subscription = this.appService.$pendingExams.subscribe((res: any) => {
-      this.exams = res;
-    })
+      this.exams = res.sort((a: any, b: any) => { return b.id - a.id });
+    });
   }
 
   ngOnInit() {
     this.route.params.subscribe((params: Params) => {
       this.userId = params['id'];
-      this.appService.getClientUserExams(this.userId).subscribe((res: any) => {
-        this.exams = res;
+      this.appService.getClientUserExams(this.userId).subscribe((res: any) => {        
+        this.exams = res.sort((a: any, b: any) => { return b.id - a.id });
       }, error => {
         this.uiService.showSnackBarNotification("An error occured while processing the request, try again later or contact the system adminstrator.", null, 3000, 'top', 'errror-notification');
       })
@@ -43,5 +43,9 @@ export class ScheduledExamsComponent implements OnInit {
         userId: this.userId
       }
     })  
+  }
+
+  onBack() {
+    this.router.navigate(['clients']);
   }
 }

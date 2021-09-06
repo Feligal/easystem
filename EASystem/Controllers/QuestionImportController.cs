@@ -31,7 +31,7 @@ namespace EASystem.Controllers
 
         }
         [HttpPost("/api/uploadBulkyQuestions/{examId}")]
-        //[Authorize(Roles = "AdminUserRole")]
+        [Authorize(Roles = "AdminUserRole")]
         public async Task<IActionResult> UploadBulkyQuestions(int examId,IFormFile file)
         {
             if (file != null)

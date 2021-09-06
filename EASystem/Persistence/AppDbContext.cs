@@ -42,8 +42,8 @@ namespace EASystem.Persistence
         public DbSet<Question> Questions { get; set; }
         public DbSet<Log> Logs { get; set; }
         public DbSet<Report> ExamReports { get; set; }
-
-
-
+        public DbSet<Application> Applications { get; set; }
+        public DbSet<ClientApplication> ClientApplications { get; set; }
+        public DbSet<ExamReview> ExamReviews { get; set; }
     }
 }

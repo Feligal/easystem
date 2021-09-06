@@ -23,6 +23,10 @@ namespace EASystem.Mappings
             CreateMap<AdminUserViewModel, AdminUserViewModelDTO>().ReverseMap();
             CreateMap<Question, QuestionViewModel>().ReverseMap();
             CreateMap<Report, ReportDTO>().ReverseMap();
+            CreateMap<Application, ClientApplicationDTO>().ReverseMap();
+            CreateMap<ClientApplication, ClientApplicationDTO>().ReverseMap();
+            CreateMap<Application, ApplicationDTO>().ReverseMap();
+            CreateMap<ExamReview, ExamReviewDTO>().ReverseMap();            
         }
     }
 }

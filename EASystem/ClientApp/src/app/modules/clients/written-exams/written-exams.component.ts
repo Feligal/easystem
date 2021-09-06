@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material';
+import { Router } from '@angular/router';
 import { LoadingSpinnerComponent } from '../../../loading-spinner/loading-spinner.component';
 import { ApplicationService } from '../../../services/application.service';
 import { UiService } from '../../../services/ui.service';
@@ -10,9 +11,9 @@ import { UiService } from '../../../services/ui.service';
   styleUrls: ['./written-exams.component.scss']
 })
 export class WrittenExamsComponent implements OnInit {
-  constructor(private appService: ApplicationService, private dialog: MatDialog, private uiService: UiService) { }
-  exams = [];
-  ngOnInit() {
+  constructor(private router: Router, private appService: ApplicationService, private dialog: MatDialog, private uiService: UiService) { }
+  exams = [];  
+  ngOnInit() {    
     const spinner = this.dialog.open(LoadingSpinnerComponent, {
       panelClass: 'custom-class',
       disableClose: true
@@ -24,5 +25,5 @@ export class WrittenExamsComponent implements OnInit {
         this.uiService.showSnackBarNotification("An error occured while processing, try again later.", null, 3000, 'top', 'error-notification');
         spinner.close();
     });
-  }
+  } 
 }

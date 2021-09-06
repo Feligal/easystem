@@ -1,3 +1,4 @@
+import { animate, state, style, transition, trigger } from '@angular/animations';
 import { HttpClient, HttpErrorResponse, HttpEventType, HttpRequest } from '@angular/common/http';
 import { Component, EventEmitter, Inject, Input, OnInit, Output, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
@@ -16,7 +17,15 @@ import { UiService } from '../../../services/ui.service';
 @Component({
   selector: 'app-import-questions',
   templateUrl: './import-questions.component.html',
-  styleUrls: ['./import-questions.component.scss']
+  styleUrls: ['./import-questions.component.scss'],
+  animations: [
+    trigger('fadeInOut', [
+      state('in', style({ opacity: 100 })),
+      transition('* => void', [
+        animate(300, style({ opacity: 0 }))
+      ])
+    ])
+  ]
 })
 export class ImportQuestionsComponent implements OnInit {
   /** Link text */

@@ -5,7 +5,7 @@
     <mat-card-content>
       <br />
       <button style="margin-top:15px" color="primary" mat-raised-button type="button" matTooltip="Recover Exam" id="scheduleExam" (click)="onRecoverExam()"><mat-icon>undo</mat-icon>Recover Exam</button>
-
+      <button style="margin-left:10px" matTooltip="Cancel" mat-raised-button type="button" (click)="onBack()" color="accent"><mat-icon>arrow_back_ios</mat-icon>Back</button>
       <form #examForm="ngForm">
         <mat-accordion>
           <mat-expansion-panel *ngFor="let question of questions; let i = index" [expanded]="step === i" (opened)="setStep(i)">
@@ -34,7 +34,7 @@
       </form>
     </mat-card-content>
     <mat-card-actions>
-      <button *ngIf="examData" mat-raised-button type="button" (click)="onSubmit()" style="margin:10px; background-color:green"><mat-icon>done</mat-icon>Submit for Marking</button>
+      <button *ngIf="examData" mat-raised-button type="button" (click)="onSubmit()" style="margin:10px; background-color:green"><mat-icon>done</mat-icon>Submit for Marking</button>      
     </mat-card-actions>
   </mat-card>
 

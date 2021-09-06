@@ -26,7 +26,7 @@ namespace EASystem.Models.AuthenticationModels
         public string PortraitImage { get; set; }
         //public EmploymentInfo EmploymentInfo { get; set; }        
         public ICollection<ExamTaken> WrittenExams { get; set; }
-        //public ICollection<ClientAttachment> ClientAttachments { get; set; }
+        public ICollection<ClientApplication> ClientApplications { get; set; }
         //public ICollection<ClientNotification> ClientNotifications { get; set; }
         //public ICollection<ClientPlotApplication> ClientPlotApplications { get; set; }
 
@@ -35,6 +35,7 @@ namespace EASystem.Models.AuthenticationModels
         public ClientUserProfile()
         {
             WrittenExams = new Collection<ExamTaken>();
+            ClientApplications = new Collection<ClientApplication>();
         //    Plots = new Collection<Plot>();
         //    ClientNotifications = new Collection<ClientNotification>();
         //    ClientPlotApplications = new Collection<ClientPlotApplication>();

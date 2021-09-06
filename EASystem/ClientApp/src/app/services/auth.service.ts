@@ -5,9 +5,15 @@ import { Observable, Subject } from 'rxjs';
 import { TokenResponse } from '../interface/token.response';
 import * as jwt_decode from 'jwt-decode';
 import { map, tap } from 'rxjs/operators';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Injectable()
 export class AuthService {
+
+  private provider: string;
+  private email: string;
+  private returnUrl: string;
+
   $currentUser = new Subject<string>();
   userAccessRole = [];
   roles = [];
@@ -15,6 +21,8 @@ export class AuthService {
   authKey = "auth";
   clientId = "eyJzdWIiOiI1MzVmZDI1YS04NDlkLTQwZWYtOTAxOS0xZjZkM2M5NWEyOTMiLCJqdGkiOiJlMmMzNTE5Yy0wNGMwLTQ1N2UtO";
   constructor(
+    private router: Router,
+    private route: ActivatedRoute,
     private httpClient: HttpClient,
     @Inject(PLATFORM_ID) private platformId: any,
     @Inject('BASE_URL') private baseUrl: string
@@ -52,7 +60,15 @@ export class AuthService {
   }
   //Retrieve the access and refresh tokens from the server
   getAuthFromServer(url: string, data): Observable<boolean> {
-    return this.httpClient.post<TokenResponse>(url, data).pipe(map((res) => {
+    return this.httpClient.post<TokenResponse>(url, data).pipe(map((res:any) => {
+
+      //check if the returned object has is2StepVerificationRequired
+      if (res.is2StepVerificationRequired) {
+        this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';        
+        this.router.navigate(['/login/twostepverification'],
+          { queryParams: { returnUrl: this.returnUrl, provider: res.provider, email: data.username } });
+      }
+
       const token = res && res.token;
       //If the token  is there , login  has been successful
       if (token) {
@@ -130,5 +146,10 @@ export class AuthService {
   resetPassword(data) {
     const url = this.baseUrl + "api/forgotPassword/"
     return this.httpClient.put(url, data);
+  }
+
+  twoStepLogin(data) {
+    const url = this.baseUrl + "api/twostepverification"
+    return this.httpClient.post(url, data);
   }
 }

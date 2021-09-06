@@ -11,6 +11,7 @@ import * as pdfMake from 'pdfmake/build/pdfmake';
 import * as pdfFonts from 'pdfmake/build/vfs_fonts';
 import { DatePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
+import { ConfirmationMessageComponent } from '../../../confirmation-message/confirmation-message.component';
 pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
 @Component({
@@ -20,6 +21,7 @@ pdfMake.vfs = pdfFonts.pdfMake.vfs;
 })
 export class ExamReportsComponent implements OnInit, OnDestroy, AfterViewInit {
   logoImageBlob = [];
+  examId: number;
   examRecords = [];
   firstDate: any;
   secondDate: any;
@@ -61,8 +63,8 @@ export class ExamReportsComponent implements OnInit, OnDestroy, AfterViewInit {
       disableClose: true
     });
     this.route.params.subscribe((param: Params) => {
-      const examId = +param['examId'];
-      this.appService.getExamRecords(examId).subscribe((res: any[]) => {
+      this.examId = +param['examId'];
+      this.appService.getExamRecords(this.examId).subscribe((res: any[]) => {
         if (res.length > 0) {
           this.examRecords = res;
           this.examName = res[0].examName;
@@ -82,6 +84,65 @@ export class ExamReportsComponent implements OnInit, OnDestroy, AfterViewInit {
     })
   }
 
+  onDeleteRecord(event) {
+    const id = +event.currentTarget.id.split("_")[1];
+    const dialogRef = this.dialog.open(ConfirmationMessageComponent, {
+      data: {
+        message: "Are you sure you want to delete the record?"
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        //If accepted to delete
+        const dialogRef = this.dialog.open(LoadingSpinnerComponent, {
+          panelClass: 'custom-class',
+          disableClose: true
+        });
+        this.appService.deleteRecordByExamId(id, this.examId).subscribe((res: any) => {
+          this.$examRecordSubject.next(res);
+          dialogRef.close();
+          this.uiService.showSnackBarNotification("The record was successfully deleted.", null, 3000, 'top', 'success-notification');
+        }, error => {
+          dialogRef.close();
+          this.uiService.showSnackBarNotification("An error occured while processing the request, try again later.", null, 3000, 'top', 'errror-notification');
+        });
+      } else {
+        //Do nothing
+      }
+    })
+  }
+
+  onDeleteAllSelected() {
+    const dialog = this.dialog.open(ConfirmationMessageComponent, {
+      data: {
+        message: "Are you sure you want to delete the selected exam records?"
+      }
+    });
+    dialog.afterClosed().subscribe(result => {
+      if (result) {
+        const dialog = this.dialog.open(LoadingSpinnerComponent, {
+          panelClass: 'custom-class',
+          disableClose: true
+        });
+        const selectedItems = this.selection.selected;
+        for (const item of selectedItems) {
+          const id = item.id;
+          this.appService.deleteRecordByExamId(id, this.examId).subscribe((res: any) => {
+            this.uiService.showSnackBarNotification("Exam records were successfully deleted.", null, 3000, 'top', 'success-notification');
+            this.$examRecordSubject.next(res);
+            dialog.close();
+          }, error => {
+            dialog.close();
+            console.log(error);
+          });
+        }
+        this.selection.clear();
+      } else {
+        this.selection.clear();
+      }
+    })
+  }
 
   ngAfterViewInit(): void {
     this.dataSource.sort = this.sort;
@@ -96,6 +157,10 @@ export class ExamReportsComponent implements OnInit, OnDestroy, AfterViewInit {
     this.dataSource.filter = filterValue.trim().toLowerCase();
   }
 
+  highlight(row) {
+    this.selectedRowIndex = row.id;
+  }
+ 
   changeStartDate(event: any) {
     this.firstDate = event.target.value;
     if (this.firstDate && this.secondDate)

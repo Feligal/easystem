@@ -46,6 +46,17 @@ import { AdminWrittenExamsComponent } from '../../modules/clients/admin-written-
 import { ExamRecoveryComponent } from '../../modules/clients/exam-recovery/exam-recovery.component';
 import { ExamReportsComponent } from '../../modules/examinations/exam-reports/exam-reports.component';
 import { AdminExamRecordsComponent } from '../../modules/examinations/admin-exam-records/admin-exam-records.component';
+import { ClientInformationComponent } from '../../modules/clients/client-information/client-information.component';
+import { DisplayScheduledExamsComponent } from '../../modules/clients/display-scheduled-exams/display-scheduled-exams.component';
+import { DisplayWrittenExamsComponent } from '../../modules/clients/display-written-exams/display-written-exams.component';
+import { ApplicationsComponent } from '../../modules/applications/applications.component';
+import { ClientApplicationsComponent } from '../../modules/clients/client-applications/client-applications.component';
+import { CreateApplicationsComponent } from '../../modules/clients/create-applications/create-applications.component';
+import { ApplicationDetailsComponent } from '../../modules/clients/application-details/application-details.component';
+import { ExamReviewComponent } from '../../modules/clients/exam-review/exam-review.component';
+import { ImportUsersComponent } from '../../modules/clients/import-users/import-users.component';
+import { ImportClientErrorComponent } from '../../modules/clients/import-client-error/import-client-error.component';
+import { TwoStepVerificationComponent } from '../../modules/two-step-verification/two-step-verification.component';
 
 
 
@@ -93,7 +104,18 @@ import { AdminExamRecordsComponent } from '../../modules/examinations/admin-exam
     AdminWrittenExamsComponent,
     ExamRecoveryComponent,
     ExamReportsComponent,
-    AdminExamRecordsComponent
+    AdminExamRecordsComponent,
+    ClientInformationComponent,
+    DisplayScheduledExamsComponent,
+    DisplayWrittenExamsComponent,
+    ApplicationsComponent,
+    ClientApplicationsComponent,
+    CreateApplicationsComponent,
+    ApplicationDetailsComponent,
+    ExamReviewComponent,
+    ImportUsersComponent,
+    ImportClientErrorComponent,
+    TwoStepVerificationComponent
     
   ],
   imports: [

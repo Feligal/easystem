@@ -35,13 +35,28 @@ namespace EASystem.Persistence
                .OrderByDescending(x => x.DateTaken)               
                .ToListAsync();
         }
+
+        public async Task<IEnumerable<ExamReview>> GetExamReviews(int id)
+        {
+            return await _dbContext.ExamReviews
+                .Where(x=>x.ExamTakenId == id)
+                .OrderBy(x => x.Id)
+                .ToListAsync();
+        }
+
         public async Task<Exam> GetExam(int examId) {
             return await _dbContext.Exams
             .SingleOrDefaultAsync(e => e.Id == examId);            
         }
 
+        public async Task<Exam> GetExamWithQuestion(int examId) {
+            return await _dbContext.Exams.Include(q=>q.Questions)
+            .SingleOrDefaultAsync(e => e.Id == examId);
+        }
+
         public async Task<ExamTaken> GetWrittenExam(int id) {
             return await _dbContext.ExamsTaken
+                .Include(x=>x.ExamReviews)
                 .SingleOrDefaultAsync(e => e.Id == id);
         }
 
@@ -49,7 +64,21 @@ namespace EASystem.Persistence
         public void AddExam(Exam exam) {
             _dbContext.Add(exam);
         }
+        public void DeleteExam(Exam exam) {
+            _dbContext.Remove(exam);
+        }
 
+        public void CancelExam(ExamTaken exam) {
+            _dbContext.Remove(exam);
+        }
+
+        public void DeleteExamRecord(Report report) {
+            _dbContext.Remove(report);
+        }
+        public async Task<Report> GetExamRecord(int Id) {
+            return await _dbContext.ExamReports
+                .SingleOrDefaultAsync(s => s.Id == Id);
+        }
         public async Task<IEnumerable<ExamTaken>> PendingExamsByClientId(int id) {
             return await _dbContext.ExamsTaken
                 .OrderBy(x => x.Name).Where(x => x.ClientUserProfileId.GetValueOrDefault() == id && x.HasBeenTaken == false)
@@ -94,6 +123,48 @@ namespace EASystem.Persistence
             return await _dbContext.Questions
                 .SingleOrDefaultAsync(q => q.Id == questionId);
                 
+        }
+        public void AddClientApplication(ClientApplication application) {
+            _dbContext.ClientApplications.Add(application);
+        }
+        public void AddApplication(Application application) {
+            _dbContext.Applications.Add(application);
+        }
+
+        public void RemoveClientApplication(ClientApplication application) {
+            _dbContext.ClientApplications.Remove(application);
+        }
+
+        public void RemoveApplication(Application application)
+        {
+            _dbContext.Applications.Remove(application);
+        }
+
+
+        public async Task<ClientApplication> GetClientApplication(int id) {
+           return await _dbContext.ClientApplications
+                .SingleOrDefaultAsync(x => x.Id == id);
+        }
+
+        public async Task<Application> GetApplication(int id) {
+            return await _dbContext.Applications
+                .SingleOrDefaultAsync(x => x.Id == id);
+        }
+
+        public async Task<IEnumerable<ClientApplication>> GetClientApplications(string userId) {
+            var applications =  await _dbContext.ClientApplications
+                .Where(x => x.UserId == userId)
+                .OrderByDescending(x=>x.Id)
+                .ToArrayAsync();
+            return applications;
+        }
+
+        public async Task<IEnumerable<Application>> GetApplications()
+        {
+            var applications = await _dbContext.Applications
+                .OrderByDescending(x => x.Id)
+                .ToArrayAsync(); 
+            return applications;
         }
 
         //ADMINISTRATIVE FUNCTIONS
@@ -222,7 +293,8 @@ namespace EASystem.Persistence
 
         public async Task<AppUser> GetClientUserWithProfile(string id, UserManager<AppUser> userManager)
         {
-            var user = userManager.Users.Include(x => x.ClientUserProfile)
+            var user = userManager.Users
+                .Include(x => x.ClientUserProfile)
                 .SingleOrDefaultAsync(u => u.Id == id);
             if (user != null)
             {

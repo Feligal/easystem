@@ -2,8 +2,10 @@ import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatDialog, MatPaginator } from '@angular/material';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { ConfirmationMessageComponent } from '../../confirmation-message/confirmation-message.component';
 import { LoadingSpinnerComponent } from '../../loading-spinner/loading-spinner.component';
 import { ApplicationService } from '../../services/application.service';
+import { UiService } from '../../services/ui.service';
 import { CreateExamComponent } from './create-exam/create-exam.component';
 import { CreateQuestionComponent } from './create-question/create-question.component';
 import { ImportQuestionsComponent } from './import-questions/import-questions.component';
@@ -21,7 +23,7 @@ export class ExaminationsComponent implements OnInit, OnDestroy {
   length: number;
   selectedExamId: number
   activeExam
-  constructor(private appService: ApplicationService, private router: Router, private dialog: MatDialog) { }
+  constructor(private appService: ApplicationService, private router: Router, private dialog: MatDialog, private uiService: UiService) { }
 
   ngOnInit() {
     this.examSubscription =  this.appService.$exams.subscribe(res => {
@@ -66,6 +68,11 @@ export class ExaminationsComponent implements OnInit, OnDestroy {
     })
   }
 
+  pageChangeEvent(event) {
+    const offset = ((event.pageIndex + 1) - 1) * event.pageSize;
+    this.pagedExams = this.exams.slice(offset).slice(0, event.pageSize);    
+  }
+
   onShowAddBulkyQuestions() {
     this.router.navigate(['examinations/addbulkyquestions/' + this.selectedExamId]); 
   }
@@ -77,7 +84,29 @@ export class ExaminationsComponent implements OnInit, OnDestroy {
     this.router.navigate(['examinations/reports/' + this.selectedExamId]); 
   }
   onDelete() {
-    this.router.navigate(['examinations/deleteexam/' + this.selectedExamId]); 
+    const dialogRef = this.dialog.open(ConfirmationMessageComponent, {
+      data: {
+        message: "Are you sure you want to delete the exam?"
+      }
+    });
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        const spinner = this.dialog.open(LoadingSpinnerComponent, {
+          panelClass: 'custom-class',
+          disableClose: true
+        });
+
+        this.appService.deleteExam(this.selectedExamId).subscribe(res => {
+          this.appService.$exams.next(res);
+          this.uiService.showSnackBarNotification("The exam was successfully deleted.", null, 3000, 'top', 'success-notification');
+          spinner.close();
+        }, error => {
+          this.uiService.showSnackBarNotification("An error occured while processing, try again later.", null, 3000, 'top', 'error-notification');
+        });
+      } else {
+        //Do nothing
+      }
+    });   
   }
 
   onAddExam() {

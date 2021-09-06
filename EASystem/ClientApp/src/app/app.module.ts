@@ -28,10 +28,15 @@ import { ActiveExamComponent } from './modules/clients/active-exam/active-exam.c
 import { ExamScoreComponent } from './modules/clients/exam-score/exam-score.component';
 import { ClientAuthGuardService } from './services/client-auth-guard.service';
 import { DatePipe } from '@angular/common';
+import { CreateApplicationsComponent } from './modules/clients/create-applications/create-applications.component';
+import { ExamReviewComponent } from './modules/clients/exam-review/exam-review.component';
+import { ImportUsersComponent } from './modules/clients/import-users/import-users.component';
+import { ImportClientErrorComponent } from './modules/clients/import-client-error/import-client-error.component';
+
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,    
   ],
   imports: [
     BrowserModule,
@@ -73,7 +78,11 @@ import { DatePipe } from '@angular/common';
     CreateClientUserComponent,
     ScheduleExamsListComponent,
     ActiveExamComponent,
-    ExamScoreComponent
+    ExamScoreComponent,
+    CreateApplicationsComponent,
+    ExamReviewComponent,
+    ImportUsersComponent,
+    ImportClientErrorComponent
   ]
 })
 export class AppModule { }

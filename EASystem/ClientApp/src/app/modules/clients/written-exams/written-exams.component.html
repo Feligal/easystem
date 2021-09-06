@@ -4,6 +4,9 @@
     <mat-divider></mat-divider>
     <mat-card-content>
       <br />
+      <div *ngIf="exams.length === 0">
+        <h1 style="text-align:center">There is no written exam</h1>
+      </div>
       <div fxLayout="row wrap" fxLayout.xs="column" fxLayoutAlign="space-between">
         <div *ngFor="let exam of exams">
           <app-display-exams [examData]="exam"></app-display-exams>

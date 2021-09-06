@@ -13,13 +13,14 @@ import { UiService } from '../../../services/ui.service';
   styleUrls: ['./schedule-exams-list.component.scss']
 })
 export class ScheduleExamsListComponent implements OnInit {
+  minDate;
   userId: string;
   examId: number;
   data: any;
   myForm: FormGroup;
-  dulationList = [30, 60, 90, 120, 180];
+  durationList = [30, 60, 90, 120, 180];
   questionNumbers = [];
-  
+  scheduleDate: any;
   dataColumns = ['index', 'name', 'action'];
   @ViewChild(MatSort, { static: true }) sort: MatSort;
   @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
@@ -41,13 +42,22 @@ export class ScheduleExamsListComponent implements OnInit {
     this.subscription.unsubscribe();
   }
 
+  changeScheduleDate(event: any) {
+    this.scheduleDate = event.target.value;
+    console.log(this.scheduleDate);
+  }
+
   ngOnInit() {
+    //Setting today's date a min value for the date picker
+    this.minDate = new Date();
+
     for (let i = 0; i < 100; i++) {
       this.questionNumbers.push(i + 1);
     }
     this.myForm = new FormGroup({
       name: new FormControl('', [Validators.required, Validators.maxLength(60)]),
       duration: new FormControl('', [Validators.required, Validators.maxLength(3)]),
+      dateFilter1: new FormControl('', [Validators.required]),
       numberQuestions: new FormControl('', [Validators.required, Validators.maxLength(3)]),      
     });
 
@@ -107,8 +117,10 @@ export class ScheduleExamsListComponent implements OnInit {
 
   onSubmit() {    
     this.examId = this.myForm.value.name;
+    console.log(this.examId);
     const duration = this.myForm.value.duration;
-    const numberQuestions = this.myForm.value.numberQuestions;        
+    const numberQuestions = this.myForm.value.numberQuestions;
+    const scheduleDate = new Date(this.scheduleDate);
     this.appService.getExam(this.examId).subscribe((res: any) => {
       this.data = {
         id: 0,
@@ -120,7 +132,8 @@ export class ScheduleExamsListComponent implements OnInit {
         dateTaken: new Date(),
         score: 0,
         passStatus: '',
-        hasBeenTake: false
+        hasBeenTake: false,
+        scheduledDate: scheduleDate
       }
     });
 

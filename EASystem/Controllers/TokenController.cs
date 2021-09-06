@@ -1,11 +1,13 @@
 ﻿
+using EASystem.Extensions;
 using EASystem.Models.AuthenticationModels;
 using EASystem.Models.ViewModels;
 using EASystem.Persistence;
-
+using EASystem.Resources;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System;
@@ -25,12 +27,16 @@ namespace EASystem.Controllers
         private readonly SignInManager<AppUser> _signInManager;
         private readonly IConfiguration _config;
 
-        public TokenController(AppDbContext dbContext, UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IConfiguration config)
+        private readonly IEmailSender _emailSender;
+        
+
+        public TokenController(AppDbContext dbContext, UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IConfiguration config, IEmailSender emailSender)
         {
             _dbContext = dbContext;
             _userManager = userManager;
             _signInManager = signInManager;
             _config = config;
+            _emailSender = emailSender;
         }
 
         [AllowAnonymous]
@@ -49,7 +55,43 @@ namespace EASystem.Controllers
                     return new UnauthorizedResult();
             }
         }
+        [HttpPost("/api/twostepverification")]
+        public async Task<IActionResult> TwoStepVerification([FromBody] TwoFactorDTO twoFactorDTO) {
+            if (!ModelState.IsValid) {
+                return BadRequest();
+            }
+            var user = await _userManager.FindByEmailAsync(twoFactorDTO.Email);
+            if (user == null)
+                return BadRequest("Invalid Request");
 
+            var validVerification = await _userManager.VerifyTwoFactorTokenAsync(user, twoFactorDTO.Provider, twoFactorDTO.Token);
+            if (!validVerification)
+                return BadRequest("Invalid Token Verification");
+
+            //Username & password match: create the refresh token
+            var rt = CreateRefreshToken(twoFactorDTO.ClientId, user.Id);
+            _dbContext.Tokens.Add(rt);
+            await _dbContext.SaveChangesAsync();
+            //Get user's role type
+            var roleType = await _userManager.GetRolesAsync(user);
+            //Create and return the access
+            var accessToken = CreateAccessToken(user.Id, rt.Value, roleType, user.UserName);
+            return new JsonResult(accessToken);
+        }
+
+        private async Task<IActionResult> GenerateOTPFor2StepVerification(AppUser user) {
+            var providers = await _userManager.GetValidTwoFactorProvidersAsync(user);
+            if (!providers.Contains("Email")) {
+                return Unauthorized("Invalid 2-Step Verification Provider.");
+            }
+
+            var token = await _userManager.GenerateTwoFactorTokenAsync(user, "Email");           
+            string fromEmail = _config["EmailSettings:Sender"];
+            string subject = "Authentication Token";
+            string body = $"Dear Esteemed Customer, <br/> Your authentication verification token  is <h3>{token}</h3>.<br/> Kind regards, <br/> CAA Admin";
+            await _emailSender.SendEmail(fromEmail,"fkmantini2012@gmail.com",subject,body);
+            return Ok(new AuthOtpResponseViewModel { Is2StepVerificationRequired = true, Provider = "Email" });
+        }
 
         private async Task<IActionResult> GetToken(TokenRequestViewModel model)
         {
@@ -65,6 +107,13 @@ namespace EASystem.Controllers
                     //User does not exist or password mismatch
                     return new UnauthorizedResult();
                 }
+
+                //Check for Two Factor Authentication
+
+                if (await _userManager.GetTwoFactorEnabledAsync(user)) {
+                    return await GenerateOTPFor2StepVerification(user);
+                }
+
                 //Username & password match: create the refresh token
                 var rt = CreateRefreshToken(model.ClientId, user.Id);
                 _dbContext.Tokens.Add(rt);
@@ -80,6 +129,9 @@ namespace EASystem.Controllers
                 return new UnauthorizedResult();
             }
         }
+
+
+
 
         private async Task<IActionResult> RefreshToken(TokenRequestViewModel model)
         {

@@ -75,7 +75,7 @@ namespace EASystem.Controllers
         }
 
         [HttpGet("/api/admins")]
-        //[Authorize(Roles = "AdminUserRole, ReadOnly")]
+        [Authorize(Roles = "AdminUserRole")]
         public async Task<IActionResult> GetAdminUsers()
         {
             var adminUsers = await _repository.GetAllAdminUsers(_userManager);
@@ -101,7 +101,7 @@ namespace EASystem.Controllers
 
 
 
-        //[Authorize(Roles = "AdminUserRole")]
+        [Authorize(Roles = "AdminUserRole")]
         [HttpGet("/api/clients")]
         public async Task<IActionResult> GetClientUsers()
         {
@@ -116,6 +116,7 @@ namespace EASystem.Controllers
                         Id = client.Id,
                         FirstName = client.ClientUserProfile.FirstName,
                         LastName = client.ClientUserProfile.LastName,
+                        PortraitImage = client.ClientUserProfile.PortraitImage,
                         Email = client.Email.ToLower(),
                         UserName = client.UserName
                     };
@@ -126,7 +127,7 @@ namespace EASystem.Controllers
             return Ok(clientModel);
         }
 
-        //[Authorize(Roles = "AdminUserRole")]
+        [Authorize(Roles = "AdminUserRole")]
         [HttpPost("/api/admin")]
         public async Task<IActionResult> CreateAdminUser([FromBody] AdminUserViewModel model)
         {
@@ -178,7 +179,7 @@ namespace EASystem.Controllers
             return Ok(new { userName = user.UserName });
         }
 
-        //[Authorize(Roles = "AdminUserRole")]
+        [Authorize(Roles = "AdminUserRole")]
         [HttpGet("/api/admin/{id}")]
         public async Task<IActionResult> GetAdminUser(string id)
         {
@@ -196,7 +197,7 @@ namespace EASystem.Controllers
             return Ok(result);
         }
 
-        //[Authorize(Roles = "AdminUserRole")]
+        [Authorize(Roles = "AdminUserRole,ClientUserRole")]
         [HttpGet("/api/client/{id}")]
         public async Task<IActionResult> GetClientUser(string id)
         {
@@ -213,6 +214,7 @@ namespace EASystem.Controllers
                 LastName = clientProfile.ClientUserProfile.LastName,
                 Nrc = clientProfile.ClientUserProfile.Nrc,
                 UserName = clientProfile.UserName,
+                PortraitImage = clientProfile.ClientUserProfile.PortraitImage,
                 Password = "",
                 PhoneNumber = clientProfile.PhoneNumber
             };
@@ -220,7 +222,7 @@ namespace EASystem.Controllers
         }
 
 
-        //[Authorize(Roles = "AdminUserRole")]
+        [Authorize(Roles = "AdminUserRole")]
         [HttpPut("/api/admin/{id}")]
         public async Task<IActionResult> EditAdminUser([FromBody] AdminUserViewModel model, string id)
         {
@@ -278,7 +280,7 @@ namespace EASystem.Controllers
             return Ok(new { Message = "Username not found." });
         }
 
-        //[Authorize(Roles = "AdminUserRole")]
+        [Authorize(Roles = "AdminUserRole,ClientUserRole")]
         [HttpPut("/api/client/{id}")]
         public async Task<IActionResult> EditClientUser([FromBody] ClientUserViewModel model, string id)
         {
@@ -338,7 +340,7 @@ namespace EASystem.Controllers
             return Ok(new { Message = "Username not found." });
         }
 
-        //[Authorize(Roles = "AdminUserRole,AerodromeClientRole")]
+        [Authorize(Roles = "AdminUserRole,ClientUserRole")]
         [HttpPut("/api/changePassword/{id}")]
         public async Task<IActionResult> ChangePassword(string id, [FromBody] PasswordChangeViewModel model)
         {
@@ -426,7 +428,7 @@ namespace EASystem.Controllers
         }
 
 
-        //[Authorize(Roles = "AdminUserRole")]
+        [Authorize(Roles = "AdminUserRole")]
         [HttpDelete("/api/deleteclient/{userId}")]
         public async Task<IActionResult> DeleteClientUser(string userId)
         {

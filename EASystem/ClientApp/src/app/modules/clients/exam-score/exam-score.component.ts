@@ -13,7 +13,7 @@ export class ExamScoreComponent implements OnInit {
     if (this.data.percentage >= 50) {
       this.title = "Congratulations!!! You have passed."
     } else {
-      this.title = "Sorry, failed."
+      this.title = "Sorry!!! You have failed."
     }
   }
 }

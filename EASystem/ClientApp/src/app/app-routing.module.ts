@@ -25,6 +25,10 @@ import { ReportsComponent } from './modules/clients/reports/reports.component';
 import { ClientAuthGuardService } from './services/client-auth-guard.service';
 import { ExamReportsComponent } from './modules/examinations/exam-reports/exam-reports.component';
 import { AdminExamRecordsComponent } from './modules/examinations/admin-exam-records/admin-exam-records.component';
+import { ApplicationsComponent } from './modules/applications/applications.component';
+import { ClientApplicationsComponent } from './modules/clients/client-applications/client-applications.component';
+import { ApplicationDetailsComponent } from './modules/clients/application-details/application-details.component';
+import { TwoStepVerificationComponent } from './modules/two-step-verification/two-step-verification.component';
 
 
 const routes: Routes = [
@@ -35,31 +39,31 @@ const routes: Routes = [
       { path: 'login', component: LoginComponent },
       { path: 'dashboard', component: DashboardComponent, canActivate: [AdministratorAuthGuardService] },
       { path: 'clients', component: ClientsComponent, canActivate: [AdministratorAuthGuardService] },
+      { path: 'applications', component: ApplicationsComponent, canActivate: [AdministratorAuthGuardService] },
       { path: 'examrecords', component: AdminExamRecordsComponent, canActivate: [AdministratorAuthGuardService] },
       {
         path: 'examinations', component: ExaminationsComponent, canActivate: [AdministratorAuthGuardService], children: [
           { path: 'viewquestions/:examId', component: ViewQuestionsComponent },
           { path: 'reports/:examId', component: ExamReportsComponent },         
         ]
-      },
-      
+      },      
       { path: 'client/details/:id', component: ClientDetailContainerComponent, canActivate: [AdministratorAuthGuardService] },
       { path: 'changepassword', component: ChangePasswordComponent, canActivate: [AuthGuardService] },
       { path: 'forgotpassword', component: ForgotPasswordComponent },
       { path: 'confirmpassreset/:tag', component: PasswordResetConfirmationComponent },
       { path: 'login/ConfirmEmail', component: ClientEmailConfirmationComponent },
       { path: 'login/ResetPassword', component: PasswordResetComponent },
-
+      { path: 'login/twostepverification', component: TwoStepVerificationComponent },
       { path: 'admin/roles', component: RolesComponent, canActivate: [AdministratorAuthGuardService] },
       { path: 'admin/adminUsers', component: AdminUsersComponent, canActivate: [AdministratorAuthGuardService]},
       { path: 'admin/clientUsers', component: ClientUsersComponent, canActivate: [AdministratorAuthGuardService]},
-      { path: 'admin/systemlogs', component: SystemlogsComponent, canActivate: [AdministratorAuthGuardService]},
-
-      //{ path: 'client/activeexam/:id', component: ActiveExamComponent },
+      { path: 'admin/systemlogs', component: SystemlogsComponent, canActivate: [AdministratorAuthGuardService] },
+      { path: 'admin/applications/details/:id', component: ApplicationDetailsComponent, canActivate: [AdministratorAuthGuardService] },
       { path: 'client/scheduledexams', component: PendingExamsComponent, canActivate: [ClientAuthGuardService] },
       { path: 'client/writtenexams', component: WrittenExamsComponent, canActivate: [ClientAuthGuardService]},
-      { path: 'client/reports', component: ReportsComponent, canActivate: [ClientAuthGuardService] },      
-
+      { path: 'client/reports', component: ReportsComponent, canActivate: [ClientAuthGuardService] },
+      { path: 'client/applications', component: ClientApplicationsComponent, canActivate: [ClientAuthGuardService] },
+      
       { path: '**', redirectTo: 'home' }
     ]
   },

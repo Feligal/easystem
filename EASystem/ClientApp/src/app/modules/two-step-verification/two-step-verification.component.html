@@ -1,0 +1,33 @@
+<br />
+<section>
+  <div class="login-container" fxLayout="row wrap" fxFlex fxLayoutAlign="center">
+    <mat-card>
+      <h4 style="text-align: center">Two Step Verification</h4>  <mat-divider></mat-divider>
+      <mat-card-content>
+        <br />        
+        <form style="margin:0 30px" fxLayoutGap="10px" [formGroup]="myForm" (ngSubmit)="onSubmit()">
+          <div fxLayoutAlign="center" fxLayout="column">
+            <div class="has-error" *ngIf="myForm.errors?.authError">
+              {{myForm.errors.authError}}
+            </div>
+            <br />
+            <mat-form-field>
+              <input matInput type="text" placeholder="Two Factor Code *"
+                     formControlName="twoFactorCode" />
+              <mat-hint>Please enter Two Factor Verification Code sent to your email.</mat-hint>
+              <mat-error><span *ngIf="errorHandling('twoFactorCode','required')">Two Factor Code is a required field.</span></mat-error>              
+              <mat-error><span *ngIf="errorHandling('twoFactorCode','maxlength')">Two Factor Code must be 6 digits.</span></mat-error>
+            </mat-form-field>
+          </div>
+          <br />
+          <mat-divider></mat-divider>
+          <br />
+          <div fxLayoutAlign="center" fxLayoutGap="10px" fxLayout="row wrap">
+            <button mat-raised-button type="submit" color="primary" [disabled]="myForm.invalid"><mat-icon>how_to_reg</mat-icon>Submit</button>            
+          </div>
+        </form><br />        
+      </mat-card-content>
+    </mat-card>
+  </div>
+</section>
+

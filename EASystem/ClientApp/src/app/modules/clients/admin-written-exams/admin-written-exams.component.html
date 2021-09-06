@@ -2,13 +2,17 @@
   <mat-card>
     <h4>Written Exams</h4>
     <mat-divider></mat-divider>
-    <mat-card-content>
+    <mat-card-content><br />
+      <div *ngIf="exams.length === 0">
+        <h1 style="text-align:center">There is no written exam</h1>
+      </div>
       <br />
       <div fxLayout="row wrap" fxLayout.xs="column" fxLayoutAlign="space-between">
         <div *ngFor="let exam of exams">
-          <app-display-exams [examData]="exam"></app-display-exams>
+          <app-display-written-exams [examData]="exam"></app-display-written-exams>
         </div>
       </div>
+      <button style="margin-top:15px; margin-left:10px" matTooltip="Back" mat-raised-button type="button" (click)="onBack()" color="accent"><mat-icon>arrow_back_ios</mat-icon>Back</button>
     </mat-card-content>
   </mat-card>
 

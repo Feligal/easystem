@@ -5,7 +5,7 @@
     <mat-card-content>
 
       <form style="margin:0 30px" fxLayoutGap="30px" [formGroup]="myForm" (ngSubmit)="onSubmit()">
-        <div fxLayoutAlign="center" fxLayout="row wrap">          
+        <div fxLayoutAlign="center" fxLayout="row wrap">
           <mat-form-field>
             <mat-label>Exam Name</mat-label>
             <mat-select ([value])="selected" formControlName="name">
@@ -19,9 +19,16 @@
           </mat-form-field>
 
           <mat-form-field>
+            <mat-label>Schedule Date</mat-label>
+            <input matInput [min]="minDate" required [matDatepicker]="picker" placeholder="Schedule Date" formControlName="dateFilter1" id="dateFilter1"  (dateChange)="changeScheduleDate($event)" />
+            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+          </mat-form-field>
+
+          <mat-form-field>
             <mat-label>Duration (Min) </mat-label>
             <mat-select ([value])="selected" formControlName="duration">
-              <mat-option *ngFor="let duration of dulationList" [value]="duration">
+              <mat-option *ngFor="let duration of durationList" [value]="duration">
                 {{duration}} Mins
               </mat-option>
             </mat-select>

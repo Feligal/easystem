@@ -81,8 +81,7 @@ export class ActiveExamComponent implements OnInit {
     const spinner = this.dialog.open(LoadingSpinnerComponent, {
       panelClass: 'custom-class',
       disableClose: true
-    });
-    
+    });    
     this.examId = this.data.examId;
     this.id = this.data.id;
     const numberOfQuestions = this.data.numberOfQuestions;   
@@ -98,6 +97,7 @@ export class ActiveExamComponent implements OnInit {
         this.shuffle(q.answers);
       })
       this.startLogoutTimer();
+      console.log(this.questions)
       spinner.close();
     }, error => {
         spinner.close();

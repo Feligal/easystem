@@ -29,8 +29,10 @@ import {
   MatTableModule,
   MatTabsModule,
   MatToolbarModule,
-  MatTooltipModule
+  MatTooltipModule,
+  
 } from '@angular/material';
+
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatTableExporterModule } from 'mat-table-exporter';
 
@@ -70,7 +72,7 @@ import { MatTableExporterModule } from 'mat-table-exporter';
     MatStepperModule,
     MatGridListModule,
     MatExpansionModule,
-    MatRadioModule
+    MatRadioModule,
     //MatCarouselModule.forRoot(),
 
   ],

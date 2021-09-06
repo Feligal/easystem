@@ -46,13 +46,13 @@ export class DisplayExamsComponent implements OnInit {
     if (lastExamQuestions) {
       localStorage.removeItem('exam_data');
     }
-    const examId = +event.currentTarget.id.split("_")[1];        
+    const id = +event.currentTarget.id.split("_")[1];        
     this.dialog.open(ActiveExamComponent, {
       disableClose: true,
       height:'800px',
       data: {
-        id: this.examData.id,
-        examId: examId,
+        id: id,
+        examId: this.examData.examId,
         examName: this.examData.name,
         duration: this.examData.duration,
         numberOfQuestions: this.examData.numberOfQuestions
@@ -241,5 +241,5 @@ export class DisplayExamsComponent implements OnInit {
       image: this.logoImageBlob[0],
       width: 75
     };
-  }  
+  }
 }

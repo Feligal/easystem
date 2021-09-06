@@ -1,0 +1,19 @@
+
+  <section>
+    <h4 style="color:red">The following Clients where not exported due to data errors.Check the data and try again. </h4>
+    <mat-card>
+      <mat-card-content>
+        <mat-list>
+          <mat-list-item *ngFor="let user of data.unsuccessful">
+            <mat-icon color="warn">cancel</mat-icon>{{user}}
+          </mat-list-item>
+        </mat-list>
+        <br />
+        
+          <button mat-raised-button matTooltip="Close" color="primary" (click)="onClose()">
+            <mat-icon>close</mat-icon>
+            Close
+          </button>              
+      </mat-card-content>
+    </mat-card>
+  </section>

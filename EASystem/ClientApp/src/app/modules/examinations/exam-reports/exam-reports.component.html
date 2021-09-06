@@ -4,11 +4,9 @@
       <h3>Exam Records</h3><mat-divider></mat-divider>
       <div style="padding:10px 0;text-align:center" *ngIf="examRecords.length === 0" >
         <h2>No record found!</h2>
-      </div>
-      <form *ngIf="examRecords.length > 0" style="    margin: 0 30px
-" fxLayoutGap="30px" #f="ngForm" (ngSubmit)="onDeleteAllSelected()">        
+      </div>        
         <br />
-        <div fxLayout="">
+        <div *ngIf="examRecords.length > 0" fxLayout="">
           <div fxFlex fxLayout="row" fxLayoutAlign="flex-end">
             <mat-form-field style="margin:0 20px">
               <mat-label>From</mat-label>
@@ -56,8 +54,9 @@
                             [indeterminate]="selection.hasValue() && !isAllSelected()"
                             [aria-label]="checkboxLabel()">
               </mat-checkbox>
-              <button *ngIf="selection.hasValue()" type="submit"
+              <button *ngIf="selection.hasValue()" type="button"
                       matTooltip="Delete All Selected"
+                      (click)="onDeleteAllSelected()"
                       name="btnDelNotification"
                       mat-icon-button
                       color="accent">
@@ -110,10 +109,10 @@
             <th mat-header-cell *matHeaderCellDef>Action</th>
             <td mat-cell *matCellDef="let element">
               <button type="button"
-                      matTooltip="Delete File"
+                      matTooltip="Delete Record"
                       name="btnDelLog"
                       id="delete_{{element.id}}"
-                      (click)="onDeleteLog($event)"
+                      (click)="onDeleteRecord($event)"
                       mat-icon-button
                       color="warn">
                 <mat-icon>delete</mat-icon>
@@ -131,11 +130,11 @@
           </tr>
         </table>
 
-        <mat-paginator #paginator
-                       [pageSize]="20"
-                       [pageSizeOptions]="[20, 30, 40,50,100]">
+        <mat-paginator #paginator showFirstLastButtons
+                       [pageSize]="10"
+                       [pageSizeOptions]="[10, 20, 30, 40,50,100]">
         </mat-paginator>
-      </form>
+      
     </mat-card-content>
   </mat-card>
 </section>

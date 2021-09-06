@@ -12,9 +12,11 @@ namespace EASystem.Resources
         public string Name { get; set; }
         public DateTime DateCreated { get; set; }
         public ICollection<ReportDTO> ExamReports { get; set; }
+        public ICollection<QuestionDTO> Questions { get; set; }
         public ExamDTO()
         {
             ExamReports = new Collection<ReportDTO>();
+            Questions = new Collection<QuestionDTO>();
         }
     }
 
