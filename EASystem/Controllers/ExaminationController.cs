@@ -14,8 +14,11 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using MimeKit;
 using MimeKit.Text;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Syncfusion.Drawing;
 using Syncfusion.Pdf;
 using Syncfusion.Pdf.Graphics;
@@ -44,15 +47,18 @@ namespace EASystem.Controllers
         private readonly IEmailSender _emailSender;
         private readonly UserManager<AppUser> _userManager;
         private readonly IWebHostEnvironment _host;
+        private readonly AttachmentSetting _attachmentSettings;
 
-        public ExaminationController(IAppRepository repository,
+        public ExaminationController(
+            IAppRepository repository,
             IMapper autoMapper,
             IUnitOfWork unitOfWork,
             IHttpContextAccessor contextAccessor,
             IConfiguration configuration,
             IEmailSender emailSender,
             UserManager<AppUser> userManager,
-            IWebHostEnvironment host
+            IWebHostEnvironment host,
+            IOptionsSnapshot<AttachmentSetting> optionsSnapshot
             )
         {
             _appRepository = repository;
@@ -63,18 +69,45 @@ namespace EASystem.Controllers
             _emailSender = emailSender;
             _userManager = userManager;
             _host = host;
+            _attachmentSettings = optionsSnapshot.Value;
 
         }
-        [Authorize(Roles = ("ClientUserRole, AdminUserRole"))]
+        [Authorize(Roles = ("ClientUserRole, AdminUserRole,ExamUserRole"))]
         [HttpGet("/api/allexams")]
         public async Task<ActionResult> GetAllExams() {
-            var exams = await _appRepository.GetExams();
+            //var userName = _httpContextAccessor.HttpContext.User.Identity.Name;
+            var userId = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var user = await _appRepository.GetAdminUserWithProfile(userId, _userManager);
+            IEnumerable<Exam> exams = null;
+            if (await _userManager.IsInRoleAsync(user, "ExamUserRole"))
+            {
+                //Get Exams by department Id
+                exams = await _appRepository.GetExamsByDepartmentId(user.AdminUserProfile.DepartmentId.GetValueOrDefault());
+            }
+            else {
+                exams = await _appRepository.GetExams();
+            }
+                        
             if (exams == null) {
                 return NotFound("Resources not found, try again later");
             }
             var result = _autoMapper.Map<IEnumerable<Exam>, IEnumerable<ExamDTO>>(exams);
             return Ok(result);
         }
+
+
+        [Authorize(Roles = ("ClientUserRole, AdminUserRole,ExamUserRole"))]
+        [HttpGet("/api/exams")]
+        public async Task<ActionResult> GetExams()
+        {
+            //var userName = _httpContextAccessor.HttpContext.User.Identity.Name;
+            var userId = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var user = await _appRepository.GetAdminUserWithProfile(userId, _userManager);
+            var exams = await _appRepository.GetExams();            
+            var result = _autoMapper.Map<IEnumerable<Exam>, IEnumerable<ExamDTO>>(exams);
+            return Ok(result);
+        }
+
 
         [Authorize(Roles = ("ClientUserRole, AdminUserRole"))]
         [HttpGet("/api/getexam/{examId}")]
@@ -97,29 +130,251 @@ namespace EASystem.Controllers
             {
                 return BadRequest(ModelState);
             }
-            var newExam = _autoMapper.Map<ExamDTO, Exam>(exam);
+            var newExam = _autoMapper.Map<ExamDTO, Exam>(exam);            
             _appRepository.AddExam(newExam);
             _unitOfWork.GetAppDbContext().Entry(newExam).State = EntityState.Added;
             await _unitOfWork.CompletionAsync();
-            var exams = await _appRepository.GetExams();
+            
+            var userName = _httpContextAccessor.HttpContext.User.Identity.Name;
+            var department = await _appRepository.GetDepartment(exam.DepartmentId.GetValueOrDefault());
+            var newLog = new Log
+            {
+                LogInformation = $"{newExam.Name} examination in {department.Name} was created on system.",
+                DateCreated = DateTime.Now,
+                Owner = userName
+            };
+            _appRepository.AddLog(newLog);
+            _unitOfWork.GetAppDbContext().Entry(newLog).State = EntityState.Added;
+            await _unitOfWork.CompletionAsync();
+            
+            var userId = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var user = await _appRepository.GetAdminUserWithProfile(userId, _userManager);
+            IEnumerable<Exam> exams = null;
+            if (await _userManager.IsInRoleAsync(user, "ExamUserRole"))
+            {
+                //Get Exams by department Id
+                exams = await _appRepository.GetExamsByDepartmentId(user.AdminUserProfile.DepartmentId.GetValueOrDefault());
+            }
+            else
+            {
+                exams = await _appRepository.GetExams();
+            }
             var result = _autoMapper.Map<IEnumerable<Exam>, IEnumerable<ExamDTO>>(exams);
             return Ok(result);
         }
+
+
         [Authorize(Roles = ("AdminUserRole"))]
-        [HttpPost("/api/createquestion")]
-        public async Task<ActionResult> CreateQuestion([FromBody] QuestionDTO question)
+        [HttpPut("/api/editexam/{examId}")]
+        public async Task<ActionResult> EditExam(int examId,  [FromBody] ExamDTO exam)
         {
+
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            var newQuetion = _autoMapper.Map<QuestionDTO, Question>(question);
-            _appRepository.AddQuestion(newQuetion);
-            _unitOfWork.GetAppDbContext().Entry(newQuetion).State = EntityState.Added;
+            var examToUpdate = await _appRepository.GetExam(examId);
+            examToUpdate.Name = exam.Name;
+            examToUpdate.PassMarkPercentage = exam.PassMarkPercentage;
+            examToUpdate.DepartmentId = exam.DepartmentId;
+
+            _unitOfWork.GetAppDbContext().Entry(examToUpdate).State = EntityState.Modified;
             await _unitOfWork.CompletionAsync();
-            var result = _autoMapper.Map<Question, QuestionDTO>(newQuetion);
+            var userName = _httpContextAccessor.HttpContext.User.Identity.Name;
+            var department = await _appRepository.GetDepartment(exam.DepartmentId.GetValueOrDefault());
+            var newLog = new Log
+            {
+                LogInformation = $"{examToUpdate.Name} examination in {department.Name} was updated.",
+                DateCreated = DateTime.Now,
+                Owner = userName
+            };
+            _appRepository.AddLog(newLog);
+            _unitOfWork.GetAppDbContext().Entry(newLog).State = EntityState.Added;
+            await _unitOfWork.CompletionAsync();
+
+            var userId = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var user = await _appRepository.GetAdminUserWithProfile(userId, _userManager);
+            IEnumerable<Exam> exams = null;
+            if (await _userManager.IsInRoleAsync(user, "ExamUserRole"))
+            {
+                //Get Exams by department Id
+                exams = await _appRepository.GetExamsByDepartmentId(user.AdminUserProfile.DepartmentId.GetValueOrDefault());
+            }
+            else
+            {
+                exams = await _appRepository.GetExams();
+            }
+            var result = _autoMapper.Map<IEnumerable<Exam>, IEnumerable<ExamDTO>>(exams);
             return Ok(result);
         }
+
+
+
+        [Authorize(Roles = ("AdminUserRole"))]
+        [HttpPost("/api/createquestion")]
+        public async Task<ActionResult> CreateQuestion(string question,IFormFile file = null)
+        {
+            //Converting the String Question to JSON Object
+            QuestionDTO json = JsonConvert.DeserializeObject<QuestionDTO>(question);          
+            var newQuetion = _autoMapper.Map<QuestionDTO, Question>(json);
+
+            if (file != null)
+            {
+                if (file.Length == 0) return BadRequest("Empty file");
+                if (file.Length > _attachmentSettings.MaxBytes) return BadRequest("Exceeded file size of " + (_attachmentSettings.MaxBytes / (1024 * 1024) + "Mb"));
+                if (!_attachmentSettings.IsSupported(file.FileName)) return BadRequest("Invalid file type.");
+                var uploadFolderPath = Path.Combine(_host.WebRootPath, "questionDiagramImages");
+                if (!Directory.Exists(uploadFolderPath))
+                {
+                    Directory.CreateDirectory(uploadFolderPath);
+                }
+                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+                var filePath = Path.Combine(uploadFolderPath, fileName);
+
+                var q = await _appRepository.GetQuestionByQText(newQuetion.Text);
+                if (q.Count() > 0)
+                {
+                    return Ok(new { error = "questionExist" });
+                }
+                else
+                {
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await file.CopyToAsync(stream);
+                        stream.Dispose();
+                    }
+                    newQuetion.Image = fileName;
+                    _appRepository.AddQuestion(newQuetion);
+                    _unitOfWork.GetAppDbContext().Entry(newQuetion).State = EntityState.Added;
+                    await _unitOfWork.CompletionAsync();
+                    var userName = _httpContextAccessor.HttpContext.User.Identity.Name;
+                    var exam = await _appRepository.GetExam(newQuetion.ExamId);
+                    var newLog = new Log
+                    {
+                        LogInformation = $"Added a question to {exam.Name} examination.",
+                        DateCreated = DateTime.Now,
+                        Owner = userName
+                    };
+                    _appRepository.AddLog(newLog);
+                    _unitOfWork.GetAppDbContext().Entry(newLog).State = EntityState.Added;
+                    await _unitOfWork.CompletionAsync();
+                    var result = _autoMapper.Map<Question, QuestionDTO>(newQuetion);
+                    return Ok(result);
+                }
+            }
+            else {
+                var q = await _appRepository.GetQuestionByQText(newQuetion.Text);
+                if (q.Count() > 0)
+                {
+                    return Ok(new { error = "questionExist" });
+                }
+                else {
+                    _appRepository.AddQuestion(newQuetion);
+                    _unitOfWork.GetAppDbContext().Entry(newQuetion).State = EntityState.Added;
+                    await _unitOfWork.CompletionAsync();
+                    var userName = _httpContextAccessor.HttpContext.User.Identity.Name;
+                    var exam = await _appRepository.GetExam(newQuetion.ExamId);
+                    var newLog = new Log
+                    {
+                        LogInformation = $"Added a question to {exam.Name} examination.",
+                        DateCreated = DateTime.Now,
+                        Owner = userName
+                    };
+                    _appRepository.AddLog(newLog);
+                    _unitOfWork.GetAppDbContext().Entry(newLog).State = EntityState.Added;
+                    await _unitOfWork.CompletionAsync();
+                    var result = _autoMapper.Map<Question, QuestionDTO>(newQuetion);
+                    return Ok(result);
+                }                
+            }                       
+        }
+
+
+        [Authorize(Roles = ("AdminUserRole"))]
+        [HttpPut("/api/editquestion/{questionId}")]
+        public async Task<ActionResult> EditQuestionById(int questionId, string question, IFormFile file = null)
+        {
+            //Converting the String Question to JSON Object
+            QuestionDTO json = JsonConvert.DeserializeObject<QuestionDTO>(question);
+            var newQuetion = _autoMapper.Map<QuestionDTO, Question>(json);
+            if (newQuetion.Id != questionId)
+            {
+                return BadRequest(ModelState);
+            }
+            var questionToEdit = await _appRepository.GetQuestionById(questionId);
+            if (questionToEdit == null)
+            {
+                return NotFound();
+            }
+
+            if (file != null)
+            {
+                if (file.Length == 0) return BadRequest("Empty file");
+                if (file.Length > _attachmentSettings.MaxBytes) return BadRequest("Exceeded file size of " + (_attachmentSettings.MaxBytes / (1024 * 1024) + "Mb"));
+                if (!_attachmentSettings.IsSupported(file.FileName)) return BadRequest("Invalid file type.");
+                var uploadFolderPath = Path.Combine(_host.WebRootPath, "questionDiagramImages");
+                if (!Directory.Exists(uploadFolderPath))
+                {
+                    Directory.CreateDirectory(uploadFolderPath);
+                }
+                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+                var filePath = Path.Combine(uploadFolderPath, fileName);
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                    stream.Dispose();
+                }
+                questionToEdit.Text = newQuetion.Text;
+                questionToEdit.AnswerA = newQuetion.AnswerA;
+                questionToEdit.AnswerB = newQuetion.AnswerB;
+                questionToEdit.AnswerC = newQuetion.AnswerC;
+                questionToEdit.AnswerD = newQuetion.AnswerD;
+                questionToEdit.Image = fileName;
+                questionToEdit.CorrectAnswer = newQuetion.CorrectAnswer;
+                _unitOfWork.GetAppDbContext().Entry(questionToEdit).State = EntityState.Modified;
+                await _unitOfWork.CompletionAsync();
+
+                var userName = _httpContextAccessor.HttpContext.User.Identity.Name;
+                var exam = await _appRepository.GetExam(questionToEdit.ExamId);
+                var newLog = new Log
+                {
+                    LogInformation = $"Edited question {questionToEdit.Text} in {exam.Name} examination",
+                    DateCreated = DateTime.Now,
+                    Owner = userName
+                };
+                _appRepository.AddLog(newLog);
+                _unitOfWork.GetAppDbContext().Entry(newLog).State = EntityState.Added;
+                await _unitOfWork.CompletionAsync();
+
+                var result = _autoMapper.Map<Question, QuestionDTO>(questionToEdit);
+                return Ok(result);
+            }
+            else {
+                questionToEdit.Text = newQuetion.Text;
+                questionToEdit.AnswerA = newQuetion.AnswerA;
+                questionToEdit.AnswerB = newQuetion.AnswerB;
+                questionToEdit.AnswerC = newQuetion.AnswerC;
+                questionToEdit.AnswerD = newQuetion.AnswerD;
+                questionToEdit.CorrectAnswer = newQuetion.CorrectAnswer;
+                _unitOfWork.GetAppDbContext().Entry(questionToEdit).State = EntityState.Modified;
+                await _unitOfWork.CompletionAsync();
+
+                var userName = _httpContextAccessor.HttpContext.User.Identity.Name;
+                var exam = await _appRepository.GetExam(questionToEdit.ExamId);
+                var newLog = new Log
+                {
+                    LogInformation = $"Edited question {questionToEdit.Text} in {exam.Name} examination",
+                    DateCreated = DateTime.Now,
+                    Owner = userName
+                };
+                _appRepository.AddLog(newLog);
+                _unitOfWork.GetAppDbContext().Entry(newLog).State = EntityState.Added;
+                await _unitOfWork.CompletionAsync();
+                var result = _autoMapper.Map<Question, QuestionDTO>(questionToEdit);
+                return Ok(result);
+            }            
+        }
+
         [Authorize(Roles = ("AdminUserRole"))]
         [HttpDelete("/api/deletequestion/{questionId}")]
         public async Task<ActionResult> DeleteQuestion(int questionId)
@@ -131,6 +386,20 @@ namespace EASystem.Controllers
             _appRepository.RemoveQuestion(question);
             _unitOfWork.GetAppDbContext().Entry(question).State = EntityState.Deleted;
             await _unitOfWork.CompletionAsync();
+
+
+            var userName = _httpContextAccessor.HttpContext.User.Identity.Name;
+            var exam = await _appRepository.GetExam(question.ExamId);
+            var newLog = new Log
+            {
+                LogInformation = $"Deleted a question from {exam.Name} examination.",
+                DateCreated = DateTime.Now,
+                Owner = userName
+            };
+            _appRepository.AddLog(newLog);
+            _unitOfWork.GetAppDbContext().Entry(newLog).State = EntityState.Added;
+            await _unitOfWork.CompletionAsync();
+
             var result = _autoMapper.Map<Question, QuestionDTO>(question);
             return Ok(result);
         }
@@ -148,6 +417,18 @@ namespace EASystem.Controllers
             _appRepository.CancelExam(exemToRemove);
             _unitOfWork.GetAppDbContext().Entry(exemToRemove).State = EntityState.Deleted;
             await _unitOfWork.CompletionAsync();
+
+            var userName = _httpContextAccessor.HttpContext.User.Identity.Name;            
+            var newLog = new Log
+            {
+                LogInformation = $"Cancelled scheduled examination.",
+                DateCreated = DateTime.Now,
+                Owner = userName
+            };
+            _appRepository.AddLog(newLog);
+            _unitOfWork.GetAppDbContext().Entry(newLog).State = EntityState.Added;
+            await _unitOfWork.CompletionAsync();
+
             var result = _autoMapper.Map<ExamTaken, ExamTakenDTO>(exemToRemove);
             return Ok(result);
         }
@@ -164,7 +445,31 @@ namespace EASystem.Controllers
             _appRepository.DeleteExam(examToRemove);
             _unitOfWork.GetAppDbContext().Entry(examToRemove).State = EntityState.Deleted;
             await _unitOfWork.CompletionAsync();
-            var exams = await _appRepository.GetExams();
+
+
+            var userName = _httpContextAccessor.HttpContext.User.Identity.Name;
+            var newLog = new Log
+            {
+                LogInformation = $"Deleted {examToRemove.Name} examination.",
+                DateCreated = DateTime.Now,
+                Owner = userName
+            };
+            _appRepository.AddLog(newLog);
+            _unitOfWork.GetAppDbContext().Entry(newLog).State = EntityState.Added;
+            await _unitOfWork.CompletionAsync();
+
+            var userId = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var user = await _appRepository.GetAdminUserWithProfile(userId, _userManager);
+            IEnumerable<Exam> exams = null;
+            if (await _userManager.IsInRoleAsync(user, "ExamUserRole"))
+            {
+                //Get Exams by department Id
+                exams = await _appRepository.GetExamsByDepartmentId(user.AdminUserProfile.DepartmentId.GetValueOrDefault());
+            }
+            else
+            {
+                exams = await _appRepository.GetExams();
+            }
             var result = _autoMapper.Map<IEnumerable<Exam>, IEnumerable<ExamDTO>>(exams);
             return Ok(result);
         }
@@ -194,6 +499,7 @@ namespace EASystem.Controllers
             }
             //Randomise the question generation
             var shuffledQuestions = questions.Shuffle();
+            shuffledQuestions = questions.Shuffle();            
             if (shuffledQuestions.Count() > numberOfQuestions)
             {
                 shuffledQuestions = shuffledQuestions.Take(numberOfQuestions);
@@ -216,33 +522,135 @@ namespace EASystem.Controllers
         }
 
         [Authorize(Roles = ("AdminUserRole"))]
-        [HttpPut("/api/editquestion/{questionId}")]
-        public async Task<ActionResult> EditQuestionById(int questionId, [FromBody] QuestionDTO questionDTO)
+        [HttpGet("/api/schedulesubjectexams/{examName}")]
+        public async Task<ActionResult> GetScheduleSubjectExamId(string examName)
+        {
+            IEnumerable<ExamTaken> exams = null;
+            var userId = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var user = await _appRepository.GetAdminUserWithProfile(userId, _userManager);
+            if (await _userManager.IsInRoleAsync(user, "ExamUserRole"))
+            {
+                exams = await _appRepository.GetExamPendingActiveByDepartmentId(examName, user.AdminUserProfile.DepartmentId.GetValueOrDefault());
+            }
+            else
+            {
+                exams = await _appRepository.GetExamPendingActive(examName);
+            }
+            if (exams == null)
+            {
+                return NotFound();
+            }
+            var result = _autoMapper.Map<IEnumerable<ExamTaken>,IEnumerable<ExamTakenDTO>>(exams);
+            return Ok(result);
+        }
+
+        [Authorize(Roles = ("AdminUserRole"))]
+        [HttpPut("/api/activatescheduledexam/{id}")]
+        public async Task<ActionResult> ActivateScheduledExam(int id)
+        {
+            var examsToActivate = await _appRepository.GetExamToActivate(id);            
+            if (examsToActivate == null)
+            {
+                return NotFound();
+            }
+            examsToActivate.IsActivated = true;
+            await _unitOfWork.CompletionAsync();
+
+            var userName = _httpContextAccessor.HttpContext.User.Identity.Name;
+            var newLog = new Log
+            {
+                LogInformation = $"Activated {examsToActivate.Name} examination for {examsToActivate.UserName}.",
+                DateCreated = DateTime.Now,
+                Owner = userName
+            };
+
+            _appRepository.AddLog(newLog);
+            _unitOfWork.GetAppDbContext().Entry(newLog).State = EntityState.Added;
+            await _unitOfWork.CompletionAsync();
+
+            var result = _autoMapper.Map<ExamTaken, ExamTakenDTO>(examsToActivate);
+            return Ok(result);
+        }
+
+        [Authorize(Roles = ("AdminUserRole"))]
+        [HttpPut("/api/activateselectedexam")]
+        public async Task<ActionResult> ActivateScheduledExams([FromBody] IEnumerable<int> selectedIds)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            if (questionDTO.Id != questionId)
+            int counter = 0;
+            foreach (var itemId in selectedIds) {
+                var examsToActivate = await _appRepository.GetExamToActivate(itemId);                
+                if (examsToActivate == null)
+                {
+                    return NotFound();
+                }
+                examsToActivate.IsActivated = true;
+                await _unitOfWork.CompletionAsync();
+                counter++;
+            }
+            if (counter == selectedIds.Count())
+            {
+                return Ok(new { success = "success"});
+            }
+            else {
+                return Ok(new { error ="error"});
+            }                        
+        }
+
+
+        [Authorize(Roles = ("AdminUserRole"))]
+        [HttpPut("/api/deleteselectedexam")]
+        public async Task<ActionResult> DeleteAllSelectedScheduledExams([FromBody] IEnumerable<int> selectedIds)
+        {            
+            if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            var question = await _appRepository.GetQuestionById(questionId);
-            if (question == null)
+            int counter = 0;
+            foreach (var itemId in selectedIds)
             {
-                return NotFound();
+                var examsToCancel = await _appRepository.GetExamToActivate(itemId);               
+                if (examsToCancel == null)
+                {
+                    return NotFound();
+                }
+                _appRepository.CancelExam(examsToCancel);
+                await _unitOfWork.CompletionAsync();
+                counter++;
             }
-            question.Text = questionDTO.Text;
-            question.AnswerA = questionDTO.AnswerA;
-            question.AnswerB = questionDTO.AnswerB;
-            question.AnswerC = questionDTO.AnswerC;
-            question.AnswerD = questionDTO.AnswerD;
-            question.CorrectAnswer = questionDTO.CorrectAnswer;
-            _unitOfWork.GetAppDbContext().Entry(question).State = EntityState.Modified;
-            await _unitOfWork.CompletionAsync();
-            var result = _autoMapper.Map<Question, QuestionDTO>(question);
-            return Ok(result);
+            if (counter == selectedIds.Count())
+            {
+                return Ok(new { success = "success" });
+            }
+            else
+            {
+                return Ok(new { error = "error" });
+            }
         }
+
+        [Authorize(Roles = ("AdminUserRole,ClientUserRole"))]
+        [HttpPost("api/startexam/{id}")]
+        public async Task<ActionResult> StartExam(int id,[FromBody] StartExamViewModel startData)
+        {
+            if (startData.HasStarted) {
+                var examToStart = await _appRepository.GetWrittenExam(id);
+                if (examToStart == null)
+                {
+                    return BadRequest("Exam was not found");
+                }
+                examToStart.TimeStarted = DateTime.Now;
+                await _unitOfWork.CompletionAsync();
+                return Ok(examToStart);
+            }
+            else
+            {
+                return BadRequest("An error occured due to invalid exam data.");
+            }            
+        }
+
 
         [Authorize(Roles = ("AdminUserRole"))]
         [HttpPost("api/assignexam/{examId}/{userId}")]
@@ -256,29 +664,170 @@ namespace EASystem.Controllers
             {
                 return BadRequest(ModelState);
             }
+            var exam = await _appRepository.GetExam(examId);
             var user = await _appRepository.GetUserWithProfileData(userId, _userManager);
             if (user == null)
             {
                 return NotFound();
             }
-            user.ClientUserProfile.WrittenExams.Add(new ExamTaken
-            {
-                ExamId = examTakenDTO.ExamId,
-                ClientUserProfileId = user.ClientUserProfile.Id,
-                UserId = userId,
-                Name = examTakenDTO.Name,
-                Duration = (examTakenDTO.Duration * 60),
-                NumberOfQuestions = examTakenDTO.NumberOfQuestions,
-                ScheduledDate = examTakenDTO.ScheduledDate,
-                DateAdded = DateTime.Now,
-                Score = 0,
-                PassStatus = "Pending",
-                HasBeenTaken = false                
-            });
 
+            var loggedUserId = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var loggedUser = await _appRepository.GetAdminUserWithProfile(loggedUserId, _userManager);
+            
+            if (await _userManager.IsInRoleAsync(loggedUser, "ExamUserRole"))
+            {
+                int departmentId = loggedUser.AdminUserProfile.DepartmentId.GetValueOrDefault();
+                user.ClientUserProfile.WrittenExams.Add(new ExamTaken
+                {
+                    ExamId = examTakenDTO.ExamId,
+                    ClientUserProfileId = user.ClientUserProfile.Id,
+                    UserId = userId,
+                    UserName = $"{user.ClientUserProfile.FirstName} {user.ClientUserProfile.LastName}",
+                    UserPhoneNumber = user.PhoneNumber,
+                    UserEmail = user.Email,
+                    Name = examTakenDTO.Name,
+                    Duration = (examTakenDTO.Duration * 60),
+                    NumberOfQuestions = examTakenDTO.NumberOfQuestions,
+                    PassMarkPercentage = exam.PassMarkPercentage,
+                    ScheduledDate = examTakenDTO.ScheduledDate.AddDays(1),
+                    DateAdded = DateTime.Now,
+                    Score = 0,
+                    MarksScored = 0,
+                    PassStatus = "Pending",
+                    HasBeenTaken = false,
+                    DepartmentId = departmentId,
+                    ExamTime = examTakenDTO.ExamTime
+                }) ;
+                await _unitOfWork.CompletionAsync();
+            }
+            else {
+                user.ClientUserProfile.WrittenExams.Add(new ExamTaken
+                {
+                    ExamId = examTakenDTO.ExamId,
+                    ClientUserProfileId = user.ClientUserProfile.Id,
+                    UserId = userId,
+                    UserName = $"{user.ClientUserProfile.FirstName} {user.ClientUserProfile.LastName}",
+                    UserPhoneNumber = user.PhoneNumber,
+                    UserEmail = user.Email,
+                    Name = examTakenDTO.Name,
+                    Duration = (examTakenDTO.Duration * 60),
+                    NumberOfQuestions = examTakenDTO.NumberOfQuestions,
+                    PassMarkPercentage = exam.PassMarkPercentage,
+                    ScheduledDate = examTakenDTO.ScheduledDate.AddDays(1),
+                    DateAdded = DateTime.Now,
+                    Score = 0,
+                    MarksScored = 0,
+                    PassStatus = "Pending",
+                    HasBeenTaken = false,
+                    ExamTime = examTakenDTO.ExamTime
+                });
+                await _unitOfWork.CompletionAsync();
+            }
+
+            
+            
+            var userName = _httpContextAccessor.HttpContext.User.Identity.Name;            
+            var newLog = new Log
+            {
+                LogInformation = $"Assigned  {examTakenDTO.Name} examination to {examTakenDTO.UserName}",
+                DateCreated = DateTime.Now,
+                Owner = userName
+            };
+            _appRepository.AddLog(newLog);
+            _unitOfWork.GetAppDbContext().Entry(newLog).State = EntityState.Added;
             await _unitOfWork.CompletionAsync();
+
+            var company = await _appRepository.GetCompanyInfos();
+            var companyInfo = company.ToList()[0];
+            string fromEmail = _configuration["EmailSettings:Sender"];
+            string toEmail = user.Email;
+            string subject = $"{companyInfo.Aliase} - Examination Schedule Notification";            
+            string body = $"Dear Esteemed Client, <br/> This serves to inform you that an exam for <b>{examTakenDTO.Name}</b> has been scheduled for <b>{examTakenDTO.ScheduledDate.AddDays(1):dddd, dd MMMM yyyy}</b> at <b>{examTakenDTO.ExamTime}</b>.<br/> Therefore, you are requested to come to {companyInfo.Aliase} on the same date to take your exam.<br/> Kind regards, <br/><br/> <b>{companyInfo.Aliase} Admin</b>";
+            await _emailSender.SendEmail(fromEmail, toEmail, subject, body);
+
             var result = _autoMapper.Map<IEnumerable<ExamTaken>, IEnumerable<ExamTakenDTO>>(user.ClientUserProfile.WrittenExams);
             return Ok(result);
+        }
+
+        [Authorize(Roles = ("AdminUserRole"))]
+        [HttpPost("api/assignexamtomany/{examId}")]
+        public async Task<ActionResult> AssignExamToMany(int examId,  [FromBody] IEnumerable<ExamTakenDTO> examSchedules)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var exam = await _appRepository.GetExam(examId);
+            foreach (var item in examSchedules) {
+                var user = await _appRepository.GetUserWithProfileData(item.UserId, _userManager);
+                if (user == null)
+                {
+                    return NotFound();
+                }
+
+                var loggedUserId = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var loggedUser = await _appRepository.GetAdminUserWithProfile(loggedUserId, _userManager);
+                int departmentId;
+                if (await _userManager.IsInRoleAsync(user, "ExamUserRole"))
+                {
+                    departmentId = loggedUser.AdminUserProfile.DepartmentId.GetValueOrDefault();
+                    user.ClientUserProfile.WrittenExams.Add(new ExamTaken
+                    {
+                        ExamId = item.ExamId,
+                        ClientUserProfileId = user.ClientUserProfile.Id,
+                        UserId = item.UserId,
+                        UserName = $"{user.ClientUserProfile.FirstName} {user.ClientUserProfile.LastName}",
+                        UserPhoneNumber = user.PhoneNumber,
+                        UserEmail = user.Email,
+                        Name = item.Name,
+                        Duration = (item.Duration * 60),
+                        NumberOfQuestions = item.NumberOfQuestions,
+                        ScheduledDate = item.ScheduledDate.AddDays(1),
+                        DateAdded = DateTime.Now,
+                        Score = 0,
+                        MarksScored = 0,
+                        PassMarkPercentage = exam.PassMarkPercentage,
+                        IsActivated = false,
+                        PassStatus = "Pending",
+                        HasBeenTaken = false,
+                        DepartmentId = departmentId,
+                        ExamTime = item.ExamTime,
+                    });
+                    await _unitOfWork.CompletionAsync();
+                }
+                else {                    
+                    user.ClientUserProfile.WrittenExams.Add(new ExamTaken
+                    {
+                        ExamId = item.ExamId,
+                        ClientUserProfileId = user.ClientUserProfile.Id,
+                        UserId = item.UserId,
+                        UserName = $"{user.ClientUserProfile.FirstName} {user.ClientUserProfile.LastName}",
+                        UserPhoneNumber = user.PhoneNumber,
+                        UserEmail = user.Email,
+                        Name = item.Name,
+                        Duration = (item.Duration * 60),
+                        NumberOfQuestions = item.NumberOfQuestions,
+                        ScheduledDate = item.ScheduledDate.AddDays(1),
+                        DateAdded = DateTime.Now,
+                        Score = 0,
+                        MarksScored = 0,
+                        PassMarkPercentage = exam.PassMarkPercentage,
+                        IsActivated = false,
+                        PassStatus = "Pending",
+                        HasBeenTaken = false,                        
+                        ExamTime = item.ExamTime,
+                    });
+                    await _unitOfWork.CompletionAsync();
+                }                                
+                var company = await _appRepository.GetCompanyInfos();
+                var companyInfo = company.ToList()[0];
+                string fromEmail = _configuration["EmailSettings:Sender"];
+                string toEmail = user.Email;
+                string subject = $"{companyInfo.Aliase} - Examination Schedule Notification";
+                string body = $"Dear Esteemed Client, <br/> This serves to inform you that an exam for <b>{item.Name}</b> has been scheduled for <b>{item.ScheduledDate.AddDays(1):dddd, dd MMMM yyyy}</b> at <b>{item.ExamTime}</b>.<br/> Therefore, you are requested to come to {companyInfo.Aliase} on the same date to take your exam.<br/> Kind regards, <br/><br/> <b>{companyInfo.Aliase} Admin</b>";
+                await _emailSender.SendEmail(fromEmail, toEmail, subject, body);
+            }
+            return Ok(new { success ="Success"});
         }
 
         [Authorize(Roles = ("ClientUserRole"))]
@@ -289,6 +838,7 @@ namespace EASystem.Controllers
             {
                 return BadRequest(ModelState);
             }
+                       
             var writtenExam = await _appRepository.GetWrittenExam(id);
             int counter = 0;
             foreach (var item in submitedAnswers) {
@@ -306,28 +856,77 @@ namespace EASystem.Controllers
                 });
             }
             await _unitOfWork.CompletionAsync();
-            //var writtenExam = await _appRepository.GetWrittenExam(id);
+            var exam = await _appRepository.GetExam(writtenExam.ExamId);
             int percentage = (int)Math.Round((double) counter / submitedAnswers.Count() * 100);
             writtenExam.Score = percentage;
+            writtenExam.MarksScored =  counter;
+            writtenExam.NumberOfQuestions = submitedAnswers.Count();
             writtenExam.HasBeenTaken = true;
-            writtenExam.PassStatus = percentage >= 50 ? "Passed" : "Failed";
+            writtenExam.PassMarkPercentage = exam.PassMarkPercentage;
+            writtenExam.PassStatus = percentage >= exam.PassMarkPercentage ? "Passed" : "Failed";
             writtenExam.DateTaken = DateTime.Now;
-
+            writtenExam.TimeFinished = DateTime.Now;
+            writtenExam.TimeTakenToWrite = Math.Round(writtenExam.TimeFinished.Subtract(writtenExam.TimeStarted).TotalMinutes,1);
             var userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
-            var user = await _appRepository.GetClientUserWithProfile(userId, _userManager);
-
-            var exam = await _appRepository.GetExam(writtenExam.ExamId);
-            if (exam != null) { 
-                exam.ExamReports.Add(new Report
+            var user = await _appRepository.GetClientUserWithProfile(userId, _userManager);           
+            if (exam != null) {
+                if (exam.DepartmentId.HasValue)
                 {
-                    ExamId = id,
-                    ExamName = writtenExam.Name,
-                    Score = percentage,
-                    PassStatus = percentage >= 50 ? "Passed" : "Failed",
-                    DateTaken = DateTime.Now,
-                    ClientName = $"{user.ClientUserProfile.FirstName} {user.ClientUserProfile.LastName}"
-                });
+                    exam.ExamReports.Add(new Report
+                    {
+                        ExamId = id,
+                        ExamName = writtenExam.Name,
+                        Score = percentage,
+                        MarksScored = counter,
+                        TotalNumberOfQuestions = submitedAnswers.Count(),
+                        PassStatus = percentage >= exam.PassMarkPercentage ? "Passed" : "Failed",
+                        PassMarkPercentage = exam.PassMarkPercentage,
+                        DateTaken = DateTime.Now,
+                        ClientName = $"{user.ClientUserProfile.FirstName} {user.ClientUserProfile.LastName}",
+                        UserPhoneNumber = user.PhoneNumber,
+                        UserEmail = user.Email,
+                        DepartmentId = exam.DepartmentId
+                    });
+                }
+                else {
+                    exam.ExamReports.Add(new Report
+                    {
+                        ExamId = id,
+                        ExamName = writtenExam.Name,
+                        Score = percentage,
+                        MarksScored = counter,
+                        TotalNumberOfQuestions = submitedAnswers.Count(),
+                        PassStatus = percentage >= exam.PassMarkPercentage ? "Passed" : "Failed",
+                        PassMarkPercentage = exam.PassMarkPercentage,
+                        DateTaken = DateTime.Now,
+                        ClientName = $"{user.ClientUserProfile.FirstName} {user.ClientUserProfile.LastName}",
+                        UserPhoneNumber = user.PhoneNumber,
+                        UserEmail = user.Email,
+                    });
+                }                
             }
+
+            var userName = _httpContextAccessor.HttpContext.User.Identity.Name;
+            var newLog = new Log
+            {
+                LogInformation = $"{userName} submitted  {writtenExam.Name} examination for marking.",
+                DateCreated = DateTime.Now,
+                Owner = userName
+            };
+            _appRepository.AddLog(newLog);
+            _unitOfWork.GetAppDbContext().Entry(newLog).State = EntityState.Added;
+            await _unitOfWork.CompletionAsync();
+            var status = percentage >= writtenExam.PassMarkPercentage ? "Passed" : "Failed";
+            var company = await _appRepository.GetCompanyInfos();
+            var companyInfo = company.ToList()[0];
+            string fromEmail = _configuration["EmailSettings:Sender"];
+            string toEmail = user.Email;
+            string subject = $"{companyInfo.Aliase} - Examination Result Notification";
+            string body = $"Dear Esteemed Client, <br/> This serves to inform you that you have scored <b>{counter}/{submitedAnswers.Count() }</b> which is <b> {percentage}%</b>. Therefore, you have <b>{status}</b>.<br/>You can download your statement of results from your profile. <br/> Kind regards, <br/><br/> <b>{companyInfo.Aliase} Admin</b>";
+            await _emailSender.SendEmail(fromEmail, toEmail, subject, body);
+
+            /*
+
             //Create a new pdf  document
             PdfDocument document = new PdfDocument();
             //Add a page to the document
@@ -336,7 +935,7 @@ namespace EASystem.Controllers
             PdfGraphics graphics = page.Graphics;
             //Load the image as stream.
             var imagePath = Path.Combine(_host.WebRootPath);
-            var filePath = Path.Combine(imagePath, "CAA_Big_Logo.png");
+            var filePath = Path.Combine(imagePath, "logo.png");
             FileStream imageStream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
             RectangleF bounds = new RectangleF(200, 0, 100, 100);
             PdfBitmap image = new PdfBitmap(imageStream);
@@ -410,7 +1009,10 @@ namespace EASystem.Controllers
             pdfLightTable.Style.ShowHeader = true;
 
             //Add Rows
-            var passStatus = percentage >= 50 ? "Passed" : "Failed";
+           
+            
+            
+            var passStatus = percentage >= int.Parse(_configuration["ExamSettings:Passmark"]) ? "Passed" : "Failed";
             pdfLightTable.Rows.Add(new object[] { 
                 writtenExam.Name, 
                 $"{percentage} %", 
@@ -446,16 +1048,15 @@ namespace EASystem.Controllers
             //message.Attachments.
             //Send email
             using var smtp = new MailKit.Net.Smtp.SmtpClient();
+            smtp.CheckCertificateRevocation = false;
             await smtp.ConnectAsync(_configuration["EmailSettings:MailServer"], int.Parse(_configuration["EmailSettings:Port"]), SecureSocketOptions.StartTls);
             await smtp.AuthenticateAsync(_configuration["EmailSettings:Sender"], _configuration["EmailSettings:AdminPass"]);
             await smtp.SendAsync(message);
+
             await smtp.DisconnectAsync(true);
-            await _unitOfWork.CompletionAsync();
-            return Ok(new
-            {
-                Correct = counter,
-                Total = submitedAnswers.Count()
-            }) ;
+            
+            */
+            return Ok(writtenExam) ;
         }
 
 
@@ -476,12 +1077,16 @@ namespace EASystem.Controllers
                     counter++;
                 }
             }
-            var exam = await _appRepository.GetWrittenExam(id);
+            var exam = await _appRepository.GetExam(id);
+            var writtenExam = await _appRepository.GetWrittenExam(id);
             int percentage = (int)Math.Round((double)counter / submitedAnswers.Count() * 100);
-            exam.Score = percentage;
-            exam.HasBeenTaken = true;
-            exam.PassStatus = percentage >= 50 ? "Passed" : "Failed";
-            exam.DateTaken = DateTime.Now;
+            writtenExam.Score = percentage;
+            writtenExam.MarksScored = counter;
+            writtenExam.HasBeenTaken = true;
+            writtenExam.NumberOfQuestions = submitedAnswers.Count();
+            writtenExam.PassMarkPercentage = exam.PassMarkPercentage;
+            writtenExam.PassStatus = percentage >= exam.PassMarkPercentage ? "Passed" : "Failed";
+            writtenExam.DateTaken = DateTime.Now;
 
             await _unitOfWork.CompletionAsync();
             return Ok(new
@@ -490,7 +1095,6 @@ namespace EASystem.Controllers
                 Total = submitedAnswers.Count()
             });
         }
-
 
         [Authorize(Roles =("ClientUserRole"))]
         [HttpGet("/api/pendingexams")]
@@ -505,6 +1109,8 @@ namespace EASystem.Controllers
             var result = _autoMapper.Map<IEnumerable<ExamTaken>, IEnumerable<ExamTakenDTO>>(pendingExams);
             return Ok(result);
         }
+
+
 
         [Authorize(Roles = ("AdminUserRole"))]
         [HttpGet("/api/clientexams/{userId}")]
@@ -534,6 +1140,31 @@ namespace EASystem.Controllers
             var result = _autoMapper.Map<IEnumerable<ExamTaken>, IEnumerable<ExamTakenDTO>>(takenExams);
             return Ok(result);
         }
+
+        [Authorize(Roles = ("AdminUserRole"))]
+        [HttpGet("/api/allpendingexam")]
+        public async Task<ActionResult> GetTakenAllPendingExams()
+        {       
+            var loggedUserId = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var loggedUser = await _appRepository.GetAdminUserWithProfile(loggedUserId, _userManager);
+            IEnumerable<ExamTaken> pendingExams = null;
+            if (await _userManager.IsInRoleAsync(loggedUser, "ExamUserRole"))
+            {
+                int departmentId = loggedUser.AdminUserProfile.DepartmentId.GetValueOrDefault();
+                pendingExams = await _appRepository.GetPendingWrittenExamsByDepartmentId(departmentId);
+            }
+            else {
+                pendingExams = await _appRepository.GetPendingWrittenExams();
+            }
+            
+            if (pendingExams == null)
+            {
+                return NotFound();
+            }
+            var result = _autoMapper.Map<IEnumerable<ExamTaken>, IEnumerable<ExamTakenDTO>>(pendingExams);
+            return Ok(result);
+        }
+
 
 
         [Authorize(Roles = ("AdminUserRole"))]
@@ -593,7 +1224,8 @@ namespace EASystem.Controllers
                         AnswerC = question.AnswerC,
                         AnswerD = question.AnswerD,
                         CorrectAnswer = question.CorrectAnswer,
-                        SelectedAnswer = item.SelectedAnswer
+                        SelectedAnswer = item.SelectedAnswer,
+                        Image =question.Image,
                     });                    
                 }
             }           
@@ -611,6 +1243,18 @@ namespace EASystem.Controllers
             }
             _appRepository.DeleteExamRecord(examRecord);
             await _unitOfWork.CompletionAsync();
+
+            var userName = _httpContextAccessor.HttpContext.User.Identity.Name;
+            var newLog = new Log
+            {
+                LogInformation = $"Deleted {examRecord.ExamName} examination record.",
+                DateCreated = DateTime.Now,
+                Owner = userName
+            };
+            _appRepository.AddLog(newLog);
+            _unitOfWork.GetAppDbContext().Entry(newLog).State = EntityState.Added;
+            await _unitOfWork.CompletionAsync();
+
             var records = await _appRepository.GetAllExamRecords();
             var result = _autoMapper.Map<IEnumerable<Report>, IEnumerable<ReportDTO>>(records);
             return Ok(result);
@@ -628,6 +1272,18 @@ namespace EASystem.Controllers
             }
             _appRepository.DeleteExamRecord(examRecord);
             await _unitOfWork.CompletionAsync();
+
+            var userName = _httpContextAccessor.HttpContext.User.Identity.Name;
+            var newLog = new Log
+            {
+                LogInformation = $"Deleted {examRecord.ExamName} examination record.",
+                DateCreated = DateTime.Now,
+                Owner = userName
+            };
+            _appRepository.AddLog(newLog);
+            _unitOfWork.GetAppDbContext().Entry(newLog).State = EntityState.Added;
+            await _unitOfWork.CompletionAsync();
+
             var records = await _appRepository.GetExamRecords(examId);
             var result = _autoMapper.Map<IEnumerable<Report>, IEnumerable<ReportDTO>>(records);
             return Ok(result);
@@ -638,7 +1294,17 @@ namespace EASystem.Controllers
         [HttpGet("/api/examRecords/{examId}")]
         public async Task<ActionResult> GetExamRecords(int examId)
         {
-            var examRecords = await _appRepository.GetExamRecords(examId);
+            var loggedUserId = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var loggedUser = await _appRepository.GetAdminUserWithProfile(loggedUserId, _userManager);
+            IEnumerable<Report> examRecords;
+            if (await _userManager.IsInRoleAsync(loggedUser, "ExamUserRole"))
+            {
+                int departmentId = loggedUser.AdminUserProfile.DepartmentId.GetValueOrDefault();
+                examRecords = await _appRepository.GetExamRecordsByDepatmentId(examId, departmentId);
+            }
+            else {
+                examRecords = await _appRepository.GetExamRecords(examId);
+            }                
             if (examRecords == null)
             {
                 return NotFound();
@@ -652,7 +1318,18 @@ namespace EASystem.Controllers
         [HttpGet("/api/allexamrecords")]
         public async Task<ActionResult> GetAllExamRecords()
         {
-            var examRecords = await _appRepository.GetAllExamRecords();
+            var loggedUserId = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var loggedUser = await _appRepository.GetAdminUserWithProfile(loggedUserId, _userManager);
+            IEnumerable<Report> examRecords = null;            
+            if (await _userManager.IsInRoleAsync(loggedUser, "ExamUserRole"))
+            {
+                int departmentId = loggedUser.AdminUserProfile.DepartmentId.GetValueOrDefault();                
+                examRecords = await _appRepository.GetAllExamRecordsByDepartmentId(departmentId);
+            }
+            else
+            {
+                examRecords = await _appRepository.GetAllExamRecords();
+            }                
             if (examRecords == null)
             {
                 return NotFound();
@@ -677,14 +1354,37 @@ namespace EASystem.Controllers
             application.ApplicationDate = DateTime.Now;
             application.IsOpened = false;
             application.ReadStatus = false;
+            
             application.UserName = $"{user.ClientUserProfile.FirstName} {user.ClientUserProfile.LastName}";            
             var clientApplication = _autoMapper.Map<ClientApplicationDTO, ClientApplication>(application); 
             var serverApplication = _autoMapper.Map<ClientApplicationDTO, Application>(application);
+            serverApplication.Email = user.Email;
             _appRepository.AddClientApplication(clientApplication);
-            _appRepository.AddApplication(serverApplication);
-            //_unitOfWork.GetAppDbContext().Entry(clientApplication).State = EntityState.Added;
-            var clientapplications = await _appRepository.GetClientApplications(userId);    
+            _appRepository.AddApplication(serverApplication);                         
             await _unitOfWork.CompletionAsync();
+
+            var userName = _httpContextAccessor.HttpContext.User.Identity.Name;
+            var newLog = new Log
+            {
+                LogInformation = $"{userName} created application.",
+                DateCreated = DateTime.Now,
+                Owner = userName
+            };
+            _appRepository.AddLog(newLog);
+            _unitOfWork.GetAppDbContext().Entry(newLog).State = EntityState.Added;
+            await _unitOfWork.CompletionAsync();
+            var clientapplications = await _appRepository.GetClientApplications(userId);
+
+            //Send Email also notifying the responsible users
+            string fromEmail = _configuration["EmailSettings:Sender"];
+            string toEmail = _configuration["ExamGroupEmail"]; 
+            string subject = $"{application.Subject}";
+            string body = $"Dear ALL, <br/> This serves to inform you that you have a message below from <b>{user.Email}</b>.Kindly act promptly on the application request.<br/><br/>" +
+                $"<b>Subject: {application.Subject}</b>.<br/><b>Message</b>:<p> {application.ApplicationText}</p>";
+
+                
+            await _emailSender.SendEmail(fromEmail, toEmail, subject, body);
+
             var result = _autoMapper.Map<IEnumerable<ClientApplication>, IEnumerable<ClientApplicationDTO>>(clientapplications);
             return Ok(result);
         }
@@ -717,6 +1417,7 @@ namespace EASystem.Controllers
             {
                 return NotFound("Resource not found, try again later.");
             }
+
             return Ok(result);
         }
 
@@ -733,6 +1434,19 @@ namespace EASystem.Controllers
             {
                 return NotFound("Resource not found, try again later.");
             }
+
+
+            var userName = _httpContextAccessor.HttpContext.User.Identity.Name;
+            var newLog = new Log
+            {
+                LogInformation = $"Deleted application from {application.UserName}.",
+                DateCreated = DateTime.Now,
+                Owner = userName
+            };
+            _appRepository.AddLog(newLog);
+            _unitOfWork.GetAppDbContext().Entry(newLog).State = EntityState.Added;
+            await _unitOfWork.CompletionAsync();
+
             return Ok(result);
         }
 
@@ -752,6 +1466,22 @@ namespace EASystem.Controllers
             return Ok(result);
         }
 
+        [Authorize(Roles = ("ClientUserRole"))]
+        [HttpGet("/api/getclientapplication/{id}")]
+        public async Task<ActionResult> GetClientApplicationById(int id)
+        {
+            var application = await _appRepository.GetClientApplication(id);
+            if (application == null)
+            {
+                return NotFound("Resource not found, try again later.");
+            }
+            application.IsOpened = true;
+            application.ReadStatus = true;
+            await _unitOfWork.CompletionAsync();
+            var result = _autoMapper.Map<ClientApplication, ClientApplicationDTO>(application);
+            return Ok(result);
+        }
+
 
         [Authorize(Roles = ("AdminUserRole"))]
         [HttpGet("/api/applications")]
@@ -764,6 +1494,228 @@ namespace EASystem.Controllers
                 return NotFound("Resource not found, try again later.");
             }
             return Ok(result);
+        }
+
+        [Authorize(Roles = "AdminUserRole")]
+        [HttpPost("/api/sendbulkyemail/{id}")]
+        public async Task<IActionResult> SendBulkyMessage(string id, [FromBody] BulkyEmailViewModel email)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+            List<string> failedEmails = new List<string>();
+            var user = await _appRepository.GetClientUserByUserId(id,_userManager);
+            string fromEmail = _configuration["EmailSettings:Sender"];
+           
+            string toEmail = user.Email;
+            string subject = email.Subject;
+            string body = email.Message;
+            try
+            {
+                await _emailSender.SendEmail(fromEmail, toEmail, subject, body);
+            }
+            catch (Exception e)
+            {
+                failedEmails.Add(user.Email);                
+            }
+            
+            if (failedEmails.Count == 0)
+            {
+                return Ok(new { success = "success" });
+            }
+            else
+            {
+                return Ok(new { failedEmails = failedEmails });
+            }
+        }
+
+        [Authorize(Roles = "AdminUserRole")]
+        [HttpGet("/api/examstatistics/")]
+        public async Task<IActionResult> GetDashboardStatistics() {
+            var userId = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var user = await _appRepository.GetAdminUserWithProfile(userId, _userManager);
+            IEnumerable<Exam> exams = null;
+            if (await _userManager.IsInRoleAsync(user, "ExamUserRole"))
+            {
+                //Get Exams by department Id
+                exams = await _appRepository.GetExamsByDepartmentId(user.AdminUserProfile.DepartmentId.GetValueOrDefault());
+            }
+            else
+            {
+                exams = await _appRepository.GetExams();
+            }
+            //var exams = await _appRepository.GetExams();
+            List<ExamStatisticModel> examStatics = new List<ExamStatisticModel>();
+            foreach (var exam in exams) {
+                int examsPassed = 0;
+                int examsFailed = 0;
+                var examRecords = await _appRepository.GetExamsReportsByName(exam.Name);
+                foreach (var item in examRecords) {
+                    if (item.Score >= item.PassMarkPercentage)
+                    {
+                        examsPassed++;
+                    }
+                    else {
+                        examsFailed++;
+                    }
+                }
+                examStatics.Add(new ExamStatisticModel
+                {
+                    Name = exam.Name,
+                    PassedExams = examsPassed,
+                    FailedExams = examsFailed,                                        
+                });
+            }
+            return Ok(examStatics);
+        }
+
+        [Authorize(Roles = "AdminUserRole")]
+        [HttpPost("/api/getfilterdexamstatistics")]
+        public async Task<IActionResult> GetFilteredDashboardStatistics([FromBody] DateViewModel dateModel)
+        {
+            if (!ModelState.IsValid) {
+                return BadRequest();
+            }
+
+            var userId = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var user = await _appRepository.GetAdminUserWithProfile(userId, _userManager);
+            IEnumerable<Exam> exams = null;
+            if (await _userManager.IsInRoleAsync(user, "ExamUserRole"))
+            {
+                //Get Exams by department Id
+                exams = await _appRepository.GetExamsByDepartmentId(user.AdminUserProfile.DepartmentId.GetValueOrDefault());
+            }
+            else
+            {
+                exams = await _appRepository.GetExams();
+            }
+            List<ExamStatisticModel> examStatics = new List<ExamStatisticModel>();
+            foreach (var exam in exams)
+            {
+                int examsPassed = 0;
+                int examsFailed = 0;
+                var examRecords = await _appRepository.GetFilteredExamsReportsByName(dateModel.StartDate, dateModel.EndDate, exam.Name);
+                foreach (var item in examRecords)
+                {
+                    if (item.Score >= item.PassMarkPercentage)
+                    {
+                        examsPassed++;
+                    }
+                    else
+                    {
+                        examsFailed++;
+                    }
+                }
+                examStatics.Add(new ExamStatisticModel
+                {
+                    Name = exam.Name,
+                    PassedExams = examsPassed,
+                    FailedExams = examsFailed,
+                });
+            }
+            return Ok(examStatics);
+        }
+
+        //Departments
+        [Authorize(Roles = ("AdminUserRole"))]
+        [HttpGet("/api/alldepartments")]
+        public async Task<ActionResult> GetAllDepartments()
+        {
+            var departments = await _appRepository.GetDepartments();
+            if (departments == null)
+            {
+                return NotFound("Resources not found, try again later");
+            }            
+            return Ok(departments);
+        }
+
+        [Authorize(Roles = ("AdminUserRole"))]
+        [HttpPost("/api/createdepartment")]
+        public async Task<ActionResult> CreateDepartment([FromBody] Department department)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }            
+            _appRepository.AddDepartment(department);
+            _unitOfWork.GetAppDbContext().Entry(department).State = EntityState.Added;
+            await _unitOfWork.CompletionAsync();
+            var userName = _httpContextAccessor.HttpContext.User.Identity.Name;
+            var newLog = new Log
+            {
+                LogInformation = $"{department.Name} department was created on system.",
+                DateCreated = DateTime.Now,
+                Owner = userName
+            };
+            _appRepository.AddLog(newLog);
+            _unitOfWork.GetAppDbContext().Entry(newLog).State = EntityState.Added;
+            await _unitOfWork.CompletionAsync();
+            var departments = await _appRepository.GetDepartments();            
+            return Ok(departments);
+        }
+
+
+        [Authorize(Roles = ("AdminUserRole"))]
+        [HttpPut("/api/updatedepartment/{id}")]
+        public async Task<ActionResult> UpdateDepartment(int id, [FromBody] Department department)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var departmentToUpdate = await _appRepository.GetDepartment(id);
+            if (departmentToUpdate == null) {
+                return NotFound();
+            }
+            departmentToUpdate.Name = department.Name;
+            _unitOfWork.GetAppDbContext().Entry(departmentToUpdate).State = EntityState.Modified;
+            await _unitOfWork.CompletionAsync();
+            var userName = _httpContextAccessor.HttpContext.User.Identity.Name;
+            var newLog = new Log
+            {
+                LogInformation = $"{department.Name} department was updated.",
+                DateCreated = DateTime.Now,
+                Owner = userName
+            };
+            _appRepository.AddLog(newLog);
+            _unitOfWork.GetAppDbContext().Entry(newLog).State = EntityState.Added;
+            await _unitOfWork.CompletionAsync();
+            var departments = await _appRepository.GetDepartments();
+            return Ok(departments);
+        }
+
+
+        [Authorize(Roles = ("AdminUserRole"))]
+        [HttpDelete("/api/deletedepartment/{id}")]
+        public async Task<ActionResult> DeleteDepartment(int id)
+        {
+            var department = await _appRepository.GetDepartmentWithUsers(id);
+            //Detach the profiles from the Departments
+            foreach (var userProfile in department.AdminUserProfiles) {
+                userProfile.DepartmentId = null;
+                await _unitOfWork.CompletionAsync();
+            }
+            foreach (var exam in department.Exams)
+            {
+                exam.DepartmentId = null;
+                await _unitOfWork.CompletionAsync();
+            }
+            _appRepository.DeleteDepartment(department);
+            _unitOfWork.GetAppDbContext().Entry(department).State = EntityState.Deleted;
+            await _unitOfWork.CompletionAsync();
+            var userName = _httpContextAccessor.HttpContext.User.Identity.Name;
+            var newLog = new Log
+            {
+                LogInformation = $"{department.Name} department was deleted.",
+                DateCreated = DateTime.Now,
+                Owner = userName
+            };
+            _appRepository.AddLog(newLog);
+            _unitOfWork.GetAppDbContext().Entry(newLog).State = EntityState.Added;
+            await _unitOfWork.CompletionAsync();
+            var departments = await _appRepository.GetDepartments();
+            return Ok(departments);
         }
     }
 }

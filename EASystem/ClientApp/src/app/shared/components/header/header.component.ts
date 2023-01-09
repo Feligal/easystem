@@ -11,19 +11,23 @@ import { ApplicationService } from '../../../services/application.service';
   styleUrls: ['./header.component.scss']
 })
 export class HeaderComponent implements OnInit, OnDestroy {
+  isActive = false;
   @Output() toggleSideBarForMe: EventEmitter<any> = new EventEmitter();
   adminUserRole = "AdminUserRole";
   clientUserRole = "ClientUserRole";
   applicationCounter;
   currentUser: any;
+  isTwoFactor: any;
   userSubscription: Subscription;
   counterSubscription: Subscription;
   $counterSubject = new Subject<any>();
-  constructor(private router: Router, private auth: AuthService, private appService: ApplicationService) {
-    
+  constructor(
+    private router: Router,
+    private auth: AuthService,
+    private appService: ApplicationService, private authService: AuthService) {    
   }
 
-  ngOnInit() {
+  ngOnInit() {    
     this.userSubscription = this.auth.$currentUser.subscribe(res => {
       this.currentUser = res;
     }); 
@@ -41,7 +45,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
             _this.$counterSubject.next(applications.length);
           });
         }
-      }, 40000);
+      }, 20000);
     }
   }
 

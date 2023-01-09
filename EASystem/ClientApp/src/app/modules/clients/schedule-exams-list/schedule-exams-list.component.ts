@@ -18,7 +18,7 @@ export class ScheduleExamsListComponent implements OnInit {
   examId: number;
   data: any;
   myForm: FormGroup;
-  durationList = [30, 60, 90, 120, 180];
+  durationList = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 120, 180,200,300,400,500];
   questionNumbers = [];
   scheduleDate: any;
   dataColumns = ['index', 'name', 'action'];
@@ -51,14 +51,20 @@ export class ScheduleExamsListComponent implements OnInit {
     //Setting today's date a min value for the date picker
     this.minDate = new Date();
 
+    //These are for generating number of questions for the client.
     for (let i = 0; i < 100; i++) {
       this.questionNumbers.push(i + 1);
     }
+
+    //These are for administrative use to test all the questions
+    this.questionNumbers.push(200, 400, 500, 1000);
+
     this.myForm = new FormGroup({
       name: new FormControl('', [Validators.required, Validators.maxLength(60)]),
       duration: new FormControl('', [Validators.required, Validators.maxLength(3)]),
       dateFilter1: new FormControl('', [Validators.required]),
-      numberQuestions: new FormControl('', [Validators.required, Validators.maxLength(3)]),      
+      numberQuestions: new FormControl('', [Validators.required, Validators.maxLength(3)]),
+      examTime: new FormControl('', [Validators.required, Validators.maxLength(20)]),
     });
 
     this.userId = this.dialogData.userId;
@@ -116,24 +122,26 @@ export class ScheduleExamsListComponent implements OnInit {
   }
 
   onSubmit() {    
-    this.examId = this.myForm.value.name;
-    console.log(this.examId);
+    this.examId = this.myForm.value.name;    
     const duration = this.myForm.value.duration;
     const numberQuestions = this.myForm.value.numberQuestions;
-    const scheduleDate = new Date(this.scheduleDate);
-    this.appService.getExam(this.examId).subscribe((res: any) => {
+    const scheduledDate = new Date(this.scheduleDate);
+    const examTime = this.myForm.value.examTime;
+    this.appService.getExam(this.examId).subscribe((res: any) => {      
       this.data = {
         id: 0,
+        userId: this.userId,
         examId: this.examId,
         duration: duration,
         numberOfQuestions: numberQuestions,
         name: res.name,
-        clientUserProfileId: '',
+        clientUserProfileId: null,
         dateTaken: new Date(),
         score: 0,
         passStatus: '',
         hasBeenTake: false,
-        scheduledDate: scheduleDate
+        scheduledDate: scheduledDate,
+        examTime: examTime
       }
     });
 
@@ -153,7 +161,10 @@ export class ScheduleExamsListComponent implements OnInit {
           this.appService.getClientUserExams(this.userId).subscribe((res: any) => {
             this.appService.$pendingExams.next(res);
           });
-        }, () => { }, () => { dialog.close(); });
+        }, error => {
+          this.uiService.showSnackBarNotification("Exam was not scheduled due to a processing error.", null, 3000, 'top', 'error-notification');
+          dialog.close();
+        });
       }
     });
 

@@ -1,0 +1,26 @@
+<section cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle>
+  <mat-card>
+    <mat-card-content>
+      <h4>Create New Department</h4>
+      <mat-divider></mat-divider>
+      <form style="margin:0" [formGroup]="myForm" (ngSubmit)="onSave()">
+        <div fxLayoutAlign="space-between" fxLayout.xs="column" fxLayout="row wrap">
+          <mat-form-field>
+            <input matInput type="text" placeholder="Department Name"
+                   formControlName="name" />
+            <mat-hint>Please enter the Department Name.</mat-hint>
+            <mat-error><span *ngIf="errorHandling('name','required')">Department Name is required field.</span></mat-error>
+            <mat-error><span *ngIf="errorHandling('name','maxlength')">Department Name must not be more that 60 characters.</span></mat-error>
+          </mat-form-field>
+        </div>
+        <br />
+        <mat-divider></mat-divider>
+        <br />
+        <button matTooltip="Save" mat-raised-button color="primary" type="submit" [disabled]="myForm.invalid"><mat-icon>save</mat-icon>Save</button>
+        <button matTooltip="Back" mat-raised-button color="default" type="button" style="margin-left:10px" (click)="onClear()"><mat-icon>clear</mat-icon>Clear</button>
+        <button matTooltip="Cancel" mat-raised-button color="warn" type="button" style="margin-left:10px" (click)="onCancel()"><mat-icon>block</mat-icon>Cancel</button>
+      </form>
+      <br />
+    </mat-card-content>
+  </mat-card>
+</section>

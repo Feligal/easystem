@@ -19,7 +19,8 @@ pdfMake.vfs = pdfFonts.pdfMake.vfs;
   templateUrl: './admin-exam-records.component.html',
   styleUrls: ['./admin-exam-records.component.scss']
 })
-export class AdminExamRecordsComponent implements OnInit,AfterViewInit, OnDestroy  {  
+export class AdminExamRecordsComponent implements OnInit, AfterViewInit, OnDestroy  {
+  companyInfo: any;
   logoImageBlob = [];
   examRecords = [];
   pagedRecords = [];
@@ -37,9 +38,12 @@ export class AdminExamRecordsComponent implements OnInit,AfterViewInit, OnDestro
     'index',
     'examName',
     'clientName',
+    'userEmail',
     'dateTaken',
+    'marksScored',
+    'passMarkPercentage',
     'score',
-    'passStatus',
+    'passStatus',      
     'select',
     'action'
   ];
@@ -59,13 +63,17 @@ export class AdminExamRecordsComponent implements OnInit,AfterViewInit, OnDestro
    
 
   ngOnInit() {
+    this.appService.getCompanyInformation().subscribe(res => {
+      this.companyInfo = res[0];
+    })
+
     this.changeCAALogFileToBase64();
     const spinner = this.dialog.open(LoadingSpinnerComponent, {
       panelClass: 'custom-class',
       disableClose: true
     });    
 
-    this.appService.getAllExamRecords().subscribe((res: any[]) => {
+    this.appService.getAllExamRecords().subscribe((res: any[]) => {      
       if (res.length > 0) {
         this.examRecords = res;
         this.examName = res[0].examName;
@@ -199,81 +207,89 @@ export class AdminExamRecordsComponent implements OnInit,AfterViewInit, OnDestro
   }
 
   generatePdf() {
-    const documentDefinition = {
-      content: [
-        {
-          columns: [
-            [
-              this.getCompanyLogoPicObject()
+    if (this.selection.selected.length > 0) {
+      const documentDefinition = {
+        pageOrientation: 'landscape',
+        content: [
+          {
+            columns: [
+              [
+                this.getCompanyLogoPicObject()
+              ],
+              [
+                {
+                  text: this.companyInfo.name,
+                  style: 'name'
+                },
+                {
+                  text: this.companyInfo.address,
+                  italics: true
+                },
+
+                {
+                  text: this.companyInfo.city + ', ' + this.companyInfo.country,
+                  italics: true
+                },
+                {
+                  text: 'Contact: ' + this.companyInfo.contact,
+                  italics: true
+                },
+                {
+                  text: 'Fax: ' + this.companyInfo.fax,
+                  italics: true
+                },
+                {
+                  text: 'Email: ' + this.companyInfo.email,
+                  italics: true
+                },
+                {
+                  text: 'Website: ' + this.companyInfo.website,
+                  italics: true
+                },
+              ]
             ],
-            [
-              {
-                text: "Zambia Civil Aviation Authority",
-                style: 'name'
-              },
-              {
-                text: 'Former Zambia Airways Technical Base, Hangar 38/947M',
-                italics: true
-              },
-              {
-                text: 'Kenneth Kaunda Intenational Airport',
-                italics: true
-              },
-              {
-                text: 'P.O Box 50137, Lusaka, 15101',
-                italics: true
-              },
-              {
-                text: 'Email : civil.aviation@caa.co.zm ',
-                italics: true
-              },
-              {
-                text: 'Contant No : +260 211 251677/251861',
-                italics: true
-              },
-              {
-                text: 'Fax : +260 211 251841',
-                italics: true
-              }
-            ]
-          ],
-        },
-        {
-          text: `Examination Records`,
-          style: 'header',
-          margin: [0, 10, 0, 30],
-          alignment: 'center',
-        },
-        this.getExaminationRecord(this.examRecordsCopy),
-      ],
-      styles: {
-        name: {
-          fontSize: 12,
-          bold: true,
-          italics: true
-        },
-        header: {
-          fontSize: 13,
-          bold: true,
-          margin: [0, 20, 0, 10],
-          decoration: 'underline'
-        },
-        checkListTitle: {
-          fontSize: 12,
-          bold: true,
-          italics: true
-        },
-        tableHeader: {
-          bold: true,
+          },
+          {
+            text: `Examination Records`,
+            style: 'header',
+            margin: [0, 10, 0, 30],
+            alignment: 'center',
+          },
+          this.getExaminationRecord(this.selection.selected),
+        ],
+        styles: {
+          name: {
+            fontSize: 12,
+            bold: true,
+            italics: true
+          },
+          header: {
+            fontSize: 13,
+            bold: true,
+            margin: [0, 20, 0, 10],
+            decoration: 'underline'
+          },
+          checkListTitle: {
+            fontSize: 12,
+            bold: true,
+            italics: true
+          },
+          tableHeader: {
+            bold: true,
+          }
         }
-      }
-    };
-    pdfMake.createPdf(documentDefinition).open();
+      };
+      pdfMake.createPdf(documentDefinition).open();
+    
+  } else {
+      this.uiService.showSnackBarNotification("No exam record selected, please select the exam record you want to be printed.", null, 3000, 'top', 'error-notification');
+  }
+    
   }
   getExaminationRecord(data: any) {
     return {
       table: {
-        widths: ['*', '*', '*', '*', '*', '*'],
+        widths: ['auto','auto', '*', 'auto','auto','auto','auto', 'auto', 'auto', 'auto'],
         body: [
           [
             {
@@ -288,16 +304,36 @@ export class AdminExamRecordsComponent implements OnInit,AfterViewInit, OnDestro
               text: 'Client',
               style: 'tableHeader'
             },
+
+            {
+              text: 'Email',
+              style: 'tableHeader'
+            },
+
+            {
+              text: 'Phone',
+              style: 'tableHeader'
+            },
             {
               text: 'Date Taken',
               style: 'tableHeader'
             },
             {
-              text: 'Score',
+              text: 'P/Marks',
+              style: 'tableHeader'
+            },
+
+            {
+              text: 'Marks',
+              style: 'tableHeader'
+            },
+
+            {
+              text: 'Percentage',
               style: 'tableHeader'
             },
             {
-              text: 'Pass Status',
+              text: 'P/Status',
               style: 'tableHeader'
             },
           ],
@@ -306,7 +342,11 @@ export class AdminExamRecordsComponent implements OnInit,AfterViewInit, OnDestro
               index + 1,
               statement.examName,
               statement.clientName,
+              statement.userEmail,
+              statement.userPhoneNumber,
               this.datepipe.transform(statement.dateTaken, 'MMM d, y'),
+              `${statement.passMarkPercentage}%`,
+              `${statement.marksScored}/${statement.totalNumberOfQuestions}`,
               `${statement.score}%`,
               statement.passStatus,
             ];
@@ -319,8 +359,9 @@ export class AdminExamRecordsComponent implements OnInit,AfterViewInit, OnDestro
   getImage(filePath: string): Observable<Blob> {
     return this.httpClient.get(filePath, { responseType: 'blob' });
   }
+
   changeCAALogFileToBase64() {
-    const fileUrl = this.baseUrl + 'CAA_Big_Logo.png';
+    const fileUrl = this.baseUrl + 'logo.png';
     this.getImage(fileUrl).subscribe(data => {
       const reader = new FileReader();
       reader.readAsDataURL(data);

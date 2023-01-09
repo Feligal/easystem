@@ -12,6 +12,7 @@ import { UiService } from '../../../services/ui.service';
   styleUrls: ['./create-client-user.component.scss']
 })
 export class CreateClientUserComponent implements OnInit {
+  genders = ['Male', 'Female'];
   myForm: FormGroup;
   url: string;
   title: string;
@@ -20,6 +21,7 @@ export class CreateClientUserComponent implements OnInit {
     firstName: '',
     lastName: '',
     userName: '',
+    gender:'',
     nrc:'',
     phoneNumber: '',
     email: '',
@@ -38,10 +40,8 @@ export class CreateClientUserComponent implements OnInit {
   }
 
   ngOnInit() {
-    if (this.data.clientUser !== undefined) {
-      this.title = "Editing Client User Information";
-      this.populateClientInfo(this.data.clientUser);
-    } else if (this.data.clientUser === undefined) {
+    if (this.data.clientUser === undefined)
+    {
       this.title = "Create New Client User";
     }
   }
@@ -55,12 +55,12 @@ export class CreateClientUserComponent implements OnInit {
     this.myForm.reset();
     this.data = {}
   }
-  populateClientInfo(data) {
-    console.log(data);
+  populateClientInfo(data) {    
     this.myForm.patchValue({
       id: data.id,
       firstName: data.firstName,
       lastName: data.lastName,
+      gender:data.gender,
       nrc : data.nrc,
       userName: data.userName,
       email: data.email,
@@ -77,6 +77,7 @@ export class CreateClientUserComponent implements OnInit {
       firstName: ['', [Validators.required, Validators.maxLength(32)]],
       lastName: ['', [Validators.required, Validators.maxLength(32)]],
       userName: ['', [Validators.required, Validators.maxLength(32)]],
+      gender: ['', [Validators.required, Validators.maxLength(32)]],
       nrc: ['', [Validators.required, Validators.maxLength(20)]],
       phoneNumber: ['', [Validators.required, Validators.maxLength(13)]],
       email: ['', [Validators.email, Validators.required, Validators.maxLength(40)]],
@@ -122,40 +123,25 @@ export class CreateClientUserComponent implements OnInit {
     this.clientUser.firstName = this.myForm.value.firstName;
     this.clientUser.lastName = this.myForm.value.lastName;
     this.clientUser.userName = this.myForm.value.userName;
+    this.clientUser.gender = this.myForm.value.gender;
     this.clientUser.nrc = this.myForm.value.nrc;
     this.clientUser.email = this.myForm.value.email;
     this.clientUser.password = this.myForm.value.password;
     this.clientUser.passwordConfirm = this.myForm.value.passwordConfirm;
     this.clientUser.phoneNumber = this.myForm.value.phoneNumber;
     //If data.adminUser is undefined ,then we are creating an admin user 
-    if (this.data.clientUser !== undefined) {
-      this.clientUser.id = this.myForm.value.id;
-      this.appService.editClientUser(this.data.clientUser.id, this.clientUser).subscribe((res) => {
-        this.appService.getClientUsers().subscribe((res: any[]) => {
-          this.appService.$clientUsers.next(res);
-          this.uiService.showSnackBarNotification("The user account was successfully updated.", null, 3000, 'top', 'success-notification');
-          this.dialogRef.close();
-          dialogRef.close();
-        }, error => {
-          dialogRef.close();
-          console.log(error);
-        });
+    
+    //Create the user
+    this.appService.createClientUser(this.clientUser).subscribe((res: any) => {
+      this.appService.getClientUsers().subscribe((res: any[]) => {
+        this.appService.$clientUsers.next(res);
+        this.uiService.showSnackBarNotification("The user account was successfully created.", null, 3000, 'top', 'success-notification');
+        this.dialogRef.close();
+        dialogRef.close();
       }, error => {
-        this.uiService.showSnackBarNotification(error.error, null, 3000, 'top', 'error-notification');
+        dialogRef.close();
+        console.log(error);
       });
-    } else {
-      //Create the user
-      this.appService.createClientUser(this.clientUser).subscribe((res: any) => {
-        this.appService.getClientUsers().subscribe((res: any[]) => {
-          this.appService.$clientUsers.next(res);
-          this.uiService.showSnackBarNotification("The user account was successfully created.", null, 3000, 'top', 'success-notification');
-          this.dialogRef.close();
-          dialogRef.close();
-        }, error => {
-          dialogRef.close();
-          console.log(error);
-        });
-      })
-    }
+    })    
   }
 }

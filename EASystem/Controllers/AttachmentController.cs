@@ -17,6 +17,10 @@ using System.IO;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
+using System.Security.Claims;
+using EASystem.Models.ExamModels;
+using Microsoft.EntityFrameworkCore;
+using EASystem.Resources;
 
 namespace EASystem.Controllers
 {
@@ -105,6 +109,128 @@ namespace EASystem.Controllers
             await _unitOfWork.CompletionAsync();
             return Ok(new { message = "success" });
         }
+
+
+        [Authorize(Roles = "ClientUserRole")]
+        [HttpPost("/api/clientUploadAttachment/")]
+        public async Task<IActionResult> UploadClientAttachment(IFormFile file)
+        {
+            var userId = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var client = await _repository.GetClientUserWithProfile(userId, _userManager);
+            if (client == null)
+            {
+                return NotFound();
+            }
+            //File validation
+            if (file == null) return BadRequest("Null file");
+            if (file.Length == 0) return BadRequest("Empty file");
+            if (file.Length > _attachmentSettings.MaxBytes) return BadRequest("Exceeded file size of " + (_attachmentSettings.MaxBytes / (1024 * 1024) + "Mb"));
+            if (!_attachmentSettings.IsSupported(file.FileName)) return BadRequest("Invalid file type.");
+            var uploadFolderPath = Path.Combine(_host.WebRootPath, "clientUploadedDocuments");
+            if (!Directory.Exists(uploadFolderPath))
+            {
+                Directory.CreateDirectory(uploadFolderPath);
+            }
+            var fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+            var filePath = Path.Combine(uploadFolderPath, fileName);
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+                stream.Dispose();
+            }
+            var thumbNailFolderPath = Path.Combine(_host.WebRootPath, "clientUploadedThumbnail");
+            if (!Directory.Exists(thumbNailFolderPath))
+            {
+                Directory.CreateDirectory(thumbNailFolderPath);
+            }
+            var thumbnailFileName = "thumbnail_" + fileName;
+            var thumbnailFilePath = Path.Combine(thumbNailFolderPath, thumbnailFileName);
+            var thumbnailImage = Image.FromFile(filePath);
+            CreateAndSaveThumbnail(thumbnailImage, 100, thumbnailFilePath);
+            var clientAttachment = new ClientUploadedImage
+            {
+                ClientUserProfileId = client.ClientUserProfile.Id,
+                FileName = fileName,
+                ThumbnailName = thumbnailFileName,
+                DateCreated = DateTime.Now
+            };
+            _repository.AddDocumentAttachement(clientAttachment);
+            _unitOfWork.GetAppDbContext().Entry(clientAttachment).State = EntityState.Added;
+            await _unitOfWork.CompletionAsync();
+
+            var userName = _httpContextAccessor.HttpContext.User.Identity.Name;            
+            var log = new Log
+            {
+                LogInformation = $"{userName} uploaded client attachment document.",
+                DateCreated = DateTime.Now,
+                Owner = userName
+            };
+            _repository.AddLog(log);
+            _unitOfWork.GetAppDbContext().Entry(log).State = EntityState.Added;
+            await _unitOfWork.CompletionAsync();
+            var attachments = await _repository.GetClientUploadedImages(client.ClientUserProfile.Id);
+            var result = _mapper.Map<IEnumerable<ClientUploadedImage>, IEnumerable<ClientUploadedImageDTO>>(attachments);            
+            return Ok(result);
+        }
+
+        [Authorize(Roles = "ClientUserRole")]
+        [HttpDelete("/api/deleteClientAttachment/{fileName}")]
+        public async Task<IActionResult> DeleteClientAttachment(string fileName)
+        {
+            var attachment = await _repository.GetClientUploadImage(fileName);
+            if (attachment == null)
+            {
+                return NotFound("Resource not found!");
+            }
+            _repository.RemoveDocumentAttachement(attachment);
+            _unitOfWork.GetAppDbContext().Entry(attachment).State = EntityState.Deleted;
+            await _unitOfWork.CompletionAsync();
+            var userName = _httpContextAccessor.HttpContext.User.Identity.Name;            
+            var log = new Log
+            {
+                LogInformation = $"{userName} deleted client attachment.",
+                DateCreated = DateTime.Now,
+                Owner = userName
+            };
+            _repository.AddLog(log);
+            await _unitOfWork.CompletionAsync();
+            return Ok();
+        }
+
+
+        //Client attachment methods
+        [Authorize(Roles = "ClientUserRole")]
+        [HttpGet("/api/clientUploadAttachments/")]
+        public async Task<IActionResult> GetUploadedClientAttachments()
+        {
+            var userId = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var client = await _repository.GetClientUserWithProfile(userId, _userManager);
+            var attachments = await _repository.GetClientUploadedImages(client.ClientUserProfile.Id);
+            if (attachments == null)
+            {
+                return NotFound("Resource not found, try again later");
+            }
+            var result = _mapper.Map<IEnumerable<ClientUploadedImage>, IEnumerable<ClientUploadedImageDTO>>(attachments);
+            return Ok(result);
+        }
+
+
+
+        //Client attachment methods
+        [Authorize(Roles = "AdminUserRole")]
+        [HttpGet("/api/clientUploadAttachments/{userId}")]
+        public async Task<IActionResult> GetUploadedClientAttachmentsByUserId(string userId)
+        {            
+            var client = await _repository.GetClientUserWithProfile(userId, _userManager);
+            var attachments = await _repository.GetClientUploadedImages(client.ClientUserProfile.Id);
+            if (attachments == null)
+            {
+                return NotFound("Resource not found, try again later");
+            }
+            var result = _mapper.Map<IEnumerable<ClientUploadedImage>, IEnumerable<ClientUploadedImageDTO>>(attachments);
+            return Ok(result);
+        }
+
 
         private void CreateAndSaveThumbnail(System.Drawing.Image image, int size, string thumbnailPath)
         {

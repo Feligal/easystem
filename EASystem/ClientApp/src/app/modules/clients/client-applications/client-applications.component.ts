@@ -2,6 +2,7 @@ import { SelectionModel } from '@angular/cdk/collections';
 import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { MatDialog, MatPaginator, MatSort, MatTableDataSource } from '@angular/material';
+import { Router } from '@angular/router';
 import { Subject, Subscription } from 'rxjs';
 import { ConfirmationMessageComponent } from '../../../confirmation-message/confirmation-message.component';
 import { LoadingSpinnerComponent } from '../../../loading-spinner/loading-spinner.component';
@@ -37,18 +38,18 @@ export class ClientApplicationsComponent implements OnInit, OnDestroy, AfterView
   @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
   myForm: FormGroup;
 
-  constructor(private dialog: MatDialog, private appService: ApplicationService, private uiService: UiService) { }
+  constructor(
+    private dialog: MatDialog,
+    private appService: ApplicationService,
+    private uiService: UiService,
+    private router: Router
+  ) { }
   ngOnInit() {
     this.subscription = this.appService.$clientApplications.subscribe(res => {
       this.applications = res.sort((a: any, b: any) => {return  (b.id - a.id) });
       this.applicationsCopy = this.applications;
       this.dataSource.data = this.applications;
     });
-
-    this.subscription1 = this.$applicationSubject.subscribe(res => {      
-      this.applications = res.sort((a: any, b: any) => { return (b.id - a.id) });
-      this.dataSource.data = this.applications;
-    })
 
     const dialogRef = this.dialog.open(LoadingSpinnerComponent, {
       panelClass: 'custom-class',
@@ -61,6 +62,7 @@ export class ClientApplicationsComponent implements OnInit, OnDestroy, AfterView
       this.dataSource.data = this.applications;
       dialogRef.close();
     }, error => {
+      dialogRef.close();
       this.uiService.showSnackBarNotification("An error occured while processing, try again later.", null, 3000, 'top', 'error-notification');
     });
   }
@@ -142,8 +144,8 @@ export class ClientApplicationsComponent implements OnInit, OnDestroy, AfterView
           panelClass: 'custom-class',
           disableClose: true
         });
-        this.appService.deleteApplication(id).subscribe((res: any) => {
-          this.$applicationSubject.next(res);
+        this.appService.deleteClientApplication(id).subscribe((res: any) => {
+          this.appService.$clientApplications.next(res);
           dialogRef.close();
           this.uiService.showSnackBarNotification("The application was successfully deleted.", null, 3000, 'top', 'success-notification');
         }, error => {
@@ -175,7 +177,7 @@ export class ClientApplicationsComponent implements OnInit, OnDestroy, AfterView
           this.appService.deleteApplication(id).subscribe((res:any) => {
             this.uiService.showSnackBarNotification("Applications were successfully deleted.", null, 3000, 'top', 'success-notification');
             dialog.close();
-            this.$applicationSubject.next(res);
+            this.appService.$clientApplications.next(res);
           }, error => {
               console.log(error);
               dialog.close();
@@ -188,8 +190,10 @@ export class ClientApplicationsComponent implements OnInit, OnDestroy, AfterView
     })
   }
 
+ 
+
   onViewApplication(event) {
     const id = +event.currentTarget.id.split("_")[1];
-    console.log(id);
+    this.router.navigate(['/client/applications/details', id]);
   }
 }

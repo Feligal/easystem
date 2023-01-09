@@ -23,6 +23,7 @@ import {
   MatRadioModule,
   MatSelectModule,
   MatSidenavModule,
+  MatSlideToggleModule,
   MatSnackBarModule,
   MatSortModule,
   MatStepperModule,
@@ -35,7 +36,8 @@ import {
 
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatTableExporterModule } from 'mat-table-exporter';
-
+import { HighchartsChartModule } from 'highcharts-angular';
+import { DragDropModule } from '@angular/cdk/drag-drop';
 
 
 @NgModule({
@@ -43,6 +45,7 @@ import { MatTableExporterModule } from 'mat-table-exporter';
   imports: [
     CommonModule,
     FlexLayoutModule,
+    HighchartsChartModule,
     MatButtonModule,
     MatSidenavModule,
     MatDividerModule,
@@ -73,11 +76,14 @@ import { MatTableExporterModule } from 'mat-table-exporter';
     MatGridListModule,
     MatExpansionModule,
     MatRadioModule,
+    MatSlideToggleModule,
     //MatCarouselModule.forRoot(),
+    DragDropModule
 
   ],
   exports: [
     FlexLayoutModule,
+    HighchartsChartModule,
     MatButtonModule,
     MatSidenavModule,
     MatDividerModule,
@@ -108,8 +114,9 @@ import { MatTableExporterModule } from 'mat-table-exporter';
     MatGridListModule,
     MatExpansionModule,
     MatRadioModule,
-   
+    MatSlideToggleModule,
    // MatCarouselModule
+    DragDropModule
   ]
 })
 export class MaterialModule { }

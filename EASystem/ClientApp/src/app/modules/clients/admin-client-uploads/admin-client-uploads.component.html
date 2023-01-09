@@ -1,0 +1,19 @@
+<section>  
+  <mat-card>
+    <h4>Client's Attachment</h4>
+    <mat-divider></mat-divider>
+    <mat-card-content>
+      <img *ngFor="let attachment of thumbNails" (click)="onViewFullImage($event)" src="/clientUploadedThumbnail/{{attachment.thumbnailName}}" style="cursor:pointer" class="image-thumbnail" id="{{attachment.thumbnailName}}" /><br />
+
+
+      <br /><mat-divider *ngIf="attachmentName"></mat-divider><br />
+      <div fxLayout="column" fxLayoutAlign="center center">
+        <button *ngIf="attachmentName" type="button" mat-icon-button color="warn" matTooltip="Close" (click)="onCloseAttachment()"><mat-icon>close</mat-icon>Close</button>
+        <img style="margin-bottom:50px" *ngIf="attachmentName" id="{{attachmentName}}" (dblclick)="onDeleteAttachment($event)" src="/clientUploadedDocuments/{{attachmentName}}" class="image-thumbnail" />
+        <br />
+      </div>
+
+    </mat-card-content>
+  </mat-card>
+</section>
+

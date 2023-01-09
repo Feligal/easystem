@@ -1,17 +1,41 @@
-<section>
+<section cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle>
   <mat-card>
     <mat-card-content>
-      <h4>Create New Exam</h4>
+      <h4 style="text-align:center">Create New Exam</h4>
       <mat-divider></mat-divider>
       <form style="margin:0" [formGroup]="myForm" (ngSubmit)="onSave()">
         <div fxLayoutAlign="space-between" fxLayout.xs="column" fxLayout="row wrap">
+
           <mat-form-field>
             <input matInput type="text" placeholder="Exam Name"
-                   formControlName="name" />
+                   formControlName="name" maxlength="100" />
             <mat-hint>Please the Exam Name.</mat-hint>
             <mat-error><span *ngIf="errorHandling('name','required')">Exam Name is required field.</span></mat-error>
-            <mat-error><span *ngIf="errorHandling('name','maxlength')">Exam Name must not be more that 60 characters.</span></mat-error>
+            <mat-error><span *ngIf="errorHandling('name','maxlength')">Exam Name must not be more that 100 characters.</span></mat-error>
           </mat-form-field>
+
+          <mat-form-field>
+            <mat-label>Exam Pass Mark *</mat-label>
+            <mat-select formControlName="passMarkPercentage">
+              <mat-option *ngFor="let mark of examPassMarkList" [value]="mark">
+                {{mark}}
+              </mat-option>
+            </mat-select>
+            <mat-hint>Please select exam pass mark.</mat-hint>
+            <mat-error><span *ngIf="errorHandling('passMarkPercentage','required')">Exam pass mark is a required field.</span></mat-error>
+          </mat-form-field>
+
+          <mat-form-field>
+            <mat-label>Select Department *</mat-label>
+            <mat-select formControlName="department">
+              <mat-option *ngFor="let department of departments" [value]="department.id">
+                {{department.name}}
+              </mat-option>
+            </mat-select>
+            <mat-hint>Please select department.</mat-hint>
+            <mat-error><span *ngIf="errorHandling('department','required')">Department is a required field.</span></mat-error>
+          </mat-form-field>
+
 
         </div>
         <br />

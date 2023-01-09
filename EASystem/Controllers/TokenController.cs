@@ -89,7 +89,15 @@ namespace EASystem.Controllers
             string fromEmail = _config["EmailSettings:Sender"];
             string subject = "Authentication Token";
             string body = $"Dear Esteemed Customer, <br/> Your authentication verification token  is <h3>{token}</h3>.<br/> Kind regards, <br/> CAA Admin";
-            await _emailSender.SendEmail(fromEmail,"fkmantini2012@gmail.com",subject,body);
+            //Send the email with the 2factor authentication token
+            try
+            {
+                await _emailSender.SendEmail(fromEmail, user.Email, subject, body);
+            }
+            catch (Exception e) {
+                return BadRequest(e.Message);
+            }
+            
             return Ok(new AuthOtpResponseViewModel { Is2StepVerificationRequired = true, Provider = "Email" });
         }
 

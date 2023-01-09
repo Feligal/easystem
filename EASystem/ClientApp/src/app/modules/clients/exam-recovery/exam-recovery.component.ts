@@ -71,7 +71,7 @@ export class ExamRecoveryComponent implements OnInit {
         data: { percentage: percentageScore }
       })
     }, error => {
-      this.uiService.showSnackBarNotification("An error occured while processing the request, try again later.", null, 3000, 'top', 'errror-notification');
+      this.uiService.showSnackBarNotification("An error occured while processing the request, try again later.", null, 3000, 'top', 'error-notification');
     })
 
   }

@@ -4,7 +4,7 @@ import { MAT_DIALOG_DATA } from '@angular/material';
 @Component({
   selector: 'app-confirmation-message',
   template:
-    `<mat-dialog-content fxLayoutAlign="center">
+    `<mat-dialog-content fxLayoutAlign="center" cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle>
     <h3>{{data.message}}</h3>
     </mat-dialog-content>
     <mat-dialog-actions fxLayoutAlign="center" fxLayoutGap="4px">

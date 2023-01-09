@@ -9,7 +9,9 @@ namespace EASystem.Resources
     public class ExamDTO
     {
         public int Id { get; set; }
+        public int? DepartmentId { get; set; }
         public string Name { get; set; }
+        public int PassMarkPercentage { get; set; }
         public DateTime DateCreated { get; set; }
         public ICollection<ReportDTO> ExamReports { get; set; }
         public ICollection<QuestionDTO> Questions { get; set; }

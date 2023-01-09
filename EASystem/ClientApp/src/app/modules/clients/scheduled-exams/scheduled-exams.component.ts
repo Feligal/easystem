@@ -32,7 +32,7 @@ export class ScheduledExamsComponent implements OnInit {
       this.appService.getClientUserExams(this.userId).subscribe((res: any) => {        
         this.exams = res.sort((a: any, b: any) => { return b.id - a.id });
       }, error => {
-        this.uiService.showSnackBarNotification("An error occured while processing the request, try again later or contact the system adminstrator.", null, 3000, 'top', 'errror-notification');
+        this.uiService.showSnackBarNotification("An error occured while processing the request, try again later or contact the system adminstrator.", null, 3000, 'top', 'error-notification');
       })
     })
   }
@@ -41,7 +41,8 @@ export class ScheduledExamsComponent implements OnInit {
       width: "440px",
       data: {
         userId: this.userId
-      }
+      },
+      disableClose: true
     })  
   }
 

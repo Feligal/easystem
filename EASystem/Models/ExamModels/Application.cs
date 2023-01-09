@@ -11,6 +11,7 @@ namespace EASystem.Models.ExamModels
         public string Subject { get; set; }
         public DateTime ApplicationDate { get; set; }    
         public string UserName { get; set; }
+        public string Email { get; set; }
         public string ApplicationText { get; set; }
         public bool ReadStatus { get; set; }
         public DateTime ReadDate { get; set; }

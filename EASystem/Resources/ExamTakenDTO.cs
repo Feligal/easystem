@@ -11,8 +11,17 @@ namespace EASystem.Resources
         public int Id { get; set; }
         public int ExamId { get; set; }
         public int Duration { get; set; }
+        public DateTime TimeStarted { get; set; }
+        public DateTime TimeFinished { get; set; }
+        public string ExamTime { get; set; }
+        public int? DepartmentId { get; set; }
+        public double TimeTakenToWrite { get; set; }
         public int NumberOfQuestions { get; set; }
         public string Name { get; set; }
+        public string UserName { get; set; }
+        public string UserPhoneNumber { get; set; }        
+        public string UserEmail { get; set; }
+        public int MarksScored { get; set; }
         public string UserId { get; set; }
         public int? ClientUserProfileId { get; set; }
         public DateTime DateTaken { get; set; }
@@ -21,6 +30,8 @@ namespace EASystem.Resources
         public int Score { get; set; }
         public string PassStatus { get; set; }
         public bool HasBeenTaken { get; set; } = false;
+        public int PassMarkPercentage { get; set; }
+        public bool IsActivated { get; set; } = false;
         public ICollection<ExamReviewDTO> ExamReviews { get; set; }
         public ExamTakenDTO()
         {

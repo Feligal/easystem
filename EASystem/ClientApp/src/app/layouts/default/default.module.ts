@@ -57,8 +57,24 @@ import { ExamReviewComponent } from '../../modules/clients/exam-review/exam-revi
 import { ImportUsersComponent } from '../../modules/clients/import-users/import-users.component';
 import { ImportClientErrorComponent } from '../../modules/clients/import-client-error/import-client-error.component';
 import { TwoStepVerificationComponent } from '../../modules/two-step-verification/two-step-verification.component';
-
-
+import { ScheduledPendingExaminationsComponent } from '../../modules/examinations/scheduled-pending-examinations/scheduled-pending-examinations.component';
+import { ScheduleExamManyComponent } from '../../modules/examinations/schedule-exam-many/schedule-exam-many.component';
+import { EnableTwofactorComponent } from '../../modules/enable-twofactor/enable-twofactor.component';
+import { SendBulkyEmailComponent } from '../../modules/clients/send-bulky-email/send-bulky-email.component';
+import { CompanyInformationComponent } from '../../modules/company-information/company-information.component';
+import { RegiterClientComponent } from '../../modules/clients/regiter-client/regiter-client.component';
+import { SuccessClientRegistrationComponent } from '../../modules/clients/success-client-registration/success-client-registration.component';
+import { DepartmentsComponent } from '../../modules/departments/departments.component';
+import { CreateDepartmentComponent } from '../../modules/departments/create-department/create-department.component';
+import { DepartmentUserComponent } from '../../modules/departments/department-user/department-user.component';
+import { DepartmentExamsComponent } from '../../modules/departments/department-exams/department-exams.component';
+import { ExamEditComponent } from '../../modules/examinations/exam-edit/exam-edit.component';
+import { DepartmentEditComponent } from '../../modules/departments/department-edit/department-edit.component';
+import { ApplicationClientDetailsComponent } from '../../modules/clients/application-client-details/application-client-details.component';
+import { ClientsUploadComponent } from '../../modules/clients/clients-upload/clients-upload.component';
+import { AdminClientUploadsComponent } from '../../modules/clients/admin-client-uploads/admin-client-uploads.component';
+import { ClientEditComponent } from '../../modules/admin/client-edit/client-edit.component';
+import { ChangePasswordClientComponent } from '../../modules/admin/change-password-client/change-password-client.component';
 
 
 @NgModule({
@@ -115,7 +131,26 @@ import { TwoStepVerificationComponent } from '../../modules/two-step-verificatio
     ExamReviewComponent,
     ImportUsersComponent,
     ImportClientErrorComponent,
-    TwoStepVerificationComponent
+    TwoStepVerificationComponent,
+    ScheduledPendingExaminationsComponent,
+    ScheduleExamManyComponent,
+    EnableTwofactorComponent,
+    SendBulkyEmailComponent,
+    CompanyInformationComponent,
+    RegiterClientComponent,
+    SuccessClientRegistrationComponent,
+    DepartmentsComponent,
+    CreateDepartmentComponent,
+    DepartmentUserComponent,
+    DepartmentExamsComponent,
+    ExamEditComponent,
+    DepartmentEditComponent,
+    ApplicationClientDetailsComponent,
+    ClientsUploadComponent,
+    AdminClientUploadsComponent,
+    ClientEditComponent,
+    ChangePasswordClientComponent,
+    
     
   ],
   imports: [

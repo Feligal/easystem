@@ -22,12 +22,14 @@ namespace EASystem.Controllers
         private readonly IUnitOfWork _unitOfWork;
         private readonly IAppRepository _repository;
         private readonly DownloadAttachmentSettings _downloadAttachmentSettings;
-        public QuestionImportController(IWebHostEnvironment host, IUnitOfWork unitOfWork, IAppRepository repository, IOptionsSnapshot<DownloadAttachmentSettings> optionsSnapshotDS)
+        private readonly AttachmentSetting _attachmentSettings;
+        public QuestionImportController(IWebHostEnvironment host, IUnitOfWork unitOfWork, IAppRepository repository, IOptionsSnapshot<DownloadAttachmentSettings> optionsSnapshotDS, IOptionsSnapshot<AttachmentSetting> optionsSnapshotAS)
         {
             _host = host;
             _unitOfWork = unitOfWork;
             _repository = repository;
             _downloadAttachmentSettings = optionsSnapshotDS.Value;
+            _attachmentSettings = optionsSnapshotAS.Value;
 
         }
         [HttpPost("/api/uploadBulkyQuestions/{examId}")]
@@ -41,7 +43,9 @@ namespace EASystem.Controllers
                 if (file.Length == 0) return BadRequest("Empty file");
                 if (file.Length > _downloadAttachmentSettings.MaxBytes) return BadRequest("Exceeded file size of " + (_downloadAttachmentSettings.MaxBytes / (1024 * 1024) + "Mb"));
                 if (!_downloadAttachmentSettings.IsSupported(file.FileName)) return BadRequest("Invalid file type.");
-                if (file.ContentType == "application/vnd.ms-excel" || file.ContentType == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+                if (file.ContentType == "application/vnd.ms-excel" || 
+                    file.ContentType == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" || 
+                    file.ContentType == "application/vnd.ms-excel.sheet.macroEnabled.12")
                 {
                     string fileName = file.FileName;
                     string rootFolder = _host.WebRootPath;
@@ -75,34 +79,94 @@ namespace EASystem.Controllers
                         List<string> failedList = new List<string>();
                         for (int row = 2; row <= totalRows; row++)
                         {
-                            Question question = new Question
+                            string fPath =  workSheet?.Cells[row, 7]?.Value?.ToString();
+                            string qText = workSheet?.Cells[row, 1].Value?.ToString();
+                            var q = await _repository.GetQuestionByQText(qText);
+                            if (fPath != null)
                             {
-                                Text = workSheet?.Cells[row, 1].Value?.ToString(),
-                                AnswerA = workSheet?.Cells[row, 2].Value?.ToString(),
-                                AnswerB = workSheet?.Cells[row, 3].Value?.ToString(),
-                                AnswerC = workSheet?.Cells[row, 4].Value?.ToString(),
-                                AnswerD = workSheet?.Cells[row, 5].Value?.ToString(),
-                                CorrectAnswer = workSheet?.Cells[row, 6].Value?.ToString(),
-                                ExamId = examId,
-                                Image = "",                                
-                            };
-                            if (question == null)
-                            {
-                                failedList.Add($"{question.Text}  was NOT successfully added.");
-                                continue;
+                                //If the file path for the question image exists
+                                string fileItemName = fPath.Split("\\")[fPath.Split("\\").Length - 1];
+                                if (!_attachmentSettings.IsSupported(fileItemName))
+                                {
+                                    failedList.Add($"{fileItemName}  was NOT uploaded due to unsupported format.");
+                                }else
+                                {                                   
+                                    //Check if the current questions already exists in the database
+                                    if (q.Count() > 0)
+                                    {
+                                        failedList.Add($"{ qText } exists already in the database.");
+                                        continue;
+                                    }else {
+                                        using var sourceFileStream = new FileStream(fPath, FileMode.Open);
+                                        var uploadFolderPath = Path.Combine(_host.WebRootPath, "questionDiagramImages");
+                                        if (!Directory.Exists(uploadFolderPath))
+                                        {
+                                            Directory.CreateDirectory(uploadFolderPath);
+                                        }
+                                        var diagramFileName = Guid.NewGuid().ToString() + Path.GetExtension(fileItemName);
+                                        var diagramFilePath = Path.Combine(uploadFolderPath, diagramFileName);
+                                        using var newFileStream = new FileStream(diagramFilePath, FileMode.Create);
+                                        sourceFileStream.CopyTo(newFileStream);
+                                        newFileStream.Dispose();
+                                        Question newQuestion = new Question
+                                        {
+                                            Text = workSheet?.Cells[row, 1].Value?.ToString(),
+                                            AnswerA = workSheet?.Cells[row, 2].Value?.ToString(),
+                                            AnswerB = workSheet?.Cells[row, 3].Value?.ToString(),
+                                            AnswerC = workSheet?.Cells[row, 4].Value?.ToString(),
+                                            AnswerD = workSheet?.Cells[row, 5].Value?.ToString(),
+                                            CorrectAnswer = workSheet?.Cells[row, 6].Value?.ToString(),
+                                            ExamId = examId,
+                                            Image = diagramFileName,
+                                        };
+                                        _repository.AddQuestion(newQuestion);
+                                        try
+                                        {
+                                            _unitOfWork.GetAppDbContext().Entry(newQuestion).State = EntityState.Added;
+                                            await _unitOfWork.CompletionAsync();
+                                            successfulList.Add($"{newQuestion.Text} was successfully added.");
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            failedList.Add($"{newQuestion.Text}  was NOT successfully added.");
+                                            continue;
+                                        }
+                                    }                                                                      
+                                }
                             }
-                            _repository.AddQuestion(question);
-                            try
-                            {
-                                _unitOfWork.GetAppDbContext().Entry(question).State = EntityState.Added;
-                                await _unitOfWork.CompletionAsync();
-                                successfulList.Add($"{question.Text} was successfully added.");
-                            }
-                            catch (Exception ex)
-                            {
-                                failedList.Add($"{question.Text}  was NOT successfully added.");
-                                continue;
-                            }
+                            else {
+                                //If the file path does not exist                                
+                                if (q.Count() > 0)
+                                {
+                                    failedList.Add($"{ qText } exists already in the database.");
+                                    continue;
+                                }
+                                else {
+                                    Question question = new Question
+                                    {
+                                        Text = workSheet?.Cells[row, 1].Value?.ToString(),
+                                        AnswerA = workSheet?.Cells[row, 2].Value?.ToString(),
+                                        AnswerB = workSheet?.Cells[row, 3].Value?.ToString(),
+                                        AnswerC = workSheet?.Cells[row, 4].Value?.ToString(),
+                                        AnswerD = workSheet?.Cells[row, 5].Value?.ToString(),
+                                        CorrectAnswer = workSheet?.Cells[row, 6].Value?.ToString(),
+                                        ExamId = examId,
+                                        Image = "",
+                                    };
+                                    _repository.AddQuestion(question);
+                                    try
+                                    {
+                                        _unitOfWork.GetAppDbContext().Entry(question).State = EntityState.Added;
+                                        await _unitOfWork.CompletionAsync();
+                                        successfulList.Add($"{question.Text} was successfully added.");
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        failedList.Add($"{question.Text}  was NOT successfully added.");
+                                        continue;
+                                    }
+                                }                               
+                            }                           
                         }
                         return Ok(new { SuccessfulAdd = successfulList, UnsuccessfulAdd = failedList });
                     }

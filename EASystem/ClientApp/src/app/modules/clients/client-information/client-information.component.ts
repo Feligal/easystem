@@ -120,7 +120,7 @@ export class ClientInformationComponent implements OnInit {
           email: res.email,
         });
       }, error => {
-        this.uiService.showSnackBarNotification("An error occured while processing the request, try again later or contact the system adminstrator.", null, 3000, 'top', 'errror-notification');
+        this.uiService.showSnackBarNotification("An error occured while processing the request, try again later or contact the system adminstrator.", null, 3000, 'top', 'error-notification');
       })
     })
   }

@@ -1,5 +1,6 @@
-<h4 style="text-align:center" mat-dialog-title>{{title}}</h4>
-<section>
+
+<section cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle>
+  <h4 style="text-align:center" mat-dialog-title>{{title}}</h4>
   <mat-card>
     <mat-card-content>
       <img id="login-img" class="login-img" src="//ssl.gstatic.com/accounts/ui/avatar_2x.png" />
@@ -32,6 +33,19 @@
             <mat-hint>Please enter username.</mat-hint>
             <mat-error><span *ngIf="errorHandling('userName','required')">User name is a required field.</span></mat-error>
             <mat-error><span *ngIf="errorHandling('userName','maxlength')">Username must not be more that 32 characters.</span></mat-error>
+          </mat-form-field>
+
+
+          <mat-form-field>
+            <mat-label>Gender </mat-label>
+            <mat-select ([value])="selected" formControlName="gender">
+              <mat-option>-Select Gender-</mat-option>
+              <mat-option *ngFor="let gender of genders" [value]="gender">
+                {{gender}}
+              </mat-option>
+            </mat-select>
+            <mat-hint>Please select gender.</mat-hint>
+            <mat-error><span *ngIf="errorHandling('gender','required')">Gender is a required field.</span></mat-error>
           </mat-form-field>
 
 

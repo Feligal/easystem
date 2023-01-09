@@ -65,18 +65,24 @@ export class ActiveExamComponent implements OnInit {
     const _this = this;    
     const timer = setInterval(function () {
       _this.getFormValues();
-      const data = { id: _this.data.id, answers: _this.questionAnswers }
-      console.log(data);
+      const data = { id: _this.data.id, answers: _this.questionAnswers }      
       localStorage.setItem('exam_data', JSON.stringify(data));
       if (_this.time === 0 ) {
         //clear the time
         clearInterval(timer);
         //Finish the exam and submit for marking
       }
-    }, 20000)
+    }, 5000)
   }
 
   ngOnInit() {
+    //Disable F5 refresh
+    window.addEventListener('keyup', disableF5);
+    window.addEventListener('keydown', disableF5);
+    function disableF5(e) {
+      if ((e.which || e.keyCode) === 116) e.preventDefault();
+    }
+
     this.localStorageDataTimer();
     const spinner = this.dialog.open(LoadingSpinnerComponent, {
       panelClass: 'custom-class',
@@ -96,8 +102,7 @@ export class ActiveExamComponent implements OnInit {
         ];
         this.shuffle(q.answers);
       })
-      this.startLogoutTimer();
-      console.log(this.questions)
+      this.startLogoutTimer();      
       spinner.close();
     }, error => {
         spinner.close();
@@ -152,16 +157,13 @@ export class ActiveExamComponent implements OnInit {
     this.appService.submitExam(this.id, this.questionAnswers).subscribe((res: any) => {
       const examdata = localStorage.getItem('exam_data');
       if (examdata) { localStorage.removeItem('exam_data') }
-      this.dialogRef.close();
-      const correctAnswer = res.correct;
-      const total = res.total;            
-      const percentageScore = Math.round((correctAnswer / total) * 100);
+      this.dialogRef.close();                       
       spinner.close();
       this.dialog.open(ExamScoreComponent, {
-        data: { percentage: percentageScore}
+        data: { writtenExam: res}
       })
     }, error => {
-        this.uiService.showSnackBarNotification("An error occured while processing the request, try again later or contact the system adminstrator.", null, 3000, 'top', 'errror-notification');
+        this.uiService.showSnackBarNotification("An error occured while processing the request, try again later or contact the system adminstrator.", null, 3000, 'top', 'error-notification');
     })
   }
 }

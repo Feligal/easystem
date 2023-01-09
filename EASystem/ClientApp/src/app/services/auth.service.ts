@@ -9,9 +9,6 @@ import { ActivatedRoute, Router } from '@angular/router';
 
 @Injectable()
 export class AuthService {
-
-  private provider: string;
-  private email: string;
   private returnUrl: string;
 
   $currentUser = new Subject<string>();
@@ -61,7 +58,6 @@ export class AuthService {
   //Retrieve the access and refresh tokens from the server
   getAuthFromServer(url: string, data): Observable<boolean> {
     return this.httpClient.post<TokenResponse>(url, data).pipe(map((res:any) => {
-
       //check if the returned object has is2StepVerificationRequired
       if (res.is2StepVerificationRequired) {
         this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';        
@@ -151,5 +147,20 @@ export class AuthService {
   twoStepLogin(data) {
     const url = this.baseUrl + "api/twostepverification"
     return this.httpClient.post(url, data);
+  }
+
+  enableTwoFactorAuthentication(data: any) {
+    const url = this.baseUrl + "api/enable2Factorverification/";
+    return this.httpClient.post(url, data);
+  }
+
+  adminEnableTwoFactorAuthentication(userId , data: any) {
+    const url = this.baseUrl + "api/enable2Factorverification/" + userId;
+    return this.httpClient.post(url, data);
+  }
+
+  getTwoFactorAuthentication() {
+    const url = this.baseUrl + "api/twofactorverification/";
+    return this.httpClient.get(url);
   }
 }

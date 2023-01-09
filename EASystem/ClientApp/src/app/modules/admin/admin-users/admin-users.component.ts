@@ -119,12 +119,12 @@ export class AdminUsersComponent implements OnInit, AfterViewInit, OnDestroy {
           }, error => {
             console.log(error);
             dialogRef.close();
-            this.uiService.showSnackBarNotification("An error occured while processing the request, try again later.", null, 3000, 'top', 'errror-notification');
+            this.uiService.showSnackBarNotification("An error occured while processing the request, try again later.", null, 3000, 'top', 'error-notification');
           });
         }, error => {
           dialogRef.close();
           console.log(error);
-          this.uiService.showSnackBarNotification("Delete operation failed.", null, 3000, 'top', 'errror-notification');
+          this.uiService.showSnackBarNotification("Delete operation failed.", null, 3000, 'top', 'error-notification');
         });
       } else {
         //Disagree to delete

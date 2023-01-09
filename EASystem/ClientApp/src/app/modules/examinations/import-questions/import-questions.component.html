@@ -1,13 +1,16 @@
 
-<section>
+<section cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle>
   <mat-card>
     <mat-card-content>
       <h4>Importing Questions from Excel </h4><mat-divider></mat-divider><br />
       <br />
-      <button mat-raised-button matTooltip="Upload Excel File" color="primary" (click)="onClick()">
-        <mat-icon>file_upload</mat-icon>
-        {{text}}
-      </button>
+      <div style="text-align:center">
+        <button mat-raised-button matTooltip="Upload Excel File" color="primary" (click)="onClick()">
+            <mat-icon>file_upload</mat-icon>
+            {{text}}
+        </button>
+      </div>
+      
       <br />
       <ul>
         <li *ngFor="let file of files" [@fadeInOut]="file.state">

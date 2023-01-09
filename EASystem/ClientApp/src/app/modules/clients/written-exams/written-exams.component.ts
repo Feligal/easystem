@@ -19,7 +19,8 @@ export class WrittenExamsComponent implements OnInit {
       disableClose: true
     });
     this.appService.getClientUserTakenExams().subscribe((res: any) => {      
-      this.exams = res;
+      this.exams = res.sort((a: any, b: any) => {
+        return b.id - a.id });
       spinner.close();
     }, error => {
         this.uiService.showSnackBarNotification("An error occured while processing, try again later.", null, 3000, 'top', 'error-notification');

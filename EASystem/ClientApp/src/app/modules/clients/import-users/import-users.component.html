@@ -1,13 +1,15 @@
-<section>
+<section cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle>
   <mat-card>
     <mat-card-content>
       <h4>Importing Clients from Excel </h4><mat-divider></mat-divider><br />
       <br />
-     
+      <div style="text-align:center">
         <button mat-raised-button matTooltip="Upload Excel File" color="primary" (click)="onClick()">
           <mat-icon>file_upload</mat-icon>
           {{text}}
         </button>
+      </div>
+        
          
       <br />
       <ul>

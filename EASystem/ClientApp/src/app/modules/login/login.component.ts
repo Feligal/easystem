@@ -40,8 +40,8 @@ export class LoginComponent implements OnInit {
   }
 
   createForm() {
-    this.myForm = this.fb.group({      
-      email: ['', [Validators.required, Validators.maxLength(40)]],
+    this.myForm = this.fb.group({
+      email: ['', [Validators.required, Validators.maxLength(40), Validators.email]],
       password: ['', [Validators.required, Validators.maxLength(40)]],
     })
   }
@@ -63,6 +63,7 @@ export class LoginComponent implements OnInit {
       dialogRef.close();      
       this.router.navigate(['home']);
     }, error => {
+        
       //Login fails
       dialogRef.close();
       console.log(error);

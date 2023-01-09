@@ -55,6 +55,7 @@ export class ExaminationsComponent implements OnInit, OnDestroy {
     this.selectedExamId = +event.currentTarget.id.split("_")[1];
     const activeExam = this.exams.filter(i => i.id === this.selectedExamId);    
     this.appService.activeExam = activeExam;
+    this.router.navigate(['examinations/']);
   }
 
   onShowQuestions() {
@@ -64,7 +65,8 @@ export class ExaminationsComponent implements OnInit, OnDestroy {
   onShowAddQuestion() {
     this.dialog.open(CreateQuestionComponent, {
       data: { examId: this.selectedExamId },
-      width:'400px'      
+      width: '400px',
+      disableClose: true
     })
   }
 
@@ -78,6 +80,10 @@ export class ExaminationsComponent implements OnInit, OnDestroy {
   }
   onShowEdit() {
     this.router.navigate(['examinations/editexam/' + this.selectedExamId]); 
+  }
+
+  onShowScheduleForMany() {
+    this.router.navigate(['examinations/scheduleformany/' + this.selectedExamId]);
   }
 
   onViewReports() {
@@ -111,7 +117,8 @@ export class ExaminationsComponent implements OnInit, OnDestroy {
 
   onAddExam() {
     this.dialog.open(CreateExamComponent, {
-      width:'400px',
+      width: '500px',
+      disableClose: true
     })
   }
 

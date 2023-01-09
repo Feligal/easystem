@@ -1,18 +1,63 @@
 <mat-card class="mat-custom">
-  <div style="text-align:center; background-color:green; padding:5px 0">
+  <div style="text-align:center; background-color:lightblue; padding:5px 0">
     <h1>Exam: {{examData.name}}</h1>
   </div> <mat-divider></mat-divider><br />
-  <mat-card-content style="text-align:center">
-    <p *ngIf="examData.hasBeenTaken"><b>Pass Status : {{examData.passStatus}} </b></p>
-    <p *ngIf="examData.hasBeenTaken"><b>Score : {{examData.score}}% </b></p>
-    <p><b>Date Added: {{examData.dateAdded | date}} </b></p>
-    <p *ngIf="examData.hasBeenTaken"><b>Date Taken: {{examData.dateTaken | date}} </b></p>
-    <p><b>Duration: {{examData.duration / 60}} Mins</b></p>
-    <p><b>Number of Questions: {{examData.numberOfQuestions}}</b></p>
+  <mat-card-content>
+    <table border="0" style="width:100%;border-spacing: 0; border-color: #ffffff;">
+      <tr *ngIf="examData.hasBeenTaken">
+        <td><p>Pass Status :</p></td>
+        <td><p class="btn"><b>{{examData.passStatus}}</b></p></td>
+      </tr>
+
+      <tr *ngIf="examData.hasBeenTaken">
+        <td><p>Marks :</p></td>
+        <td><p class="btn"><b>{{examData.marksScored}}/{{examData.numberOfQuestions}} </b></p></td>
+      </tr>
+
+      <tr *ngIf="examData.hasBeenTaken">
+        <td><p>Score :</p></td>
+        <td><p class="btn"><b>{{examData.score}}%</b></p></td>
+      </tr>
+      <tr>
+        <td><p>Date Scheduled :</p></td>
+        <td><p class="btn"><b>{{examData.scheduledDate | date}}</b></p></td>
+      </tr>
+
+      <tr>
+        <td><p>Date Added :</p></td>
+        <td><p class="btn"><b>{{examData.dateAdded | date}}</b></p></td>
+      </tr>
+
+      <tr *ngIf="examData.hasBeenTaken">
+        <td><p>Date Taken :</p></td>
+        <td><p class="btn"><b>{{examData.dateTaken | date}}</b></p></td>
+      </tr>
+
+      <tr>
+        <td><p>Duration :</p></td>
+        <td><p class="btn"><b>{{examData.duration / 60}} Mins</b></p></td>
+      </tr>
+
+      <tr *ngIf="examData.hasBeenTaken">
+        <td><p>Writing Duration :</p></td>
+        <td><p class="btn"><b>{{examData.timeTakenToWrite}} Mins</b></p></td>
+      </tr>
+      <tr>
+        <td><p>Number of Questions:</p></td>
+        <td><p class="btn"><b>{{examData.numberOfQuestions}}</b></p></td>
+      </tr>
+      <tr>
+        <td><p>Pass Mark:</p></td>
+        <td><p class="btn"><b>{{examData.passMarkPercentage}}%</b></p></td>
+      </tr>
+    </table>
   </mat-card-content>
+
+
+
   <div align="center">
-    <button *ngIf="examData.hasBeenTaken" mat-raised-button id="button_{{examData.id}}" color="primary" (click)="onPrintPDF($event)"><mat-icon>print</mat-icon>Print</button>
-    <button style="margin-top:15px; margin-left:10px" *ngIf="examData.hasBeenTaken" mat-raised-button id="button_{{examData.id}}" color="default" (click)="onReviewExam($event)"><mat-icon>fact_check</mat-icon>Review</button>
-    <button style="margin-top:15px; margin-left:10px" matTooltip="Cancel" id="button_{{examData.id}}" mat-raised-button type="button" (click)="onCancel($event)" color="warn"><mat-icon>delete</mat-icon>Delete</button>
+    <button matTooltip="Print Statement" *ngIf="examData.hasBeenTaken" mat-raised-button id="button_{{examData.id}}" color="primary" (click)="onPrintPDF($event)"><mat-icon>print</mat-icon>Print</button>
+    <button matTooltip="Review Exam" style="margin-top:15px; margin-left:10px" *ngIf="examData.hasBeenTaken" mat-raised-button id="button_{{examData.id}}" color="default" (click)="onReviewExam($event)"><mat-icon>fact_check</mat-icon>Review</button>
+    <button matTooltip="Delete Exam" style="margin-top:15px; margin-left:10px" id="button_{{examData.id}}" mat-raised-button type="button" (click)="onCancel($event)" color="warn"><mat-icon>delete</mat-icon>Delete</button>
   </div>
 </mat-card>

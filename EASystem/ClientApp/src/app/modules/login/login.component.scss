@@ -1,7 +1,7 @@
 
 @media screen and (max-width:600px) {
   .login-container {
-    width: 200px;
+    width: 300px;
     margin-bottom: 30px;
   }
   .mat-form-field {
@@ -12,12 +12,17 @@
 /*If screen size is more than 600px wide,*/
 @media screen and (min-width: 600px) {
   .login-container {
-    width: 25%;
+    width: 30%;
     margin-bottom: 30px;    
   }
 
   .mat-form-field {
     width: 250px;
+  }
+
+  mat-card {
+    margin: 30px 0px;
+    border-radius: 10px;
   }
 }
 

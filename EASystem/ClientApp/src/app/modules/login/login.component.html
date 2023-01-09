@@ -13,11 +13,11 @@
             </div>
             <br />
             <mat-form-field>
-              <input matInput type="text" placeholder="Email/Username *"
+              <input matInput type="email" placeholder="Email*"
                      formControlName="email" />
               <mat-hint>Please enter email address.</mat-hint>
               <mat-error><span *ngIf="errorHandling('email','required')">Email address is a required field.</span></mat-error>
-              <!--<mat-error><span *ngIf="errorHandling('email','email')">Email address is invalid.</span></mat-error>-->
+              <mat-error><span *ngIf="errorHandling('email','email')">Email address is invalid.</span></mat-error>
               <mat-error><span *ngIf="errorHandling('email','maxlength')">Email address can not be more than 40 characters.</span></mat-error>
             </mat-form-field>
 

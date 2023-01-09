@@ -21,11 +21,13 @@ export class ApplicationDetailsComponent implements OnInit {
   ngOnInit() {
     this.route.params.subscribe((params: Params) => {
       const id = +params['id'];
-      this.appService.getApplication(id).subscribe((res:any) => {
-        this.myForm.patchValue({
+      this.appService.getApplication(id).subscribe((res: any) => {        
+        this.myForm.patchValue({         
           id: res.id,
           subject: res.subject,
-          applicationText: res.applicationText
+          applicationText: res.applicationText,
+          applicantsName: res.userName,
+          email: res.email
         })
       })
     })
@@ -34,7 +36,9 @@ export class ApplicationDetailsComponent implements OnInit {
     this.myForm = this.fb.group({
       id: [''],
       subject: ['', [Validators.required, Validators.maxLength(100)]],
-      applicationText: ['', [Validators.required, Validators.maxLength(1000)]]
+      applicationText: ['', [Validators.required, Validators.maxLength(1000)]],
+      applicantsName: ['', [Validators.required, Validators.maxLength(100)]],
+      email: ['', [Validators.required, Validators.maxLength(100)]],
     });
   }
 

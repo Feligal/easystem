@@ -26,6 +26,7 @@ export class DisplayWrittenExamsComponent implements OnInit {
   clientUserRole = "ClientUserRole";
   logoImageBlob = [];
   client: any;
+  companyInfo: any;
   constructor(private authService: AuthService,
     private router: Router,
     private dialog: MatDialog,
@@ -36,7 +37,10 @@ export class DisplayWrittenExamsComponent implements OnInit {
     private httpClient: HttpClient,
   ) { }
 
-  ngOnInit() {
+  ngOnInit() {    
+    this.appService.getCompanyInformation().subscribe(res => {
+      this.companyInfo = res[0];
+    })
     this.changeCAALogFileToBase64();
     this.appService.getClientUser(this.examData.userId).subscribe((res: any) => {
       this.client = res;
@@ -76,33 +80,34 @@ export class DisplayWrittenExamsComponent implements OnInit {
             ],
             [
               {
-                text: "Zambia Civil Aviation Authority",
+                text: this.companyInfo.name,
                 style: 'name'
               },
               {
-                text: 'Former Zambia Airways Technical Base, Hangar 38/947M',
+                text: this.companyInfo.address,
+                italics: true
+              },
+
+              {
+                text: this.companyInfo.city + ', ' + this.companyInfo.country,
                 italics: true
               },
               {
-                text: 'Kenneth Kaunda Intenational Airport',
+                text: 'Contact: ' + this.companyInfo.contact,
                 italics: true
               },
               {
-                text: 'P.O Box 50137, Lusaka, 15101',
+                text: 'Fax: ' + this.companyInfo.fax,
                 italics: true
               },
               {
-                text: 'Email : civil.aviation@caa.co.zm ',
+                text: 'Email: ' + this.companyInfo.email,
                 italics: true
               },
               {
-                text: 'Contant No : +260 211 251677/251861',
+                text: 'Website: ' + this.companyInfo.website,
                 italics: true
               },
-              {
-                text: 'Fax : +260 211 251841',
-                italics: true
-              }
             ]
           ],
         },
@@ -177,11 +182,15 @@ export class DisplayWrittenExamsComponent implements OnInit {
   getExaminationStatement(data: any) {
     return {
       table: {
-        widths: ['*', '*', '*', '*', '*', '*'],
+        widths: ['*', '*', '*','*', '*', '*', '*'],
         body: [
           [
             {
               text: 'Exam',
+              style: 'tableHeader'
+            },
+            {
+              text: 'Marks',
               style: 'tableHeader'
             },
             {
@@ -208,6 +217,7 @@ export class DisplayWrittenExamsComponent implements OnInit {
           ...data.map((statement: any) => {
             return [
               statement.name,
+              `${statement.marksScored}/${statement.numberOfQuestions}`,
               `${statement.score}%`,
               statement.passStatus,
               `${statement.duration / 60} Mins`,
@@ -224,7 +234,7 @@ export class DisplayWrittenExamsComponent implements OnInit {
     return this.httpClient.get(filePath, { responseType: 'blob' });
   }
   changeCAALogFileToBase64() {
-    const fileUrl = this.baseUrl + 'CAA_Big_Logo.png';
+    const fileUrl = this.baseUrl + 'logo.png';
     this.getImage(fileUrl).subscribe(data => {
       const reader = new FileReader();
       reader.readAsDataURL(data);

@@ -1,7 +1,7 @@
-<section>
+<section cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle>
   <mat-card>
     <mat-card-content>
-      <h4>Create New Question</h4>
+      <h4>Create New Question</h4>      
       <mat-divider></mat-divider>
       <form style="margin:0" [formGroup]="myForm" (ngSubmit)="onSave()">
         <div fxLayoutAlign="space-between" fxLayout.xs="column" fxLayout="row wrap">
@@ -9,7 +9,7 @@
             <textarea matInput placeholder="Question" formControlName="text" maxlength="400"></textarea>
             <mat-hint>Please the Question Name.</mat-hint>
             <mat-error><span *ngIf="errorHandling('text','required')">Question is required field.</span></mat-error>
-            <mat-error><span *ngIf="errorHandling('text','maxlength')">Question must not be more that 400 characters.</span></mat-error>
+            <mat-error><span *ngIf="errorHandling('text','maxlength')">Question must not be more than 400 characters.</span></mat-error>
           </mat-form-field>
 
           <mat-form-field>
@@ -17,8 +17,8 @@
                    formControlName="answerA" />
             <mat-hint>Please enter Answer</mat-hint>
             <mat-error><span *ngIf="errorHandling('answerA','required')">Answer A is a required field.</span></mat-error>
-            <mat-error><span *ngIf="errorHandling('answerA','maxlength')">Answer A must not be more that 100 characters.</span></mat-error>
-          </mat-form-field>          
+            <mat-error><span *ngIf="errorHandling('answerA','maxlength')">Answer A must not be more than 100 characters.</span></mat-error>
+          </mat-form-field>
 
 
           <mat-form-field>
@@ -26,7 +26,7 @@
                    formControlName="answerB" />
             <mat-hint>Please enter Answer B</mat-hint>
             <mat-error><span *ngIf="errorHandling('answerB','required')">Answer B is a required field.</span></mat-error>
-            <mat-error><span *ngIf="errorHandling('answerB','maxlength')">Answer B must not be more that 100 characters.</span></mat-error>
+            <mat-error><span *ngIf="errorHandling('answerB','maxlength')">Answer B must not be more than 100 characters.</span></mat-error>
           </mat-form-field>
 
 
@@ -36,7 +36,7 @@
                    formControlName="answerC" />
             <mat-hint>Please enter Answer C</mat-hint>
             <mat-error><span *ngIf="errorHandling('answerC','required')">Answer C is a required field.</span></mat-error>
-            <mat-error><span *ngIf="errorHandling('answerC','maxlength')">Answer C must not be more that 100 characters.</span></mat-error>
+            <mat-error><span *ngIf="errorHandling('answerC','maxlength')">Answer C must not be more than 100 characters.</span></mat-error>
           </mat-form-field>
 
 
@@ -55,6 +55,16 @@
             <mat-error><span *ngIf="errorHandling('correctAnswer','required')">Correct answer is a required field.</span></mat-error>
             <mat-error><span *ngIf="errorHandling('correctAnswer','maxlength')">Correct answer must not be more that 100 characters.</span></mat-error>
           </mat-form-field>
+
+          <!--<button mat-button matTooltip="Upload Diagram" color="accent" (click)="onClick()">
+            <mat-icon>file_upload</mat-icon>
+            {{text}}
+          </button>-->
+        <div>
+          <h4>Upload Diagram if needed(Optional)</h4>
+          <input type="file" id="fileUpload" name="fileUpload" accept="{{accept}}" />
+        </div>
+         
 
         </div>
         <br />

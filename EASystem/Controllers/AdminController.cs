@@ -99,6 +99,176 @@ namespace EASystem.Controllers
             return Ok(adminModel);
         }
 
+        [HttpGet("/api/departmentusers/{departmentId}")]
+        [Authorize(Roles = "AdminUserRole")]
+        public async Task<IActionResult> GetDepatmentAdminUsers(int departmentId)
+        {
+            var adminUsers = await _repository.GetAllAdminUsersByDepartmentId(_userManager, departmentId);
+            List<AdminUserViewModel> adminModel = new List<AdminUserViewModel>();
+            if (adminUsers != null)
+            {
+                foreach (var admin in adminUsers)
+                {
+                    var adminUser = new AdminUserViewModel
+                    {
+                        Id = admin.Id,
+                        FirstName = admin.AdminUserProfile.FirstName,
+                        LastName = admin.AdminUserProfile.LastName,
+                        Email = admin.Email.ToLower(),
+                        UserName = admin.UserName
+                    };
+                    adminModel.Add(adminUser);
+                }
+                return Ok(_mapper.Map<IEnumerable<AdminUserViewModel>, IEnumerable<AdminUserViewModelDTO>>(adminModel));
+            }
+            return Ok(adminModel);
+        }
+
+        [HttpPost("/api/adddepartmentusers/{departmentId}")]
+        [Authorize(Roles = "AdminUserRole")]
+        public async Task<IActionResult> AddAdminsToDepartment(int departmentId, [FromBody] List<string> selectedIds)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+            foreach (var userId in selectedIds) {
+                var adminUser = await _repository.GetAdminUserWithProfile(userId, _userManager);
+                adminUser.AdminUserProfile.DepartmentId = departmentId;
+                await _unitOfWork.CompletionAsync();
+            }
+            List<AdminUserViewModel> adminModel1 = new List<AdminUserViewModel>();
+            List<AdminUserViewModel> adminModel2 = new List<AdminUserViewModel>();
+            
+            var adminUsers1 = await _repository.GetAllAdminUsersByDepartmentId(_userManager, departmentId);
+            if (adminUsers1 != null)
+            {
+                foreach (var admin in adminUsers1)
+                {                    
+                    adminModel1.Add(new AdminUserViewModel
+                    {
+                        Id = admin.Id,
+                        FirstName = admin.AdminUserProfile.FirstName,
+                        LastName = admin.AdminUserProfile.LastName,
+                        Email = admin.Email.ToLower(),
+                        UserName = admin.UserName
+                    });
+                }
+            }
+            var adminUsers2 = await _repository.GetAllAdminUsersNoDepartment(_userManager);
+            if (adminUsers2 != null)
+            {
+                foreach (var admin in adminUsers2)
+                {                    
+                    adminModel2.Add(new AdminUserViewModel
+                    {
+                        Id = admin.Id,
+                        FirstName = admin.AdminUserProfile.FirstName,
+                        LastName = admin.AdminUserProfile.LastName,
+                        Email = admin.Email.ToLower(),
+                        UserName = admin.UserName
+                    });
+                }
+            }
+            return Ok(
+                new { 
+                    users1 = adminModel1,
+                    users2 = adminModel2,
+                }
+            );
+        }
+
+        [HttpPost("/api/removedepartmentusers/{departmentId}")]
+        [Authorize(Roles = "AdminUserRole")]
+        public async Task<IActionResult> RemoveAdminsToDepartment(int departmentId, [FromBody] List<string> selectedIds)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+            foreach (var userId in selectedIds)
+            {
+                var adminUser = await _repository.GetAdminUserWithProfile(userId, _userManager);
+                adminUser.AdminUserProfile.DepartmentId = null;
+                await _unitOfWork.CompletionAsync();
+            }
+            List<AdminUserViewModel> adminModel1 = new List<AdminUserViewModel>();
+            List<AdminUserViewModel> adminModel2 = new List<AdminUserViewModel>();
+
+            var adminUsers1 = await _repository.GetAllAdminUsersByDepartmentId(_userManager, departmentId);
+            if (adminUsers1 != null)
+            {
+                foreach (var admin in adminUsers1)
+                {
+                    adminModel1.Add(new AdminUserViewModel
+                    {
+                        Id = admin.Id,
+                        FirstName = admin.AdminUserProfile.FirstName,
+                        LastName = admin.AdminUserProfile.LastName,
+                        Email = admin.Email.ToLower(),
+                        UserName = admin.UserName
+                    });
+                }
+            }
+            var adminUsers2 = await _repository.GetAllAdminUsersNoDepartment(_userManager);
+            if (adminUsers2 != null)
+            {
+                foreach (var admin in adminUsers2)
+                {
+                    adminModel2.Add(new AdminUserViewModel
+                    {
+                        Id = admin.Id,
+                        FirstName = admin.AdminUserProfile.FirstName,
+                        LastName = admin.AdminUserProfile.LastName,
+                        Email = admin.Email.ToLower(),
+                        UserName = admin.UserName
+                    });
+                }
+            }
+            return Ok(new
+                {
+                    users1 = adminModel1,
+                    users2 = adminModel2,
+                }
+            );
+        }
+
+
+        [HttpGet("/api/nodepartmentusers/")]
+        [Authorize(Roles = "AdminUserRole")]
+        public async Task<IActionResult> GetNoDepatmentAdminUsers()
+        {
+            var adminUsers = await _repository.GetAllAdminUsersNoDepartment(_userManager);
+            List<AdminUserViewModel> adminModel = new List<AdminUserViewModel>();
+            if (adminUsers != null)
+            {
+                foreach (var admin in adminUsers)
+                {
+                    var adminUser = new AdminUserViewModel
+                    {
+                        Id = admin.Id,
+                        FirstName = admin.AdminUserProfile.FirstName,
+                        LastName = admin.AdminUserProfile.LastName,
+                        Email = admin.Email.ToLower(),
+                        UserName = admin.UserName
+                    };
+                    adminModel.Add(adminUser);
+                }
+                return Ok(_mapper.Map<IEnumerable<AdminUserViewModel>, IEnumerable<AdminUserViewModelDTO>>(adminModel));
+            }
+            return Ok(adminModel);
+        }
+
+
+        [Authorize(Roles = "AdminUserRole")]
+        [HttpGet("/api/departments/{departmentId}")]
+        public async Task<IActionResult> GetDepartmentById(int departmentId) {
+            var department = await _repository.GetDepartment(departmentId);
+            if (department == null) {
+                return NotFound("Department not found");
+            }
+            return Ok(department);
+        }
 
 
         [Authorize(Roles = "AdminUserRole")]
@@ -116,9 +286,11 @@ namespace EASystem.Controllers
                         Id = client.Id,
                         FirstName = client.ClientUserProfile.FirstName,
                         LastName = client.ClientUserProfile.LastName,
+                        Gender = client.ClientUserProfile.Gender,
                         PortraitImage = client.ClientUserProfile.PortraitImage,
                         Email = client.Email.ToLower(),
-                        UserName = client.UserName
+                        UserName = client.UserName,
+                        Is2FactorEnabled = client.TwoFactorEnabled
                     };
                     clientModel.Add(clientUser);
                 }
@@ -214,6 +386,7 @@ namespace EASystem.Controllers
                 LastName = clientProfile.ClientUserProfile.LastName,
                 Nrc = clientProfile.ClientUserProfile.Nrc,
                 UserName = clientProfile.UserName,
+                Gender = clientProfile.ClientUserProfile.Gender,
                 PortraitImage = clientProfile.ClientUserProfile.PortraitImage,
                 Password = "",
                 PhoneNumber = clientProfile.PhoneNumber
@@ -221,6 +394,32 @@ namespace EASystem.Controllers
             return Ok(client);
         }
 
+
+        [Authorize(Roles = "AdminUserRole,ClientUserRole")]
+        [HttpGet("/api/clientusername/{username}")]
+        public async Task<IActionResult> GetClientUserByUsername(string username)
+        {
+            var clientProfile = await _repository.GetClientUserWithProfileByUsername(username, _userManager);
+            if (clientProfile.ClientUserProfile == null)
+            {
+                return NotFound();
+            }
+           
+            var client = new ClientUserViewModel
+            {
+                Id = clientProfile.Id,
+                Email = clientProfile.Email.ToLower(),
+                FirstName = clientProfile.ClientUserProfile.FirstName,
+                LastName = clientProfile.ClientUserProfile.LastName,
+                Nrc = clientProfile.ClientUserProfile.Nrc,
+                UserName = clientProfile.UserName,
+                Gender = clientProfile.ClientUserProfile.Gender,
+                PortraitImage = clientProfile.ClientUserProfile.PortraitImage,
+                Password = "",
+                PhoneNumber = clientProfile.PhoneNumber
+            };
+            return Ok(client);
+        }
 
         [Authorize(Roles = "AdminUserRole")]
         [HttpPut("/api/admin/{id}")]
@@ -294,25 +493,34 @@ namespace EASystem.Controllers
                 user.UserName = model.UserName;
                 user.PhoneNumber = model.PhoneNumber;
                 user.Email = model.Email;
-                IdentityResult validPass = null;
-                if (!string.IsNullOrEmpty(model.Password))
-                {
-                    validPass = await _passwordValidator.ValidateAsync(_userManager, user, model.Password);
-                    if (validPass.Succeeded)
-                    {
-                        user.PasswordHash = _passwordHasher.HashPassword(user, model.Password);
-                        user.ClientUserProfile.FirstName = model.FirstName;
-                        user.ClientUserProfile.LastName = model.LastName;
-                        user.ClientUserProfile.UserName = model.UserName;
-                        user.ClientUserProfile.Phone = model.PhoneNumber;
-                    }
-                    else
-                    {
-                        return Ok(validPass.Errors.ToArray());
-                    }
-                }
-                if (validPass == null || (model.Password != string.Empty && validPass.Succeeded))
-                {
+                user.ClientUserProfile.FirstName = model.FirstName;
+                user.ClientUserProfile.LastName = model.LastName;
+                user.ClientUserProfile.UserName = model.UserName;
+                user.ClientUserProfile.Nrc = model.Nrc;
+                user.ClientUserProfile.Gender = model.Gender;
+                user.ClientUserProfile.Phone = model.PhoneNumber;
+
+                //IdentityResult validPass = null;
+                //if (!string.IsNullOrEmpty(model.Password))
+                //{
+                //    validPass = await _passwordValidator.ValidateAsync(_userManager, user, model.Password);
+                //    if (validPass.Succeeded)
+                //    {
+                //        //user.PasswordHash = _passwordHasher.HashPassword(user, model.Password);
+                //        user.ClientUserProfile.FirstName = model.FirstName;
+                //        user.ClientUserProfile.LastName = model.LastName;
+                //        user.ClientUserProfile.UserName = model.UserName;
+                //        user.ClientUserProfile.Nrc = model.Nrc;
+                //        user.ClientUserProfile.Gender = model.Gender;
+                //        user.ClientUserProfile.Phone = model.PhoneNumber;
+                //    }
+                //    else
+                //    {
+                //        return Ok(validPass.Errors.ToArray());
+                //    }
+                //}
+                //if (validPass == null || (model.Password != string.Empty && validPass.Succeeded))
+                //{
                     IdentityResult result = await _userManager.UpdateAsync(user);
                     if (result.Succeeded)
                     {
@@ -334,7 +542,7 @@ namespace EASystem.Controllers
                     {
                         return Ok(result.Errors.ToArray());
                     }
-                }
+                //}
 
             }
             return Ok(new { Message = "Username not found." });
@@ -588,108 +796,7 @@ namespace EASystem.Controllers
         //    return Ok(user);
         //}
 
-        //[AllowAnonymous]
-        [HttpPost("/api/registerClient")]
-        public async Task<IActionResult> RegisterClientUser([FromBody] RegistrationViewModel model)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest();
-            }
-            //Check if the username/email address already exits
-            AppUser user = await _userManager.FindByNameAsync(model.UserName);
-            if (user != null)
-            {
-                return BadRequest($"{model.UserName} already exists, try to use a different");
-            }
-
-            user = await _userManager.FindByEmailAsync(model.Email);
-            if (user != null)
-            {
-                return BadRequest($"Another user with that email address {model.Email} already exists, try to use a different one.");
-            }
-            user = new AppUser
-            {
-                SecurityStamp = Guid.NewGuid().ToString(),
-                UserName = model.UserName,
-                Email = model.Email,
-                //EmailConfirmed = true,
-                LockoutEnabled = false,
-                PhoneNumber = model.Phone,
-                ClientUserProfile = new ClientUserProfile
-                {
-                    FirstName = model.FirstName,
-                    LastName = model.LastName,
-                    UserName = model.UserName,
-                    Gender = model.Gender,
-                    Dob = model.Dob.AddDays(1),
-                    Nrc = model.Nrc,
-                    City = model.City,
-                    Phone = model.Phone,
-                    Email = model.Email,
-                    Address = model.Address,
-                }
-            };
-            var clientUserRole = "ClientUserRole";
-            if (await _roleManager.FindByNameAsync(clientUserRole) == null)
-            {
-                await _roleManager.CreateAsync(new IdentityRole(clientUserRole));
-            }
-
-            var result = await _userManager.CreateAsync(user, model.Password);
-            if (result.Succeeded)
-            {
-                result = await _userManager.AddToRoleAsync(user, clientUserRole);
-                await _userManager.AddClaimAsync(user, new Claim("Clients", "Clients"));
-                _identityContext.SaveChanges();
-                var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                var confirmationLink = Url.Action(nameof(ConfirmEmail), "login", values: new { token, email = user.Email }, Request.Scheme, Request.Host.ToString());
-
-                //SEND EMAIL TO SYSTEM USER EMAIL TO THE CLIENT
-                string fromEmail = _configuration["EmailSettings:Sender"];
-                string toEmail = user.Email;
-                string subject = "Chimas Properties - Email Confirmation.";
-                string body = $"Dear Esteemed Customer, <br/>Please confirm your account by <a href='{HtmlEncoder.Default.Encode(confirmationLink)}'><b>Clicking here.</b></a>.";
-                await _emailSender.SendEmail(fromEmail, toEmail, subject, body);
-
-                // SEND EMAIL TO SYSTEM USER EMAILS
-                //TO BE ENABLED LATER %%%%%%%%%%%%%%%%%%%%%
-                fromEmail = _configuration["EmailSettings:Sender"];
-                toEmail = _configuration["EmailSettings:Sender"];
-                subject = "Chimas Properties - Client Registration.";
-                body = $"{user.UserName} has registered as client on the system, Kindly welcome him/her. <br/> Kind regards, <br/> Admin";
-                await _emailSender.SendEmail(fromEmail, toEmail, subject, body);
-                //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                //Saving the notification in as notification     
-                //var newNotification = new Notification
-                //{
-                //    Title = $"Client Registration at {DateTime.Now}",
-                //    Notice = $"This serves to inform you that a new client has been registered on the system.",
-                //    Source = "System",
-                //    IsOpened = false,
-                //    DateOfNotification = DateTime.Now
-                //};
-                //_repository.AddNotification(newNotification);
-                //_unitOfWork.GetAppIdentityDbContext().Entry(newNotification).State = EntityState.Added;
-
-                //var newLog = new Log
-                //{
-                //    LogInformation = $"Client {user.UserName} registered on system.",
-                //    DateCreated = DateTime.Now,
-                //    Owner = "System"
-                //};
-                //_repository.AddLog(newLog);
-                //_unitOfWork.GetAppIdentityDbContext().Entry(newLog).State = EntityState.Added;
-                await _unitOfWork.CompletionAsync();
-            }
-            else
-            {
-                AddErrorsFromResult(result);
-                return BadRequest(ModelState);
-            }
-            return Ok(new { Message = user.UserName + " was created successfully!" });
-        }
-
+        
         private void AddErrorsFromResult(IdentityResult result)
         {
             foreach (IdentityError error in result.Errors)
@@ -710,13 +817,66 @@ namespace EASystem.Controllers
             var user = await _userManager.FindByEmailAsync(data.email);
             if (user == null)
                 return NotFound("User not found");
+
             var result = await _userManager.ConfirmEmailAsync(user, data.token);
+            
             if (!result.Succeeded)
             {
                 return Ok(new { message = "Error ocurred while confirming the account." });
             }
             return Ok(new { message = "Account Successfully confirmed." });
         }
+
+
+
+        //TWO FACTOR AUTHENTICATION METHODS
+        [Authorize(Roles = "AdminUserRole,ReadOnly,ClientUserRole")]
+        [HttpPost("/api/enable2Factorverification/")]
+        public async Task<IActionResult> ChangeTwoFactorAuthentication([FromBody] AuthTagViewModel authTag)
+        {
+            var userName = _httpContextAccessor.HttpContext.User.Identity.Name;
+            var user = await _userManager.FindByNameAsync(userName);
+            var result = await _userManager.SetTwoFactorEnabledAsync(user, authTag.Enable2Factor);
+            if (result.Succeeded)
+            {
+                return Ok(new { Message = "Success" });
+            }
+            else
+            {
+                return Ok(new { Message = "Error" });
+            }
+        }
+
+        //TWO FACTOR AUTHENTICATION METHODS
+        [Authorize(Roles = "AdminUserRole")]
+        [HttpPost("/api/enable2Factorverification/{userId}")]
+        public async Task<IActionResult> AdminChangeTwoFactorAuthentication(string userId, [FromBody] AuthTagViewModel authTag)
+        {            
+            var user = await _userManager.FindByIdAsync(userId);
+            var result = await _userManager.SetTwoFactorEnabledAsync(user, authTag.Enable2Factor);
+            if (result.Succeeded)
+            {
+                return Ok(new { Message = "Success" });
+            }
+            else
+            {
+                return BadRequest("2FA Update failed.");
+            }
+        }
+
+
+        [Authorize(Roles = "AdminUserRole,ReadOnly,ClientUserRole")]
+        [HttpGet("/api/twofactorverification/")]
+        public async Task<IActionResult> GetTwoFactorAuthentication()
+        {
+            var userName = _httpContextAccessor.HttpContext.User.Identity.Name;
+            var user = await _userManager.FindByNameAsync(userName);
+            var isTwoFactor = await _userManager.GetTwoFactorEnabledAsync(user);
+            return Ok(new { IsTwoFactor = isTwoFactor });
+        }
+
+        //#################################################
+
 
         [AllowAnonymous]
         [HttpPost("/api/forgotPassword/")]
@@ -774,7 +934,112 @@ namespace EASystem.Controllers
             return Ok(new { message = "Password Successfully Reset." });
         }
 
-        //[Authorize(Roles = "AdminUserRole")]
+
+        [AllowAnonymous]
+        [HttpPost("/api/registerClient")]
+        public async Task<IActionResult> RegisterClientUser([FromBody] ClientUserViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+            //Check if the username/email address already exits
+            AppUser user = await _userManager.FindByNameAsync(model.UserName);
+            if (user != null)
+            {
+                return BadRequest($"{model.UserName} already exists, try to use a different");
+            }
+
+            user = await _userManager.FindByEmailAsync(model.Email);
+            if (user != null)
+            {
+                return BadRequest($"Another user with that email address {model.Email} already exists.");
+            }
+            user = new AppUser
+            {
+                SecurityStamp = Guid.NewGuid().ToString(),
+                UserName = model.UserName,
+                Email = model.Email,
+                //EmailConfirmed = false,
+                LockoutEnabled = false,
+                PhoneNumber = model.PhoneNumber,
+                ClientUserProfile = new ClientUserProfile
+                {
+                    FirstName = model.FirstName,
+                    LastName = model.LastName,
+                    UserName = model.UserName,
+                    Gender = model.Gender,
+                    Phone = model.PhoneNumber,
+                    Email = model.Email,
+                    Nrc = model.Nrc
+                }
+            };
+            var clientUserRole = "ClientUserRole";
+            if (await _roleManager.FindByNameAsync(clientUserRole) == null)
+            {
+                await _roleManager.CreateAsync(new IdentityRole(clientUserRole));
+            }
+
+            var result = await _userManager.CreateAsync(user, model.Password);
+            if (result.Succeeded)
+            {
+                //Set two factor authentication
+                await _userManager.SetTwoFactorEnabledAsync(user, true);
+
+                var company = await _repository.GetCompanyInfos();
+                var companyInfo = company.ToList()[0];
+                result = await _userManager.AddToRoleAsync(user, clientUserRole);
+                await _userManager.AddClaimAsync(user, new Claim("Clients", "Clients"));
+                _identityContext.SaveChanges();
+                var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                var confirmationLink = Url.Action(nameof(ConfirmEmail), "login", values: new { token, email = user.Email }, Request.Scheme, Request.Host.ToString());
+
+                //SEND EMAIL TO SYSTEM USER EMAIL TO THE CLIENT
+                string fromEmail = _configuration["EmailSettings:Sender"];
+                string toEmail = user.Email;
+                string subject = $"{companyInfo.Aliase} - Email Confirmation.";
+                string body = $"Dear Esteemed Customer, <br/>Please confirm your account by <a href='{HtmlEncoder.Default.Encode(confirmationLink)}'><b>Clicking here.</b></a>.";
+                await _emailSender.SendEmail(fromEmail, toEmail, subject, body);
+
+                // SEND EMAIL TO SYSTEM USER EMAILS
+                //TO BE ENABLED LATER %%%%%%%%%%%%%%%%%%%%%
+                fromEmail = _configuration["EmailSettings:Sender"];
+                toEmail = _configuration["Data:AdminUser:Email"];
+                subject = $"{companyInfo.Aliase} - Client Registration.";
+                body = $"{user.UserName}  has been registered as client on the system. <br/> Kind regards, <br/> {companyInfo.Aliase} Admin";
+                await _emailSender.SendEmail(fromEmail, toEmail, subject, body);
+                //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                //Saving the notification in as notification     
+                var newNotification = new Notification
+                {
+                    Title = $"Client Registration at {DateTime.Now}",
+                    Notice = $"This serves to inform you that a new client has been registered on the system.",
+                    Source = "System",
+                    IsOpened = false,
+                    DateOfNotification = DateTime.Now
+                };
+                _repository.AddNotification(newNotification);
+                _unitOfWork.GetAppDbContext().Entry(newNotification).State = EntityState.Added;
+                var newLog = new Log
+                {
+                    LogInformation = $"Client {user.UserName} registered on system.",
+                    DateCreated = DateTime.Now,
+                    Owner = "System"
+                };
+                _repository.AddLog(newLog);
+                _unitOfWork.GetAppDbContext().Entry(newLog).State = EntityState.Added;
+                await _unitOfWork.CompletionAsync();
+            }
+            else
+            {
+                AddErrorsFromResult(result);
+                return BadRequest(ModelState);
+            }
+            return Ok(new { Message = user.UserName + " was created successfully!" });
+        }
+
+
+        [Authorize(Roles = "AdminUserRole")]
         [HttpPost("/api/clientUser")]
         public async Task<IActionResult> CreateClientUser([FromBody] ClientUserViewModel model)
         {
@@ -806,6 +1071,7 @@ namespace EASystem.Controllers
                     FirstName = model.FirstName,
                     LastName = model.LastName,
                     UserName = model.UserName,
+                    Gender = model.Gender,
                     Phone = model.PhoneNumber,
                     Email = model.Email,   
                     Nrc = model.Nrc
@@ -844,7 +1110,7 @@ namespace EASystem.Controllers
        
 
         //Logs operational related functions
-        //[Authorize(Roles = "AdminUserRole,ReadOnly")]
+        [Authorize(Roles = "AdminUserRole,ReadOnly")]
         [HttpGet("/api/logactions")]
         public async Task<IActionResult> GetAllLogInformation()
         {

@@ -6,6 +6,8 @@ import { LoadingSpinnerComponent } from '../../../loading-spinner/loading-spinne
 import { ApplicationService } from '../../../services/application.service';
 import { AuthService } from '../../../services/auth.service';
 import { UiService } from '../../../services/ui.service';
+import { ChangePasswordClientComponent } from '../change-password-client/change-password-client.component';
+import { ClientEditComponent } from '../client-edit/client-edit.component';
 import { CreateClientUserComponent } from '../create-client-user/create-client-user.component';
 
 @Component({
@@ -22,8 +24,10 @@ export class ClientUsersComponent implements OnInit, AfterViewInit, OnDestroy {
   clientUsers = [];
   displayedColumns = [
     'index',
+    'image',
     'firstName',
     'lastName',
+    'gender',
     'email',
     'action'
   ];
@@ -47,8 +51,7 @@ export class ClientUsersComponent implements OnInit, AfterViewInit, OnDestroy {
       disableClose: true
     });    
     this.appService.getClientUsers().subscribe((res: any) => {
-      this.clientUsers = res;
-      console.log(res);
+      this.clientUsers = res;      
       this.dataSource.data = this.clientUsers;
       dialogRef.close();
     }, error => {
@@ -82,6 +85,21 @@ export class ClientUsersComponent implements OnInit, AfterViewInit, OnDestroy {
     this.dataSource.filter = filterValue.trim().toLowerCase();
   }
 
+  onChangePassword(event) {
+    const userId = event.currentTarget.id.split("_")[1];        
+    this.dialog.open(ChangePasswordClientComponent,
+    {
+        minWidth: 350,
+        width: '450px',
+        height: 'auto',        
+        data: {
+          userId: userId
+      },
+      disableClose: true
+    });
+  }
+
+
   onEditUser(event) {
     const dialogRef = this.dialog.open(LoadingSpinnerComponent, {
       panelClass: 'custom-class',
@@ -90,7 +108,7 @@ export class ClientUsersComponent implements OnInit, AfterViewInit, OnDestroy {
     const userId = event.currentTarget.id.split("_")[1];    
     this.appService.getClientUser(userId).subscribe((res) => {      
       dialogRef.close();
-      this.dialog.open(CreateClientUserComponent,
+      this.dialog.open(ClientEditComponent,
         {
           minWidth: 350,
           width: '500px',
@@ -98,7 +116,8 @@ export class ClientUsersComponent implements OnInit, AfterViewInit, OnDestroy {
           minHeight: '700',
           data: {
             clientUser: res
-          }
+          },
+          disableClose:true
         });
     }, error => {
       dialogRef.close();

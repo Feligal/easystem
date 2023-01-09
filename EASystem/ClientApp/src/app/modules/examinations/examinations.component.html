@@ -3,12 +3,13 @@
     <mat-card fxFlex="20" style="height:100%">
       <mat-card-content>
         <div>
-          <h3>Available Exams</h3>
+          <h3>Available Examinations</h3>
           <mat-divider></mat-divider>
         </div>
         <mat-nav-list fxLayout="column">
-          <a class="mat-nav-list" fxFlex id="exam_{{exam.id}}" (click)="onSelectExam($event)" [matMenuTriggerFor]="subMenu" *ngFor="let exam of pagedExams" style="margin-top:10px; " mat-raised-button><mat-icon>apartment</mat-icon><span style="margin-right:10px"></span>{{ exam.name}}</a>
+          <a class="mat-nav-list" fxFlex id="exam_{{exam.id}}" (click)="onSelectExam($event)" [matMenuTriggerFor]="subMenu" *ngFor="let exam of pagedExams" style="margin-top:10px; " mat-raised-button><mat-icon>auto_stories</mat-icon><span style="margin-right:10px"></span>{{ exam.name}}</a>
           <mat-menu #subMenu="matMenu">
+            <button (click)="onShowScheduleForMany()" mat-menu-item><mat-icon>schedule</mat-icon>Schedule for Many</button>
             <button (click)="onShowQuestions()" mat-menu-item><mat-icon>preview</mat-icon>View Questions</button>
             <button (click)="onShowAddQuestion()" mat-menu-item><mat-icon>add</mat-icon>Add Question</button>
             <button (click)="onImportQuestions()" mat-menu-item><mat-icon>post_add</mat-icon>Import Questions</button>

@@ -27,6 +27,7 @@ namespace EASystem.Extensions
             
             //Send email
             using var smtp = new MailKit.Net.Smtp.SmtpClient();
+            smtp.CheckCertificateRevocation = false;
             await smtp.ConnectAsync(configuration["EmailSettings:MailServer"], int.Parse(configuration["EmailSettings:Port"]), SecureSocketOptions.StartTls);
             await smtp.AuthenticateAsync(configuration["EmailSettings:Sender"], configuration["EmailSettings:AdminPass"]);
             await smtp.SendAsync(message);

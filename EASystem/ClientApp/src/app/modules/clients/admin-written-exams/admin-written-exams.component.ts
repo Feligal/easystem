@@ -37,7 +37,7 @@ export class AdminWrittenExamsComponent implements OnInit {
         this.exams = res.sort((a:any, b:any) => {return b.id - a.id});
         spinner.close();
       }, error => {
-          this.uiService.showSnackBarNotification("An error occured while processing the request, try again later.", null, 3000, 'top', 'errror-notification');
+          this.uiService.showSnackBarNotification("An error occured while processing the request, try again later.", null, 3000, 'top', 'error-notification');
         }
       )
     })

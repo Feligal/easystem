@@ -92,12 +92,13 @@ export class CreateApplicationsComponent implements OnInit {
     this.applications.subject = this.myForm.value.subject;
     this.applications.applicationText = this.myForm.value.applicationText;
     
-    this.appService.createExamApplication(this.applications).subscribe(res => {
+    this.appService.createExamApplication(this.applications).subscribe(res => {      
       this.appService.$clientApplications.next(res);
       dialogRef.close();
       this.dialogRef.close();
       this.uiService.showSnackBarNotification("The application was  successfully added.", null, 3000, 'top', 'success-notification');
-    },error => {
+    }, error => {
+        dialogRef.close();
         this.uiService.showSnackBarNotification("An error occured while processing, try again later.", null, 3000, 'top', 'error-notification');
     });    
     //If data.adminUser is undefined ,then we are creating an admin user else we are editng the adminUser   

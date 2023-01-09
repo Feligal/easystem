@@ -21,7 +21,14 @@
           <th mat-header-cell *matHeaderCellDef>No</th>
           <td mat-cell *matCellDef="let element;let i = index;">{{i + 1}}<span style="margin-left:20px;"></span></td>
         </ng-container>
-
+        <ng-container matColumnDef="image">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Image</th>
+          <td mat-cell *matCellDef="let element">
+            <img id="detail_{{element.id}}" (click)="onDetailUser($event)" matTooltip="Client Details" *ngIf="element.portraitImage" alt="profile" src="/clientThumbnailPortraits/{{element.portraitImage}}" width="50" style="cursor:pointer; border-radius:50% " />
+            <img id="detail_{{element.id}}" (click)="onDetailUser($event)" matTooltip="Client Details" *ngIf="!element.portraitImage && element.gender==='Male'" alt="profile" src="/user-icon.png" width="50" style="cursor: pointer; border-radius: 50%" />
+            <img id="detail_{{element.id}}" (click)="onDetailUser($event)" matTooltip="Client Details" *ngIf="!element.portraitImage && element.gender==='Female'" alt="profile" src="/femaleavatar.png" width="50" style="cursor: pointer; border-radius: 50%" />
+          </td>
+        </ng-container>
         <ng-container matColumnDef="firstName">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>First Name</th>
           <td mat-cell *matCellDef="let element">{{element.firstName }}</td>
@@ -30,6 +37,10 @@
         <ng-container matColumnDef="lastName">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>Last Name</th>
           <td mat-cell *matCellDef="let element">{{element.lastName }}</td>
+        </ng-container>
+        <ng-container matColumnDef="gender">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Gender</th>
+          <td mat-cell *matCellDef="let element">{{element.gender }}</td>
         </ng-container>
 
         <ng-container matColumnDef="email">
@@ -47,9 +58,19 @@
                     id="detail_{{element.id}}"
                     (click)="onEditUser($event)"
                     mat-icon-button
-                    color="accent">
+                    color="primary">
               <mat-icon>edit</mat-icon>
             </button>
+            <button type="button"
+                    matTooltip="Reset Password"
+                    name="passwordChange"
+                    id="user_{{element.id}}"
+                    (click)="onChangePassword($event)"
+                    mat-icon-button
+                    class="btn">
+              <mat-icon>key</mat-icon>
+            </button>
+
             <button type="button"
                     matTooltip="Delete User Info"
                     name="btnDelUser"
@@ -67,8 +88,8 @@
            columns: displayedColumns;
            let i = index;
            let even = even;"
-                 [ngClass]="{ 'gray': even, 'highlight': selectedRowIndex == row.id}"
-                 (click)="highlight(row)">
+            [ngClass]="{ 'gray': even, 'highlight': selectedRowIndex == row.id}"
+            (click)="highlight(row)">
         </tr>
       </table>
 

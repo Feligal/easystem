@@ -1,0 +1,18 @@
+<section>
+  <h4>Enable 2 Factor Authentication</h4>
+  <mat-card>
+    <mat-card-content>
+      <form style="margin:0 30px" fxLayoutGap="20px" [formGroup]="formGroup" (ngSubmit)="onSubmit()">
+        <div>
+          <mat-slide-toggle color="primary" matTooltip="Enable 2FA" *ngIf="!isTwoFactor" formControlName="enable2Factor">Enable 2 Factor Authentication</mat-slide-toggle>
+          <mat-slide-toggle color="primary" matTooltip="Disable 2FA" *ngIf="isTwoFactor" formControlName="enable2Factor">Disable 2 Factor Authentication</mat-slide-toggle>
+        </div>
+        <br />
+
+        <button style="margin-top:20px" matTooltip="Save" mat-raised-button type="submit" color="primary"><mat-icon>save</mat-icon>Save</button>
+      </form><br />
+    </mat-card-content>
+  </mat-card>
+</section>
+
+

@@ -26,7 +26,8 @@ namespace EASystem.Mappings
             CreateMap<Application, ClientApplicationDTO>().ReverseMap();
             CreateMap<ClientApplication, ClientApplicationDTO>().ReverseMap();
             CreateMap<Application, ApplicationDTO>().ReverseMap();
-            CreateMap<ExamReview, ExamReviewDTO>().ReverseMap();            
+            CreateMap<ExamReview, ExamReviewDTO>().ReverseMap();
+            CreateMap<ClientUploadedImage, ClientUploadedImageDTO>().ReverseMap();
         }
     }
 }

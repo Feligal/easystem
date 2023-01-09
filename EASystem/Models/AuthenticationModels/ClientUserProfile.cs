@@ -10,7 +10,7 @@ namespace EASystem.Models.AuthenticationModels
 {
     public class ClientUserProfile
     {
-        public int Id { get; set; }
+        public int Id { get; set; }        
         public string FirstName { get; set; }
         public string UserName { get; set; }
         public string LastName { get; set; }
@@ -24,11 +24,10 @@ namespace EASystem.Models.AuthenticationModels
         public string City { get; set; }
         public string Address { get; set; }
         public string PortraitImage { get; set; }
-        //public EmploymentInfo EmploymentInfo { get; set; }        
+            
         public ICollection<ExamTaken> WrittenExams { get; set; }
         public ICollection<ClientApplication> ClientApplications { get; set; }
-        //public ICollection<ClientNotification> ClientNotifications { get; set; }
-        //public ICollection<ClientPlotApplication> ClientPlotApplications { get; set; }
+        public ICollection<ClientUploadedImage>ClientUploadedImages { get; set; }
 
         [ForeignKey("AppUserId")]
         public virtual AppUser AppUser { get; set; }
@@ -36,9 +35,7 @@ namespace EASystem.Models.AuthenticationModels
         {
             WrittenExams = new Collection<ExamTaken>();
             ClientApplications = new Collection<ClientApplication>();
-        //    Plots = new Collection<Plot>();
-        //    ClientNotifications = new Collection<ClientNotification>();
-        //    ClientPlotApplications = new Collection<ClientPlotApplication>();
+            ClientUploadedImages = new Collection<ClientUploadedImage>();
         }
     }
 }

@@ -75,11 +75,13 @@ export class ViewQuestionsComponent implements OnInit, AfterViewInit {
   onEditQuestion(event) {
     const id = event.currentTarget.id.split("_")[1];
     this.dialog.open(EditQuestionComponent, {
+      disableClose:true,
       data: {
         questionId: id,
         examId: this.examId
       },
-      width: '400px',
+      width: '500px',
+      height:'800px'
     })
   }
 

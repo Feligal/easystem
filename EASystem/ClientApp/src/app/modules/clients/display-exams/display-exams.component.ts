@@ -11,6 +11,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { ApplicationService } from '../../../services/application.service';
 import { UiService } from '../../../services/ui.service';
+import { LoadingSpinnerComponent } from '../../../loading-spinner/loading-spinner.component';
 
 @Component({
   selector: 'app-display-exams',
@@ -18,6 +19,8 @@ import { UiService } from '../../../services/ui.service';
   styleUrls: ['./display-exams.component.scss']
 })
 export class DisplayExamsComponent implements OnInit {
+  clicked: boolean = false;
+  companyInfo: any;
   @Input() examData: any;
   clientUserRole = "ClientUserRole";
   logoImageBlob = [];
@@ -32,7 +35,11 @@ export class DisplayExamsComponent implements OnInit {
     private httpClient: HttpClient,
   ) { }
 
-  ngOnInit() {    
+  ngOnInit() {
+    this.appService.getCompanyInformation().subscribe(res => {
+      this.companyInfo = res[0];
+    })
+
     this.changeCAALogFileToBase64(); 
     this.appService.getClientUser(this.examData.userId).subscribe((res: any) => {      
       this.client = res;      
@@ -46,23 +53,39 @@ export class DisplayExamsComponent implements OnInit {
     if (lastExamQuestions) {
       localStorage.removeItem('exam_data');
     }
-    const id = +event.currentTarget.id.split("_")[1];        
-    this.dialog.open(ActiveExamComponent, {
-      disableClose: true,
-      height:'800px',
-      data: {
-        id: id,
-        examId: this.examData.examId,
-        examName: this.examData.name,
-        duration: this.examData.duration,
-        numberOfQuestions: this.examData.numberOfQuestions
-      }
-    }) 
+    //Disable the button after clicking it avoid clicking multiple times
+    this.clicked = true;
+    const data = {
+      hasStarted : true
+    }
+    const id = +event.currentTarget.id.split("_")[1];
+    const spinner = this.dialog.open(LoadingSpinnerComponent, {
+      panelClass: 'custom-class',
+      disableClose: true
+    });
+    this.appService.startExam(id, data).subscribe((res: any) => {
+      spinner.close()
+      this.dialog.open(ActiveExamComponent, {
+        disableClose: true,
+        closeOnNavigation: false,
+        height: '800px',
+        data: {
+          id: id,
+          examId: this.examData.examId,
+          examName: this.examData.name,
+          duration: this.examData.duration,
+          numberOfQuestions: this.examData.numberOfQuestions
+        }
+      })
+    },
+      error => {
+      spinner.close();
+      this.uiService.showSnackBarNotification("An error occured while processing the request, try again later or contact the system adminstrator.", null, 3000, 'top', 'error-notification');
+    })
   }
 
   onPrintPDF(event) {
-    const id = +event.currentTarget.id.split("_")[1];
-    console.log(this.examData);
+    const id = +event.currentTarget.id.split("_")[1];    
     const documentDefinition = {
       content: [
         {
@@ -72,33 +95,33 @@ export class DisplayExamsComponent implements OnInit {
             ],
             [
               {
-                text: "Zambia Civil Aviation Authority",
+                text: this.companyInfo.name,
                 style: 'name'
               },
               {
-                text: 'Former Zambia Airways Technical Base, Hangar 38/947M',
+                text: this.companyInfo.address,
                 italics: true
               },
               {
-                text: 'Kenneth Kaunda Intenational Airport',
+                text: this.companyInfo.city + ', ' + this.companyInfo.country,
                 italics: true
               },
               {
-                text: 'P.O Box 50137, Lusaka, 15101',
+                text: 'Contact: ' + this.companyInfo.contact,
                 italics: true
               },
               {
-                text: 'Email : civil.aviation@caa.co.zm ',
+                text: 'Fax: ' + this.companyInfo.fax,
                 italics: true
               },
               {
-                text: 'Contant No : +260 211 251677/251861',
+                text: 'Email: ' + this.companyInfo.email,
                 italics: true
               },
               {
-                text: 'Fax : +260 211 251841',
+                text: 'Website: ' + this.companyInfo.website,
                 italics: true
-              }
+              },
             ]
           ],
         },
@@ -173,7 +196,7 @@ export class DisplayExamsComponent implements OnInit {
   getExaminationStatement(data: any) {
     return {
       table: {
-        widths: ['*', '*', '*', '*', '*', '*'],
+        widths: ['*', 'auto', 'auto', 'auto', 'auto','auto', 'auto', 'auto'],
         body: [
           [
             {
@@ -181,11 +204,19 @@ export class DisplayExamsComponent implements OnInit {
               style: 'tableHeader'
             },
             {
-              text: 'Score',
+              text: 'Marks',
               style: 'tableHeader'
             },
             {
-              text: 'Pass Status',
+              text: 'P/Mark',
+              style: 'tableHeader'
+            },
+            {
+              text: 'P/Score',
+              style: 'tableHeader'
+            },
+            {
+              text: 'Status',
               style: 'tableHeader'
             },
             {
@@ -204,6 +235,8 @@ export class DisplayExamsComponent implements OnInit {
           ...data.map((statement: any) => {
             return [
               statement.name,
+              `${statement.marksScored}/${statement.numberOfQuestions}`,
+              `${statement.passMarkPercentage}%`,
               `${statement.score}%`,
               statement.passStatus,
               `${statement.duration / 60 } Mins`,
@@ -220,7 +253,7 @@ export class DisplayExamsComponent implements OnInit {
     return this.httpClient.get(filePath, { responseType: 'blob' });
   }
   changeCAALogFileToBase64() {
-    const fileUrl = this.baseUrl + 'CAA_Big_Logo.png';
+    const fileUrl = this.baseUrl + 'logo.png';
     this.getImage(fileUrl).subscribe(data => {
       const reader = new FileReader();
       reader.readAsDataURL(data);

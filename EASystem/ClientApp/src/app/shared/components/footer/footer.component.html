@@ -1,4 +1,4 @@
 <mat-divider></mat-divider>
 <footer style="text-align:center">
-  Examination Automated System &copy; All rights reserved {{year}}. Developed by <a href="https://yannitechnologies.com">Yanni Technologies & Consultancy Ltd.</a>
+  <div *ngIf="company">{{company.name}} -  Examination Management System &copy; All rights reserved {{year}}.</div><div style="font-weight:100; margin-top:7px">Developed by ICT - ZCAA</div>
 </footer>

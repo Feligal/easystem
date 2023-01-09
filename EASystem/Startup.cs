@@ -37,6 +37,9 @@ namespace EASystem
             services.AddMvc()
                 .AddNewtonsoftJson(
                     options => options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver());
+
+            services.AddControllers().AddNewtonsoftJson(x => x.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
+            
             services.Configure<AttachmentSetting>(Configuration.GetSection("AttachmentSettings"));
             services.Configure<DownloadAttachmentSettings>(Configuration.GetSection("downloadAttachmentSettings"));
 

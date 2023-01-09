@@ -53,4 +53,30 @@ export class DisplayScheduledExamsComponent implements OnInit {
       }
     })    
   }
+
+  onActivate(event) {
+    const id = event.currentTarget.id.split("_")[1];
+    const dialog = this.dialog.open(ConfirmationMessageComponent, {
+      data: {
+        message: "Are you sure you want to activate the selected exam?"
+      }
+    });
+    dialog.afterClosed().subscribe(result => {
+      if (result) {
+        const dialog = this.dialog.open(LoadingSpinnerComponent, {
+          panelClass: 'custom-class',
+          disableClose: true
+        });
+        this.appService.activateScheduledExam(id).subscribe((res: any) => {
+          this.uiService.showSnackBarNotification("Exam was successfully activated.", null, 3000, 'top', 'success-notification');
+          dialog.close();
+        }, error => {
+          dialog.close();
+          console.log(error);
+        });
+      } else {
+        //Do nothing
+      }
+    });        
+  }
 }

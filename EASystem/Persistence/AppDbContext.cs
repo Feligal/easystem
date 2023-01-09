@@ -1,6 +1,7 @@
 ﻿using EASystem.Models.AuthenticationModels;
 using EASystem.Models.ExamModels;
 using EASystem.Models.HelperModels;
+using EASystem.Models.ViewModels;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -45,5 +46,11 @@ namespace EASystem.Persistence
         public DbSet<Application> Applications { get; set; }
         public DbSet<ClientApplication> ClientApplications { get; set; }
         public DbSet<ExamReview> ExamReviews { get; set; }
+        public DbSet<CompanyInfo> CompanyInfos { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
+        public DbSet<Department> Departments { get; set; }
+        public DbSet<ClientUploadedImage> ClientUploadedImages { get; set; }
+
+
     }
 }

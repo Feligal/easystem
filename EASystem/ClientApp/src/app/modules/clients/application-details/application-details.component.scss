@@ -1,8 +1,33 @@
-mat-form-field {
-  width: 100%;
+
+
+
+@media screen and (max-width:600px) {
+  mat-card {
+    width: 400px;
+  }
+
+  mat-form-field {
+    width: 350px;
+  }
+
+  .mat-raised-button {
+    padding: 0 4px 0 4px;
+    margin: 3px 5px 3px 5px;
+    min-width: 50px;
+    font-size: 10px;
+    text-align: center;
+    border: none;
+    outline: none;
+  }
 }
 
-/*mat-card {
-  margin: 0px 0px 30px 0;
-}*/
+/*If screen size is more than 600px wide,*/
+@media screen and (min-width: 600px) {
+  mat-card {
+    width: 800px;
+  }
 
+  mat-form-field {
+    width: 100%;
+  }
+}

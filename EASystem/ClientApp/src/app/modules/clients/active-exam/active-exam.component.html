@@ -1,4 +1,4 @@
-<section class="overlay " >
+<section  class="overlay " >
   <mat-card>
     <mat-card-content>
       <div>
@@ -8,7 +8,7 @@
       <form #examForm="ngForm">
         <div  fxLayout="">
           <div fxFlex fxLayout="row" fxLayoutAlign="flex-end">
-           <div style="padding:0 5px;margin:10px 0;border-radius:10px; background-color:green;"><p style="font-size:30px; font-weight:bold">Remaining Time : {{timerDisplayer}}</p></div> 
+           <div style="padding:0 5px;margin:10px 0;border-radius:10px; background-color:lightblue;"><p style="font-size:30px; font-weight:bold">Remaining Time : {{timerDisplayer}}</p></div> 
           </div>
         </div>        
         <mat-accordion>
@@ -22,6 +22,10 @@
 
               </mat-panel-description>
             </mat-expansion-panel-header>
+            <div *ngIf="question.image">
+              <h4>Diagram</h4>
+              <img style="width:500px" src="/questionDiagramImages/{{question.image}}" />
+            </div>
             <mat-radio-group name="{{question.text}}" id="{{question.text}}" aria-labelledby="example-radio-group-label"
                              class="fullWidth"
                              [(ngModel)]="question.selectedAnswer">
@@ -38,7 +42,7 @@
       </form>
     </mat-card-content>
     <mat-card-actions>
-      <button mat-raised-button type="button" (click)="onFinish()" style="margin:10px; background-color:green"><mat-icon>done</mat-icon>Finish</button>
+      <button mat-raised-button type="button" (click)="onFinish()"color:primary style="margin:10px;"><mat-icon>done</mat-icon>Submit Exam</button>
     </mat-card-actions>
   </mat-card>
 </section>

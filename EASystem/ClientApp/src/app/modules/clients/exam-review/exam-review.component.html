@@ -1,9 +1,9 @@
-<section>
+<section cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle>
   <mat-card>
     <h4>Exam Question/Answer Review</h4>
     <mat-divider></mat-divider>
-    <mat-card-content>      
-      <button style="margin:15px 0" color="primary" mat-raised-button type="button" matTooltip="Recover Exam" id="scheduleExam" (click)="onClose()"><mat-icon>close</mat-icon>Close</button>      
+    <mat-card-content>
+      <button style="margin:15px 0" color="accent" mat-raised-button type="button" matTooltip="Recover Exam" id="scheduleExam" (click)="onClose()"><mat-icon>close</mat-icon>Close</button>
       <form #examForm="ngForm">
         <mat-accordion>
           <mat-expansion-panel *ngFor="let question of questions; let i = index" [expanded]="step === i" (opened)="setStep(i)">
@@ -16,6 +16,13 @@
 
               </mat-panel-description>
             </mat-expansion-panel-header>
+
+            <div *ngIf="question.image">
+              <h4>Diagram</h4>
+              <img style="width:500px" src="/questionDiagramImages/{{question.image}}" />
+            </div>
+
+
             <mat-radio-group [disabled]="true" name="{{question.text}}" id="{{question.text}}" aria-labelledby="example-radio-group-label"
                              class="fullWidth"
                              [(ngModel)]="question.selectedAnswer">
@@ -30,6 +37,7 @@
           </mat-expansion-panel>
         </mat-accordion>
       </form>
+      <button style="margin:15px 0" color="accent" mat-raised-button type="button" matTooltip="Recover Exam" id="scheduleExam" (click)="onClose()"><mat-icon>close</mat-icon>Close</button>
     </mat-card-content>
     <mat-card-actions>
       <button *ngIf="examData" mat-raised-button type="button" (click)="onSubmit()" style="margin:10px; background-color:green"><mat-icon>done</mat-icon>Submit for Marking</button>

@@ -31,8 +31,8 @@ export class ExamReviewComponent implements OnInit {
       disableClose: true
     });
     this.appService.getExamReview(id).subscribe(res => {      
-      this.questions = res;
-      this.questions.forEach(q => {
+      this.questions = res;      
+      this.questions.forEach(q => {        
         q.answers = [
           q.answerA,
           q.answerB,

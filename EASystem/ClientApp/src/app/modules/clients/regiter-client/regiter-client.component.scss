@@ -1,0 +1,72 @@
+
+@media screen and (max-width:600px) {
+  .login-container {
+    width: 320px;
+    margin-bottom: 30px;
+  }
+
+  .mat-form-field {
+    width: 320px;
+  }
+ 
+  mat-card {
+    width: 320px;
+    //margin: 30px 0px;
+    border-radius: 10px;
+  }
+
+  .mat-raised-button {
+    padding: 0 4px 0 4px;
+    margin: 3px 5px 3px 5px;
+    min-width: 50px;    
+    font-size: 10px;
+    text-align: center;        
+    border: none;
+    outline: none;
+  }
+  }
+
+/*If screen size is more than 600px wide,*/
+@media screen and (min-width: 600px) {
+  .login-container {
+    width: 25%;
+    margin-bottom: 30px;
+  }
+
+  .mat-form-field {
+    width: 400px;
+    margin:0 10px;
+  }
+
+  mat-card {
+    width: 950px;
+    margin: 30px 0px;
+    border-radius: 10px;
+  }
+
+}
+
+.login-img {
+  width: 96px;
+  height: 96px;
+  margin: 0 auto 10px;
+  display: block;
+  border-radius: 50%;
+}
+
+
+.login-form {
+  justify-content: center;
+}
+
+.form-inputs {
+  display: flex;
+}
+
+.has-error {
+  color: red;
+  font-weight: bold;
+  text-align: center;
+  padding: 10px;
+}
+

@@ -23,13 +23,15 @@ namespace EASystem.Controllers
         private readonly ILogger<RoleAdminController> _logger;
         private readonly IAppRepository _repository;
         private readonly AppDbContext _context;
+        private readonly IUnitOfWork _unitOfWork;
         //private readonly HttpContextAccessor _httpContextAccessor;
         public RoleAdminController(
             AppDbContext context ,
             IAppRepository repository,
             RoleManager<IdentityRole> roleManager, 
             UserManager<AppUser> userManager, 
-            ILogger<RoleAdminController> logger
+            ILogger<RoleAdminController> logger,
+            IUnitOfWork unitOfWork
             //HttpContextAccessor httpContext
         )
         {
@@ -38,10 +40,11 @@ namespace EASystem.Controllers
             _userManager = userManager;            
             _roleManager = roleManager;
             _logger = logger;
-           // _httpContextAccessor = httpContext;
+            _unitOfWork = unitOfWork;
+            // _httpContextAccessor = httpContext;
         }
 
-        //[Authorize(Roles = "AdminUserRole")]
+        [Authorize(Roles = "AdminUserRole")]
         [HttpGet("/api/assignrole/{id}")]
         public async Task<IActionResult> Edit(string id) 
         {
@@ -65,7 +68,7 @@ namespace EASystem.Controllers
             });
         }
 
-        //[Authorize(Roles = "AdminUserRole")]
+        [Authorize(Roles = "AdminUserRole")]
         [HttpPost("/api/userroles")]
         public async Task<IActionResult> Edit([FromBody] RoleModificationModel model) {
             IdentityResult result;
@@ -102,7 +105,7 @@ namespace EASystem.Controllers
         }
 
 
-        //[Authorize(Roles = "AdminUserRole")]
+        [Authorize(Roles = "AdminUserRole")]
         [HttpGet("/api/getrolebyname/{roleName}")]
         public async Task<RoleUsersViewModel> GetRoleAndUsers(string roleName)
         {
@@ -127,7 +130,7 @@ namespace EASystem.Controllers
             return roleUser;
         }
 
-        //[Authorize(Roles = "AdminUserRole")]
+        [Authorize(Roles = "AdminUserRole")]
         [HttpGet("/api/getroles")]
         public async Task<IActionResult>  GetUserRoles() {
             List<RoleUsersViewModel> rolesUsers = new List<RoleUsersViewModel>();
@@ -154,7 +157,7 @@ namespace EASystem.Controllers
             return Ok(rolesUsers);
         }
 
-        //[Authorize(Roles = "AdminUserRole")]
+        [Authorize(Roles = "AdminUserRole")]
         [HttpPost("/api/createrole")]
         public async Task<IActionResult> CreateRole([FromBody] RoleViewModel model) {
             var role = await _repository.GetRoleByName(model.RoleName, _roleManager);
@@ -194,6 +197,55 @@ namespace EASystem.Controllers
                 }
             }
             return Ok(role);
+        }
+
+        [Authorize(Roles = "AdminUserRole")]
+        [HttpPost("/api/createcompanyinfo/")]
+        public async Task<IActionResult> CreateCompanyInfo([FromBody] CompanyInfo companyInfo)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest("Invalid Data Object");
+            }
+            _repository.AddCompanyInfos(companyInfo);
+            await _unitOfWork.CompletionAsync();
+            return Ok(companyInfo);
+        }
+
+        [AllowAnonymous]
+        [HttpGet("/api/company/")]
+        public async Task<IActionResult> GetCompanyInfo()
+        {
+            var item = await _repository.GetCompanyInfos();
+            return Ok(item);
+        }
+
+        [Authorize(Roles = "AdminUserRole")]
+        [HttpPut("/api/editcompanyinfo/")]
+        public async Task<IActionResult> EditCompanyInfo([FromBody] CompanyInfo companyInfo)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest("Invalid Data Object");
+            }
+
+            var company = await _repository.GetCompanyInfos();
+            if (company == null)
+            {
+                return NotFound("Company Information not found.");
+            }
+            var item = company.ToList()[0];
+            item.Address = companyInfo.Address;
+            item.Aliase = companyInfo.Aliase;
+            item.City = companyInfo.City;
+            item.Contact = companyInfo.Contact;
+            item.Country = companyInfo.Country;
+            item.Email = companyInfo.Email;
+            item.Fax = companyInfo.Fax;
+            item.Name = companyInfo.Name;
+            item.Website = companyInfo.Website;
+            await _unitOfWork.CompletionAsync();
+            return Ok(item);
         }
     }
 }

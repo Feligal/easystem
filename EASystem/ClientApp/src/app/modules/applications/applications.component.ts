@@ -50,7 +50,7 @@ export class ApplicationsComponent implements OnInit, OnDestroy, AfterViewInit {
       disableClose: true
     });
 
-    this.appService.getApplications().subscribe((res: any) => {
+    this.appService.getApplications().subscribe((res: any) => {      
       this.applications = res.sort((a: any, b: any) => { return b.id - a.id });
       this.applicationsCopy = this.applications;
       this.dataSource.data = this.applications;
@@ -60,18 +60,7 @@ export class ApplicationsComponent implements OnInit, OnDestroy, AfterViewInit {
       this.uiService.showSnackBarNotification("An error occured while processing, try again later.", null, 3000, 'top', 'error-notification');
     });
   }
-  //onCreateApplication() {
-  //  this.dialog.open(CreateApplicationsComponent,
-  //    {
-  //      minWidth: 350,
-  //      width: '500px',
-  //      height: 'auto',
-  //      minHeight: '700',
-  //      disableClose: true
-  //    }
-  //  );
-  //}
-
+ 
   ngAfterViewInit(): void {
     this.dataSource.sort = this.sort;
     this.dataSource.paginator = this.paginator;

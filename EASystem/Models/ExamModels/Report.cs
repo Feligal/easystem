@@ -11,8 +11,14 @@ namespace EASystem.Models.ExamModels
         public int ExamId { get; set; }
         public string ExamName { get; set; }
         public int Score { get; set; }
+        public int MarksScored { get; set; }
+        public int TotalNumberOfQuestions { get; set; }
+        public int PassMarkPercentage { get; set; }
         public string PassStatus { get; set; }
         public DateTime DateTaken { get; set; }
         public string ClientName { get; set; }
+        public string UserPhoneNumber { get; set; }
+        public string UserEmail { get; set; }
+        public int ? DepartmentId { get; set; }
     }
 }

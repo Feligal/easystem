@@ -29,6 +29,9 @@ namespace EASystem.Migrations.ExamMigrations
                     b.Property<string>("AppUserId")
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<int?>("DepartmentId")
+                        .HasColumnType("int");
+
                     b.Property<bool>("Enabled")
                         .HasColumnType("bit");
 
@@ -46,6 +49,8 @@ namespace EASystem.Migrations.ExamMigrations
                     b.HasIndex("AppUserId")
                         .IsUnique()
                         .HasFilter("[AppUserId] IS NOT NULL");
+
+                    b.HasIndex("DepartmentId");
 
                     b.ToTable("AdminUserProfile");
                 });
@@ -218,6 +223,9 @@ namespace EASystem.Migrations.ExamMigrations
                     b.Property<string>("ApplicationText")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Email")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<bool>("IsOpened")
                         .HasColumnType("bit");
 
@@ -279,6 +287,47 @@ namespace EASystem.Migrations.ExamMigrations
                     b.ToTable("ClientApplications");
                 });
 
+            modelBuilder.Entity("EASystem.Models.ExamModels.ClientUploadedImage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("ClientUserProfileId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("FileName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ThumbnailName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClientUserProfileId");
+
+                    b.ToTable("ClientUploadedImages");
+                });
+
+            modelBuilder.Entity("EASystem.Models.ExamModels.Department", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Departments");
+                });
+
             modelBuilder.Entity("EASystem.Models.ExamModels.Exam", b =>
                 {
                     b.Property<int>("Id")
@@ -289,10 +338,18 @@ namespace EASystem.Migrations.ExamMigrations
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("datetime2");
 
+                    b.Property<int?>("DepartmentId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("PassMarkPercentage")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("DepartmentId");
 
                     b.ToTable("Exams");
                 });
@@ -339,19 +396,34 @@ namespace EASystem.Migrations.ExamMigrations
                     b.Property<DateTime>("DateTaken")
                         .HasColumnType("datetime2");
 
+                    b.Property<int?>("DepartmentId")
+                        .HasColumnType("int");
+
                     b.Property<int>("Duration")
                         .HasColumnType("int");
 
                     b.Property<int>("ExamId")
                         .HasColumnType("int");
 
+                    b.Property<string>("ExamTime")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<bool>("HasBeenTaken")
                         .HasColumnType("bit");
+
+                    b.Property<bool>("IsActivated")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("MarksScored")
+                        .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("NumberOfQuestions")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PassMarkPercentage")
                         .HasColumnType("int");
 
                     b.Property<string>("PassStatus")
@@ -360,10 +432,28 @@ namespace EASystem.Migrations.ExamMigrations
                     b.Property<DateTime>("ScheduledDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("Score")
-                        .HasColumnType("int");
+                    b.Property<double>("Score")
+                        .HasColumnType("float");
+
+                    b.Property<DateTime>("TimeFinished")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("TimeStarted")
+                        .HasColumnType("datetime2");
+
+                    b.Property<double>("TimeTakenToWrite")
+                        .HasColumnType("float");
+
+                    b.Property<string>("UserEmail")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserPhoneNumber")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -424,17 +514,35 @@ namespace EASystem.Migrations.ExamMigrations
                     b.Property<DateTime>("DateTaken")
                         .HasColumnType("datetime2");
 
+                    b.Property<int?>("DepartmentId")
+                        .HasColumnType("int");
+
                     b.Property<int>("ExamId")
                         .HasColumnType("int");
 
                     b.Property<string>("ExamName")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("MarksScored")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PassMarkPercentage")
+                        .HasColumnType("int");
+
                     b.Property<string>("PassStatus")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Score")
                         .HasColumnType("int");
+
+                    b.Property<int>("TotalNumberOfQuestions")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserEmail")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserPhoneNumber")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -462,6 +570,72 @@ namespace EASystem.Migrations.ExamMigrations
                     b.HasKey("Id");
 
                     b.ToTable("Logs");
+                });
+
+            modelBuilder.Entity("EASystem.Models.HelperModels.Notification", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<DateTime>("DateOfNotification")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsOpened")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Notice")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Source")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Title")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Notifications");
+                });
+
+            modelBuilder.Entity("EASystem.Models.ViewModels.CompanyInfo", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Address")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Aliase")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("City")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Contact")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Country")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Email")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Fax")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Website")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("CompanyInfos");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -601,6 +775,10 @@ namespace EASystem.Migrations.ExamMigrations
                         .WithOne("AdminUserProfile")
                         .HasForeignKey("EASystem.Models.AuthenticationModels.AdminUserProfile", "AppUserId")
                         .OnDelete(DeleteBehavior.ClientCascade);
+
+                    b.HasOne("EASystem.Models.ExamModels.Department", null)
+                        .WithMany("AdminUserProfiles")
+                        .HasForeignKey("DepartmentId");
                 });
 
             modelBuilder.Entity("EASystem.Models.AuthenticationModels.ClientUserProfile", b =>
@@ -625,6 +803,22 @@ namespace EASystem.Migrations.ExamMigrations
                     b.HasOne("EASystem.Models.AuthenticationModels.ClientUserProfile", null)
                         .WithMany("ClientApplications")
                         .HasForeignKey("ClientUserProfileId");
+                });
+
+            modelBuilder.Entity("EASystem.Models.ExamModels.ClientUploadedImage", b =>
+                {
+                    b.HasOne("EASystem.Models.AuthenticationModels.ClientUserProfile", null)
+                        .WithMany("ClientUploadedImages")
+                        .HasForeignKey("ClientUserProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("EASystem.Models.ExamModels.Exam", b =>
+                {
+                    b.HasOne("EASystem.Models.ExamModels.Department", null)
+                        .WithMany("Exams")
+                        .HasForeignKey("DepartmentId");
                 });
 
             modelBuilder.Entity("EASystem.Models.ExamModels.ExamReview", b =>

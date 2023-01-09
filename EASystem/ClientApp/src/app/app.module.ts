@@ -32,6 +32,10 @@ import { CreateApplicationsComponent } from './modules/clients/create-applicatio
 import { ExamReviewComponent } from './modules/clients/exam-review/exam-review.component';
 import { ImportUsersComponent } from './modules/clients/import-users/import-users.component';
 import { ImportClientErrorComponent } from './modules/clients/import-client-error/import-client-error.component';
+import { SendBulkyEmailComponent } from './modules/clients/send-bulky-email/send-bulky-email.component';
+import { CreateDepartmentComponent } from './modules/departments/create-department/create-department.component';
+import { ClientEditComponent } from './modules/admin/client-edit/client-edit.component';
+import { ChangePasswordClientComponent } from './modules/admin/change-password-client/change-password-client.component';
 
 
 @NgModule({
@@ -44,7 +48,7 @@ import { ImportClientErrorComponent } from './modules/clients/import-client-erro
     BrowserAnimationsModule,
     DefaultModule,
   ],
-  providers: [
+  providers: [    
     MultilevelMenuService,
     ApplicationService,
     AuthGuardService,
@@ -76,13 +80,17 @@ import { ImportClientErrorComponent } from './modules/clients/import-client-erro
     CreateRoleComponent,
     CreateAdminUserComponent,
     CreateClientUserComponent,
+    ClientEditComponent,
     ScheduleExamsListComponent,
     ActiveExamComponent,
     ExamScoreComponent,
     CreateApplicationsComponent,
     ExamReviewComponent,
     ImportUsersComponent,
-    ImportClientErrorComponent
+    ImportClientErrorComponent,
+    SendBulkyEmailComponent,
+    CreateDepartmentComponent,
+    ChangePasswordClientComponent
   ]
 })
 export class AppModule { }

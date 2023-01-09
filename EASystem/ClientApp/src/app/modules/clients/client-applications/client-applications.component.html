@@ -1,8 +1,11 @@
 <section>
   <mat-card>
     <mat-card-content>
-      <h3>My Applications</h3><mat-divider></mat-divider>
-      <form style="margin: 0 30px" fxLayoutGap="30px" #f="ngForm" (ngSubmit)="onDeleteAllSelected()">
+      <h3>My Applications</h3><mat-divider></mat-divider><br />
+      <div *ngIf="applications.length === 0">
+        <h2  style="text-align:center">There are no Applications</h2>
+      </div>
+      <form  style="margin: 0 30px" fxLayoutGap="30px" #f="ngForm" (ngSubmit)="onDeleteAllSelected()">
         <br />
         <div fxLayout="">
           <div fxFlex fxLayout="row wrap" fxLayoutAlign="flex-end">
@@ -18,7 +21,19 @@
               <input matInput required [matDatepicker]="picker1" placeholder="To" name="dateFilter2" id="dateFilter2" #dateFilter2="ngModel" [(ngModel)]="secondDate" (dateChange)="changeSecondDate($event)" />
               <mat-datepicker-toggle matSuffix [for]="picker1"></mat-datepicker-toggle>
               <mat-datepicker #picker1></mat-datepicker>
-            </mat-form-field>           
+            </mat-form-field>
+
+            <ul fxLayout="row wrap">
+              <li>
+                <button *ngIf="selection.hasValue()" type="submit"
+                        color="warn"
+                        matTooltip="Delete All Selected"
+                        name="btnDelNotification"
+                        mat-raised-button>
+                  <mat-icon>delete</mat-icon>Delete All Selected
+                </button>
+              </li>
+            </ul>
           </div>
         </div>
 
@@ -33,16 +48,8 @@
               <mat-checkbox (change)="$event ? masterToggle() : null"
                             [checked]="selection.hasValue() && isAllSelected()"
                             [indeterminate]="selection.hasValue() && !isAllSelected()"
-                            [aria-label]="checkboxLabel()">
-              </mat-checkbox>
-              <button *ngIf="selection.hasValue()" type="submit"
-                      matTooltip="Delete All Selected"
-                      name="btnDelNotification"
-                      mat-icon-button
-                      color="accent">
-                <mat-icon>delete</mat-icon>
-              </button>
-
+                            [aria-label]="checkboxLabel()">Select
+              </mat-checkbox>              
             </td>
             <td mat-cell *matCellDef="let element">
               <mat-checkbox (click)="$event.stopPropagation()"
@@ -66,15 +73,15 @@
           </ng-container>
 
           <ng-container matColumnDef="isOpened">
-            <mat-header-cell *matHeaderCellDef mat-sort-header><mat-icon  matTooltip="Status">mail_outlook</mat-icon></mat-header-cell>
-            <mat-cell *matCellDef="let element">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header><mat-icon  matTooltip="Status">mail_outlook</mat-icon></th>
+            <td mat-cell *matCellDef="let element">
               <a (click)="onViewApplication($event)" id="click_{{element.id}}" color="accent" *ngIf="element.isOpened" mat-icon-button matTooltip="Read">
                 <mat-icon>drafts</mat-icon>
               </a>
               <a (click)="onViewApplication($event)" id="click_{{element.id}}" class="btn" *ngIf="!element.isOpened" mat-icon-button matTooltip="Unread">
                 <mat-icon>markunread</mat-icon>
               </a>
-            </mat-cell>
+            </td>
           </ng-container>
 
           <ng-container matColumnDef="action">
@@ -86,7 +93,7 @@
                       id="delete_{{element.id}}"
                       (click)="onDeleteApplication($event)"
                       mat-icon-button
-                      color="primary">
+                      color="warn">
                 <mat-icon>delete</mat-icon>
               </button>
             </td>

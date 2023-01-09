@@ -1,0 +1,49 @@
+<br />
+<section cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle>
+    <div style="text-align:center" *ngIf="emailsNotSent">
+      <ul>
+        <li *ngFor="let email of emailsNotSent">
+            {{email}}
+        </li>
+      </ul>
+    </div>
+    <mat-card>
+      <h4 style="text-align: center">Send Bulky Email To Selected Clients</h4>  <mat-divider></mat-divider>
+      <mat-card-content>
+        <br />
+        <form style="margin:0 30px" fxLayoutGap="10px" [formGroup]="myForm" (ngSubmit)="onSubmit()">
+          <div fxLayoutAlign="center" fxLayout="column">
+            <div class="has-error" *ngIf="myForm.errors?.authError">
+              {{myForm.errors.authError}}
+            </div>
+            <br />
+
+            <mat-form-field>
+              <input matInput type="text" placeholder="Subject *"
+                     formControlName="subject" />
+              <mat-hint>Please enter subject.</mat-hint>
+              <mat-error><span *ngIf="errorHandling('subject','required')">Subject is a required field.</span></mat-error>
+              <mat-error><span *ngIf="errorHandling('subject','maxlength')">Subject can not be more than 200 characters.</span></mat-error>
+            </mat-form-field>
+
+            <mat-form-field>
+              <textarea matInput type="text" placeholder="Message"
+                        formControlName="message" required>
+              </textarea>
+              <mat-hint>Please type the message</mat-hint>
+              <mat-error><span *ngIf="errorHandling('message','required')">Message is a required field.</span></mat-error>
+              <mat-error><span *ngIf="errorHandling('message','maxlength')">Message can not be more than 1000 characters.</span></mat-error>
+            </mat-form-field>
+          </div>
+          <br />
+          <mat-divider></mat-divider>
+          <br />
+          <div fxLayoutAlign="center" fxLayoutGap="10px" fxLayout="row wrap">            
+            <button mat-raised-button type="submit" color="primary" [disabled]="myForm.invalid"><mat-icon>send</mat-icon>Send</button>
+            <button matTooltip="Cancel" mat-raised-button type="button" (click)="onClose()" color="warn"><mat-icon>close</mat-icon>Close</button>
+          </div>
+        </form><br />
+      </mat-card-content>
+    </mat-card>  
+</section>
+

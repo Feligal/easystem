@@ -10,6 +10,8 @@ namespace EASystem.Models.ExamModels
     public class Exam
     {
         public int Id { get; set; }
+        public int ? DepartmentId { get; set; }
+        public int PassMarkPercentage { get; set; }
         public string Name { get; set; }
         public DateTime DateCreated { get; set; }
         public ICollection<Report> ExamReports { get; set; }

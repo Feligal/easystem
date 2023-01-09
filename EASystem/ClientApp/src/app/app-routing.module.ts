@@ -29,6 +29,20 @@ import { ApplicationsComponent } from './modules/applications/applications.compo
 import { ClientApplicationsComponent } from './modules/clients/client-applications/client-applications.component';
 import { ApplicationDetailsComponent } from './modules/clients/application-details/application-details.component';
 import { TwoStepVerificationComponent } from './modules/two-step-verification/two-step-verification.component';
+import { ScheduledPendingExaminationsComponent } from './modules/examinations/scheduled-pending-examinations/scheduled-pending-examinations.component';
+import { ScheduleExamManyComponent } from './modules/examinations/schedule-exam-many/schedule-exam-many.component';
+import { EnableTwofactorComponent } from './modules/enable-twofactor/enable-twofactor.component';
+import { CompanyInformationComponent } from './modules/company-information/company-information.component';
+import { RegiterClientComponent } from './modules/clients/regiter-client/regiter-client.component';
+import { SuccessClientRegistrationComponent } from './modules/clients/success-client-registration/success-client-registration.component';
+import { DepartmentsComponent } from './modules/departments/departments.component';
+import { DepartmentUserComponent } from './modules/departments/department-user/department-user.component';
+import { DepartmentExamsComponent } from './modules/departments/department-exams/department-exams.component';
+import { ExamEditComponent } from './modules/examinations/exam-edit/exam-edit.component';
+import { DepartmentEditComponent } from './modules/departments/department-edit/department-edit.component';
+import { ApplicationClientDetailsComponent } from './modules/clients/application-client-details/application-client-details.component';
+import { ClientsUploadComponent } from './modules/clients/clients-upload/clients-upload.component';
+
 
 
 const routes: Routes = [
@@ -38,13 +52,19 @@ const routes: Routes = [
       { path: 'home', component: HomeComponent },
       { path: 'login', component: LoginComponent },
       { path: 'dashboard', component: DashboardComponent, canActivate: [AdministratorAuthGuardService] },
+      { path: 'register', component: RegiterClientComponent },
       { path: 'clients', component: ClientsComponent, canActivate: [AdministratorAuthGuardService] },
+      { path: 'scheduledexams', component: ScheduledPendingExaminationsComponent, canActivate: [AdministratorAuthGuardService] },
       { path: 'applications', component: ApplicationsComponent, canActivate: [AdministratorAuthGuardService] },
       { path: 'examrecords', component: AdminExamRecordsComponent, canActivate: [AdministratorAuthGuardService] },
+      { path: 'enableverification', component: EnableTwofactorComponent, canActivate: [AuthGuardService] },
+      { path: 'successregistration', component: SuccessClientRegistrationComponent },
       {
         path: 'examinations', component: ExaminationsComponent, canActivate: [AdministratorAuthGuardService], children: [
           { path: 'viewquestions/:examId', component: ViewQuestionsComponent },
-          { path: 'reports/:examId', component: ExamReportsComponent },         
+          { path: 'reports/:examId', component: ExamReportsComponent },
+          { path: 'scheduleformany/:examId', component: ScheduleExamManyComponent },
+          { path: 'editexam/:examId', component: ExamEditComponent }
         ]
       },      
       { path: 'client/details/:id', component: ClientDetailContainerComponent, canActivate: [AdministratorAuthGuardService] },
@@ -54,16 +74,25 @@ const routes: Routes = [
       { path: 'login/ConfirmEmail', component: ClientEmailConfirmationComponent },
       { path: 'login/ResetPassword', component: PasswordResetComponent },
       { path: 'login/twostepverification', component: TwoStepVerificationComponent },
-      { path: 'admin/roles', component: RolesComponent, canActivate: [AdministratorAuthGuardService] },
+      {
+        path: 'admin/departments', component: DepartmentsComponent, canActivate: [AdministratorAuthGuardService], children: [
+          { path: 'users/:departmentId', component: DepartmentUserComponent },
+          { path: 'exams/:departmentId', component: DepartmentExamsComponent },
+          { path: 'editdepartment/:departmentId', component: DepartmentEditComponent }
+        ]
+      },
+      { path: 'admin/roles', component: RolesComponent, canActivate: [AdministratorAuthGuardService] },      
       { path: 'admin/adminUsers', component: AdminUsersComponent, canActivate: [AdministratorAuthGuardService]},
       { path: 'admin/clientUsers', component: ClientUsersComponent, canActivate: [AdministratorAuthGuardService]},
       { path: 'admin/systemlogs', component: SystemlogsComponent, canActivate: [AdministratorAuthGuardService] },
       { path: 'admin/applications/details/:id', component: ApplicationDetailsComponent, canActivate: [AdministratorAuthGuardService] },
+      { path: 'admin/company', component: CompanyInformationComponent, canActivate: [AdministratorAuthGuardService] },
       { path: 'client/scheduledexams', component: PendingExamsComponent, canActivate: [ClientAuthGuardService] },
       { path: 'client/writtenexams', component: WrittenExamsComponent, canActivate: [ClientAuthGuardService]},
       { path: 'client/reports', component: ReportsComponent, canActivate: [ClientAuthGuardService] },
+      { path: 'client/documents', component: ClientsUploadComponent, canActivate: [ClientAuthGuardService] },
       { path: 'client/applications', component: ClientApplicationsComponent, canActivate: [ClientAuthGuardService] },
-      
+      { path: 'client/applications/details/:id', component: ApplicationClientDetailsComponent, canActivate: [ClientAuthGuardService] },
       { path: '**', redirectTo: 'home' }
     ]
   },

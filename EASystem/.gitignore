@@ -181,6 +181,8 @@ orleans.codegen.cs
 
 /node_modules
 
+appsettings.json
+
 # RIA/Silverlight projects
 Generated_Code/
 

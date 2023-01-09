@@ -1,9 +1,8 @@
-<section>
+<section cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle>
   <h3 style="text-align: center">Schedule Examination</h3>
   <mat-divider></mat-divider>
   <mat-card>
     <mat-card-content>
-
       <form style="margin:0 30px" fxLayoutGap="30px" [formGroup]="myForm" (ngSubmit)="onSubmit()">
         <div fxLayoutAlign="center" fxLayout="row wrap">
           <mat-form-field>
@@ -15,12 +14,12 @@
             </mat-select>
             <mat-hint>Please select exam.</mat-hint>
             <mat-error><span *ngIf="errorHandling('name','required')">Exam Name is a required field.</span></mat-error>
-            <mat-error><span *ngIf="errorHandling('name','maxlength')">Exam Name must not exceed 40 characters.</span></mat-error>
+            <mat-error><span *ngIf="errorHandling('name','maxlength')">Exam Name must not exceed 60 characters.</span></mat-error>
           </mat-form-field>
 
           <mat-form-field>
             <mat-label>Schedule Date</mat-label>
-            <input matInput [min]="minDate" required [matDatepicker]="picker" placeholder="Schedule Date" formControlName="dateFilter1" id="dateFilter1"  (dateChange)="changeScheduleDate($event)" />
+            <input matInput [min]="minDate" required [matDatepicker]="picker" placeholder="Schedule Date" formControlName="dateFilter1" id="dateFilter1" (dateChange)="changeScheduleDate($event)" />
             <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
             <mat-datepicker #picker></mat-datepicker>
           </mat-form-field>
@@ -48,6 +47,15 @@
             <mat-error><span *ngIf="errorHandling('numberQuestions','required')">Number of questions is a required field.</span></mat-error>
             <mat-error><span *ngIf="errorHandling('numberQuestions','maxlength')">Number of questions must not exceed 3 characters.</span></mat-error>
           </mat-form-field>
+
+          <mat-form-field>
+            <input matInput type="text" placeholder="Exam Time"
+                   formControlName="examTime" />
+            <mat-hint>Please enter the Exam time.</mat-hint>
+            <mat-error><span *ngIf="errorHandling('examTime','required')">Exam time is required field.</span></mat-error>
+            <mat-error><span *ngIf="errorHandling('examTime','maxlength')">Exam time must not be more that 60 characters.</span></mat-error>
+          </mat-form-field>
+
         </div>
         <br />
         <mat-divider></mat-divider>
@@ -57,49 +65,7 @@
           <button matTooltip="Clear" mat-raised-button type="reset" (click)="onReset()" color="warn"><mat-icon>clear</mat-icon>Reset</button>
           <button matTooltip="Cancel" mat-raised-button type="button" (click)="onCancel()" color="accent"><mat-icon>not_interested</mat-icon>Cancel</button>
         </div>
-      </form><br />
-
-      <!--<div fxFlex style="width:100%">
-        <mat-table [dataSource]="dataSource" matSort>
-          <ng-container matColumnDef="index">
-            <mat-header-cell *matHeaderCellDef>No</mat-header-cell>
-            <mat-cell *matCellDef="let element;let i = index;">{{i + 1}}</mat-cell>
-          </ng-container>
-
-
-          <ng-container matColumnDef="name">
-            <mat-header-cell *matHeaderCellDef mat-sort-header>Exam Name</mat-header-cell>
-            <mat-cell *matCellDef="let element">
-              {{element.name }}
-            </mat-cell>
-          </ng-container>
-
-          <ng-container matColumnDef="action">
-            <mat-header-cell *matHeaderCellDef>Action</mat-header-cell>
-            <mat-cell *matCellDef="let element">
-              <button id="exam_{{element.id}}" (click)="onScheduleExam($event)"
-                      mat-icon-button matTooltip="Schdedule Exam">
-                <mat-icon class="btn">add_box</mat-icon>
-              </button>
-            </mat-cell>
-          </ng-container>
-
-          <mat-header-row *matHeaderRowDef="dataColumns; sticky: true"></mat-header-row>
-          <mat-row *matRowDef="let row;
-        columns: dataColumns;
-        let i = index;
-        let even = even;"
-                   [ngClass]="{gray: even, 'highlight': selectedRowIndex == row.id }"
-                   (click)="highlight(row)">
-          </mat-row>
-        </mat-table>
-        <mat-paginator #paginator
-                       [pageSize]="20"
-                       [pageSizeOptions]="[20, 30, 40,50]">
-        </mat-paginator>
-        <br />
-        <button matTooltip="Close" mat-raised-button color="warn" type="button" style="margin-left:10px" (click)="onClose()"><mat-icon>clear</mat-icon>Close</button>
-      </div>-->
+      </form><br />    
     </mat-card-content>
   </mat-card>
 </section>

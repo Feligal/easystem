@@ -3,8 +3,8 @@
 
 /*@import '@angular/material/prebuilt-themes/purple-green.css';*/
 /*@import '@angular/material/prebuilt-themes/deeppurple-amber.css';*/
-/*@import '@angular/material/prebuilt-themes/indigo-pink.css';*/
-@import '@angular/material/prebuilt-themes/pink-bluegrey.css';
+@import '@angular/material/prebuilt-themes/indigo-pink.css';
+/*@import '@angular/material/prebuilt-themes/pink-bluegrey.css';*/
 
 
 html, body { height: 100%; }
@@ -37,8 +37,8 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
 .side-nav-menu .mat-list-item:hover {
   background: dodgerblue !important;
+  border-radius:5px;
 }
-
 
 .mat-nav-list a:hover {
   /*background: #4a4a4a !important;*/
@@ -47,7 +47,7 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 }
 
 
-.gray {
+/*.gray {
   background-color: #313131
 }
 
@@ -57,7 +57,22 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
 .mat-row:hover {
   background: #808080;
+}*/
+
+
+
+.gray {
+  background-color: #e2dfdf
 }
+
+.highlight {
+  background: #8b9cad
+}
+
+.mat-row:hover {
+  background: #b4b4b4;
+}
+
 ul li {
   list-style: none;
 }
